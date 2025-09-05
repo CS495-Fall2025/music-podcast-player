@@ -1,0 +1,11 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    # Keeping node_modules in the container seperate.
+    # Using ./frontend as a volume lets us update files on the fly and have the page
+    # still autoupdate.
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
