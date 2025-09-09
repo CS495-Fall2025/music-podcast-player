@@ -1,15 +1,10 @@
-<script setup lang="ts">
-import { ref } from 'vue';
-import LocalFeedStore from '../stores/LocalFeedStore';
+<script setup>
+import { ref } from "vue";
 
 const isPlaying = ref(false); // Track if audio is playing
 const ready = ref(false); // Track if audio is ready to play
-const audioRef = ref<HTMLAudioElement | null>(null); // Reference to the audio element
+const audioRef = ref(null); // Reference to the audio element
 const chosenTrack = ref(true); // This should be set based on actual track selection logic
-
-function selectTrack(track) {
-  chosenTrack.value = track !== null;
-}
 
 // Function to toggle play/pause
 const togglePlay = () => {
@@ -19,9 +14,8 @@ const togglePlay = () => {
   if (isPlaying.value) {
     audio.pause();
   } else {
-    audio.play().catch(e => {
-      console.error("Error playing audio:", e);
-      isPlaying.value = false;
+    audio.play().catch((error) => {
+      console.error("Error playing audio:", error);
     });
   }
   // Updates playing state to the opposite of current state, so that the button text updates correctly
@@ -39,9 +33,10 @@ const onCanPlay = () => {
       ref="audioRef"
       src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
       preload="auto"
-      @canplay="onCanPlay"></audio>
+      @canplay="onCanPlay"
+    ></audio>
     <button @click="togglePlay" :disabled="!ready">
-      {{ isPlaying ? 'Pause' : 'Play' }}
+      {{ isPlaying ? "Pause" : "Play" }}
     </button>
   </div>
 </template>
