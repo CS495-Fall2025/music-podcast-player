@@ -1,4 +1,4 @@
-import Track from "./Track.vue";
+import Track from "./UserTrack.vue";
 import { localFeedStore } from "./localFeedStore.js";
 
 export default {

@@ -1,4 +1,4 @@
-<script src="./Track.js"></script>
+<script src="./userTrack.js"></script>
 
 <template>
   <div class="track" @click="selectTrack">

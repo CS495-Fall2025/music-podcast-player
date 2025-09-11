@@ -1,7 +1,7 @@
 import { localFeedStore } from "./localFeedStore.js";
 
 export default {
-  name: "Track",
+  name: "userTrack",
 
   props: {
     track: {
