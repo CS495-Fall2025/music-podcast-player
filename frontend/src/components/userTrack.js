@@ -1,4 +1,4 @@
-import { localFeedStore } from "./localFeedStore.js";
+import { currentTrack } from "./localFeedStore.js";
 
 export default {
   name: "userTrack",
@@ -12,7 +12,7 @@ export default {
 
   methods: {
     selectTrack() {
-      localFeedStore.currentTrack = this.currentTrack;
+      currentTrack = this.currentTrack;
     },
   },
 };

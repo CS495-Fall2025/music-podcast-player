@@ -1,5 +1,5 @@
 import Track from "./UserTrack.vue";
-import { localFeedStore } from "./localFeedStore.js";
+import { feed } from "./localFeedStore.js";
 
 export default {
   name: "UserFeed",
@@ -7,7 +7,7 @@ export default {
 
   computed: {
     feed() {
-      return localFeedStore.feed;
+      return feed;
     },
   },
 };

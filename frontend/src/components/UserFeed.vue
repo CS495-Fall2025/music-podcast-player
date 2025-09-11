@@ -1,4 +1,4 @@
-<script src="./UserFeed.js"></script>
+<script src="./userFeed.js"></script>
 
 <template>
   <div class="user-feed">
