@@ -1,5 +1,7 @@
 import { computed, reactive } from "vue";
 
+import { requestFeedFromURL } from "./rssParsing.js";
+
 // true for a given input's name when the value inside it is valid, false otherwise.
 // We assume everything is correct until the user clicks off the input for the first
 // time. We will also check validation on submitting.
@@ -34,8 +36,9 @@ export function onUserFeedFormSubmit(event) {
 
   validateAll(data);
 
-  if (!canSubmit.value) {
-    return;
+  if (canSubmit.value) {
+    event.target.reset();
+    requestFeedFromURL(data.get("userFeedUrl"));
   }
 }
 
