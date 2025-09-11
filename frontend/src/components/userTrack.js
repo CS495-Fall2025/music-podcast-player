@@ -12,7 +12,7 @@ export default {
 
   methods: {
     selectTrack() {
-      currentTrack = this.currentTrack;
+      currentTrack = this.track;
     },
   },
 };
