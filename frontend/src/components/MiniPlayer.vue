@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from "vue";
 
+import { currentTrack } from "./localFeedStore.js";
+
 const isPlaying = ref(false); // Track if audio is playing
 const ready = ref(false); // Track if audio is ready to play
 const audioRef = ref(null); // Reference to the audio element
@@ -31,7 +33,7 @@ const onCanPlay = () => {
   <div id="player-box" v-if="chosenTrack">
     <audio
       ref="audioRef"
-      src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+      :src="currentTrack"
       preload="auto"
       @canplay="onCanPlay"
     ></audio>
