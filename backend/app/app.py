@@ -7,11 +7,14 @@ def create_app() -> Flask:
 
     # Tell web browsers to specifically only allow our website to interact with this API.
     # We will need to put the frontend's domain here later.
-    CORS(app, resources={
-        r"/*": {
-            "origins": ["http://localhost:5173"],
+    CORS(
+        app,
+        resources={
+            r"/*": {
+                "origins": ["http://localhost:5173"],
+            },
         },
-    })
+    )
 
     apply_blueprints(app)
 
@@ -19,15 +22,11 @@ def create_app() -> Flask:
 
 
 def apply_blueprints(app: Flask) -> None:
-    from routes.time import time_blueprint
+    from app.routes.math import MATH_BP
 
-    app.register_blueprint(time_blueprint)
+    blueprints = [
+        MATH_BP,
+    ]
 
-
-# When running this backend for production, use the flask module to execute this app and
-# specifically tell it not to use debug mode. This bit of code will always use debug
-# mode when this app is run as a script.
-if __name__ == "__main__":
-    print("Running backend in debug mode")
-    app = create_app()
-    app.run(debug=True)
+    for blueprint in blueprints:
+        app.register_blueprint(blueprint)
