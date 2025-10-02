@@ -1,18 +1,18 @@
 <template>
-  <BNavbar toggleable="lg" type="dark" variant="primary">
-    <BNavbarBrand href="#">MyApp</BNavbarBrand>
+  <BNavbar class="spotify-navbar" toggleable="lg">
+    <BNavbarBrand href="#" class="brand">RSS Music Player</BNavbarBrand>
 
     <BNavbarToggle target="nav-collapse" />
 
     <BCollapse id="nav-collapse" is-nav>
       <BNavbarNav>
-        <BNavItem href="#">Home</BNavItem>
-        <BNavItem href="#">About</BNavItem>
-        <BNavItem href="#">Contact</BNavItem>
+        <BNavItem href="#" class="nav-link">Home</BNavItem>
+        <BNavItem href="#" class="nav-link">About</BNavItem>
+        <BNavItem href="#" class="nav-link">Contact</BNavItem>
       </BNavbarNav>
 
       <BNavbarNav class="ms-auto">
-        <BNavItemDropdown text="Account" right>
+        <BNavItemDropdown text="Account" class="nav-link">
           <BDropdownItem @click="onLogin">Login</BDropdownItem>
           <BDropdownItem @click="onLogout">Logout</BDropdownItem>
         </BNavItemDropdown>
@@ -31,15 +31,11 @@ import {
   BNavItem,
   BNavItemDropdown,
   BDropdownItem,
-  BButton,
 } from "bootstrap-vue-next";
 
 import navbarLogic from "./navBar.js";
 const { onLogin, onLogout } = navbarLogic;
 </script>
 
-<style scoped>
-button.btn {
-  margin-right: 0.5rem;
-}
-</style>
+<style src="../style.css" />
+

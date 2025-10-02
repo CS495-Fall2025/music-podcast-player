@@ -57,3 +57,54 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Spotify-inspired dark navbar */
+.spotify-navbar {
+  background-color: #121212 !important;
+  padding: 0.75rem 1.5rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Brand text */
+.brand {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #fff !important;
+}
+
+/* Nav links */
+.nav-link {
+  color: #b3b3b3 !important;
+  margin: 0 0.75rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: #1db954 !important; /* Spotify green on hover */
+  text-decoration: none;
+}
+
+/* Active link simulation */
+.nav-link.active {
+  color: #fff !important;
+  font-weight: 600;
+  border-bottom: 2px solid #1db954;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  background-color: #181818;
+  border: none;
+}
+
+.dropdown-item {
+  color: #b3b3b3;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: transparent;
+  color: #1db954;
+}
