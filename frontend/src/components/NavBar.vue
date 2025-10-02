@@ -31,15 +31,15 @@ import {
   BNavItem,
   BNavItemDropdown,
   BDropdownItem,
-  BButton
-} from 'bootstrap-vue-next'
+  BButton,
+} from "bootstrap-vue-next";
 
-import navbarLogic from './navBar.js'
-const { onLogin, onLogout } = navbarLogic
+import navbarLogic from "./navBar.js";
+const { onLogin, onLogout } = navbarLogic;
 </script>
 
 <style scoped>
 button.btn {
-margin-right: 0.5rem;
+  margin-right: 0.5rem;
 }
 </style>

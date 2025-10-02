@@ -6,6 +6,6 @@ export default {
     },
     onLogout() {
       alert("Logout clicked");
-    }
-  }
+    },
+  },
 };
