@@ -8,6 +8,11 @@ const ready = ref(false); // Track if audio is ready to play
 const audioRef = ref(null); // Reference to the audio element
 const currentTime = ref(0); // Current time of the audio
 const duration = ref(0); // Duration of the audio
+const repeat = ref(false); // Track if audio is set to repeat
+
+const currentIndex = feed.findIndex(
+    (track) => track.audio === currentTrack.value,
+  );
 
 const currentTrackObj = computed(() => {
   return feed.find((track) => track.audio === currentTrack.value);
@@ -50,9 +55,6 @@ const togglePlay = () => {
 
 const skipToNextTrack = () => {
   // Logic to skip to the next track in the feed
-  const currentIndex = feed.findIndex(
-    (track) => track.audio === currentTrack.value,
-  );
   currentTrack.value = feed[(currentIndex + 1) % feed.length].audio;
   isPlaying.value = false; // Reset playing state
   ready.value = false; // Reset ready state until new track is loade
@@ -81,10 +83,26 @@ const formatTime = (time) => {
   return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 };
 
+const repeatTrack = () => {
+  repeat.value = !repeat.value;
+}
+
 // Event handler for when audio can play
 const onCanPlay = () => {
   ready.value = true;
 };
+
+const onEnded = () => {
+  if (repeat.value && audioRef.value) {
+    audioRef.value.currentTime = 0;
+    audioRef.value.play().catch((error) => {
+      console.error("Error playing audio:", error);
+    });
+  } else {
+    skipToNextTrack();
+  }
+};
+
 </script>
 <template>
   <div id="player-box" v-if="currentTrack">
@@ -94,6 +112,7 @@ const onCanPlay = () => {
       preload="auto"
       @canplay="onCanPlay"
       @timeupdate="onTimeUpdate"
+      @ended="onEnded"
     ></audio>
     <img
       id="track-thumbnail"
@@ -104,7 +123,6 @@ const onCanPlay = () => {
       v-if="currentTrackObj"
     />
     <p>{{ currentTrackObj?.title }}</p>
-
     <div id="progress-bar">
       <span>{{ formatTime(currentTime) }}</span>
       <input
@@ -118,6 +136,9 @@ const onCanPlay = () => {
       <span id="timeSpan">{{ formatTime(duration) }}</span>
     </div>
     <div id="button-row-1">
+      <button id="repeat-button" @click="repeatTrack">
+        {{ repeat ? "Stop Repeat" : "Repeat" }}
+      </button>
       <button
         id="skip-back-button"
         @click="skipToLastTrack"
