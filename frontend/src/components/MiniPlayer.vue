@@ -11,8 +11,8 @@ const duration = ref(0); // Duration of the audio
 const repeat = ref(false); // Track if audio is set to repeat
 
 const currentIndex = feed.findIndex(
-    (track) => track.audio === currentTrack.value,
-  );
+  (track) => track.audio === currentTrack.value,
+);
 
 const currentTrackObj = computed(() => {
   return feed.find((track) => track.audio === currentTrack.value);
@@ -85,7 +85,7 @@ const formatTime = (time) => {
 
 const repeatTrack = () => {
   repeat.value = !repeat.value;
-}
+};
 
 // Event handler for when audio can play
 const onCanPlay = () => {
@@ -102,7 +102,6 @@ const onEnded = () => {
     skipToNextTrack();
   }
 };
-
 </script>
 <template>
   <div id="player-box" v-if="currentTrack">
