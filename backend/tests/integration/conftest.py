@@ -1,6 +1,6 @@
 import pytest
 
-from app.app import create_app
+from rss_music_backend import create_app
 
 
 @pytest.fixture

@@ -1,4 +1,4 @@
-from app.logic import math
+from rss_music_backend.logic import math
 
 
 def test_sum_of_zeros() -> None:
