@@ -55,10 +55,7 @@ const togglePlay = () => {
 
 const skipToNextTrack = () => {
   // Logic to skip to the next track in the feed
-  const index = feed.findIndex(
-    (track) => track.audio === currentTrack.value,
-  );
-  const nextIndex = (index + 1) % feed.length;
+  const nextIndex = (currentIndex + 1) % feed.length;
   currentTrack.value = feed[nextIndex].audio;
   isPlaying.value = false; // Reset playing state
   ready.value = false; // Reset ready state until new track is loade
@@ -66,11 +63,8 @@ const skipToNextTrack = () => {
 };
 
 const skipToLastTrack = () => {
-  const index = feed.findIndex(
-    (track) => track.audio === currentTrack.value,
-  );
-  const currentIndex = index === -1 ? 0 : index;
-  currentTrack.value = feed[currentIndex - 1].audio;
+  const lastIndex = currentIndex === -1 ? 0 : currentIndex;
+  currentTrack.value = feed[lastIndex - 1].audio;
   isPlaying.value = false; // Reset playing state
   ready.value = false; // Reset ready state until new track is loaded
   repeat.value = false; // Turn off repeat when skipping to last track
@@ -108,7 +102,6 @@ const onEnded = () => {
     skipToNextTrack();
   }
 };
-
 </script>
 <template>
   <div id="player-box" v-if="currentTrack">
