@@ -1,17 +1,25 @@
+import os
+
+from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
+
+
+load_dotenv()
 
 
 def create_app() -> Flask:
     app = Flask(__name__)
 
-    # Tell web browsers to specifically only allow our website to interact with this API.
-    # We will need to put the frontend's domain here later.
+    # Tell web browsers to specifically only allow our website to interact with this
+    # API.
     CORS(
         app,
         resources={
             r"/*": {
-                "origins": ["http://localhost:5173"],
+                "origins": [
+                    origin.strip() for origin in os.getenv("ALLOWED_ORIGINS").split(",")
+                ],
             },
         },
     )
@@ -22,7 +30,7 @@ def create_app() -> Flask:
 
 
 def apply_blueprints(app: Flask) -> None:
-    from app.routes.math import MATH_BP
+    from rss_music_backend.routes.math import MATH_BP
 
     blueprints = [
         MATH_BP,

@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from werkzeug.exceptions import BadRequest
 
-from app.logic import math
+from rss_music_backend.logic import math
 
 # All routes added to this BP are under "/math", so "" would just be "/math".
 MATH_BP = Blueprint("math", __name__, url_prefix="/math")
