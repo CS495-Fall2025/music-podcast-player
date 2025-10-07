@@ -38,4 +38,3 @@ const { onLogin, onLogout } = navbarLogic;
 </script>
 
 <style src="../style.css" />
-
