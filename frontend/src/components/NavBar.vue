@@ -1,5 +1,5 @@
 <template>
-  <BNavbar class="spotify-navbar" toggleable="lg">
+  <BNavbar class="navbar" toggleable="lg">
     <BNavbarBrand href="#" class="brand">RSS Music Player</BNavbarBrand>
 
     <BNavbarToggle target="nav-collapse" />
