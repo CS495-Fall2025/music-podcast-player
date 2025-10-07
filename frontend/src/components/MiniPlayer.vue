@@ -1,4 +1,4 @@
-<style src="../style.css"> </style>
+<style src="../style.css"></style>
 
 <script setup>
 import { ref, computed, watch } from "vue";
@@ -90,60 +90,60 @@ const onCanPlay = () => {
 </script>
 
 <template>
-<div class="player-box" v-if="currentTrack">
-  <audio
-    ref="audioRef"
-    :src="currentTrack"
-    preload="auto"
-    @canplay="onCanPlay"
-    @timeupdate="onTimeUpdate"
-  ></audio>
-  
-  <div class="player-info-row">
-    <div class="track-info">
-      <img
-        class="track-thumbnail"
-        :src="currentTrackObj?.image"
-        alt="Track Thumbnail"
-        v-if="currentTrackObj"
-      />
-      <p>{{ currentTrackObj?.title }}</p>
+  <div class="player-box" v-if="currentTrack">
+    <audio
+      ref="audioRef"
+      :src="currentTrack"
+      preload="auto"
+      @canplay="onCanPlay"
+      @timeupdate="onTimeUpdate"
+    ></audio>
+
+    <div class="player-info-row">
+      <div class="track-info">
+        <img
+          class="track-thumbnail"
+          :src="currentTrackObj?.image"
+          alt="Track Thumbnail"
+          v-if="currentTrackObj"
+        />
+        <p>{{ currentTrackObj?.title }}</p>
+      </div>
+
+      <div class="progress-bar">
+        <span>{{ formatTime(currentTime) }}</span>
+        <input
+          type="range"
+          min="0"
+          :max="duration"
+          step="1"
+          v-model="currentTime"
+          @input="audioRef.currentTime = currentTime"
+        />
+        <span class="timeSpan">{{ formatTime(duration) }}</span>
+      </div>
     </div>
-    
-    <div class="progress-bar">
-      <span>{{ formatTime(currentTime) }}</span>
-      <input
-        type="range"
-        min="0"
-        :max="duration"
-        step="1"
-        v-model="currentTime"
-        @input="audioRef.currentTime = currentTime"
-      />
-      <span class="timeSpan">{{ formatTime(duration) }}</span>
+
+    <div class="button-row-1">
+      <button
+        class="skip-back-button"
+        @click="skipToLastTrack"
+        vmodel="ready"
+        :disabled="!ready"
+      >
+        Back
+      </button>
+      <button class="play-button" @click="togglePlay" :disabled="!ready">
+        {{ isPlaying ? "Pause" : "Play" }}
+      </button>
+      <button
+        class="skip-button"
+        @click="skipToNextTrack"
+        vmodel="ready"
+        :disabled="!ready"
+      >
+        Skip
+      </button>
     </div>
   </div>
-  
-  <div class="button-row-1">
-    <button
-      class="skip-back-button"
-      @click="skipToLastTrack"
-      vmodel="ready"
-      :disabled="!ready"
-    >
-      Back
-    </button>
-    <button class="play-button" @click="togglePlay" :disabled="!ready">
-      {{ isPlaying ? "Pause" : "Play" }}
-    </button>
-    <button
-      class="skip-button"
-      @click="skipToNextTrack"
-      vmodel="ready"
-      :disabled="!ready"
-    >
-      Skip
-    </button>
-  </div>
-</div>
 </template>

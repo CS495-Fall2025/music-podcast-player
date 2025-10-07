@@ -8,7 +8,7 @@
   font-weight: 400;
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #2364AA;
+  background-color: #2364aa;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -87,7 +87,6 @@ p {
   max-width: 65ch;
 }
 
-
 /* ========================================
    LINKS
    ======================================== */
@@ -103,7 +102,6 @@ a:hover {
   color: #ffb780;
 }
 
-
 /* ========================================
    BUTTONS
    ======================================== */
@@ -118,8 +116,14 @@ button {
   background-color: #ffefe4;
   color: #1a1a1a;
   cursor: pointer;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, scale 0.1s ease;
+  box-shadow:
+    0 4px 8px 0 rgba(0, 0, 0, 0.2),
+    0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    scale 0.1s ease;
 }
 
 button:hover {
@@ -176,7 +180,6 @@ button:disabled {
   outline: none;
 }
 
-
 /* ========================================
    LISTS
    ======================================== */
@@ -191,7 +194,6 @@ li {
   margin-bottom: 0.5rem;
   line-height: 1.6;
 }
-
 
 /* ========================================
    LAYOUT COMPONENTS
@@ -233,7 +235,6 @@ li {
   max-height: 100px;
 }
 
-
 /* ========================================
    FORMS & INPUTS
    ======================================== */
@@ -256,8 +257,6 @@ li {
   margin-bottom: 8px;
 }
 
-
-
 /* ========================================
 TRACK & MUSIC PLAYER COMPONENTS
 ======================================== */
@@ -278,9 +277,14 @@ TRACK & MUSIC PLAYER COMPONENTS
   text-align: center;
   background-color: #ffffff;
   margin: 5px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  box-shadow:
+    0 4px 8px 0 rgba(0, 0, 0, 0.2),
+    0 6px 20px 0 rgba(0, 0, 0, 0.19);
   border-radius: 4px;
-  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .track:hover {
@@ -384,7 +388,6 @@ UTILITY CLASSES
 .error-message {
   color: #fc766a;
 }
-
 
 /* ========================================
    MEDIA QUERIES
