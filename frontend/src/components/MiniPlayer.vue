@@ -98,6 +98,7 @@ const onCanPlay = () => {
       @canplay="onCanPlay"
       @timeupdate="onTimeUpdate"
     ></audio>
+    <p>{{ currentTrackObj?.title }}</p>
 
     <div class="player-info-row">
       <div class="track-info">
@@ -107,7 +108,6 @@ const onCanPlay = () => {
           alt="Track Thumbnail"
           v-if="currentTrackObj"
         />
-        <p>{{ currentTrackObj?.title }}</p>
       </div>
 
       <div class="progress-bar">
