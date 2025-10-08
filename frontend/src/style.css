@@ -157,7 +157,7 @@ button:disabled {
   font-size: 18px;
   height: 50px;
   width: 100px;
-  margin-top: 16px;
+  /* margin-top: 16px; */
 }
 
 .play-button:disabled {
@@ -232,7 +232,7 @@ li {
   z-index: 15;
   height: auto;
   width: 100%;
-  max-height: 100px;
+  max-height: 105px;
 }
 
 /* ========================================
@@ -327,7 +327,7 @@ TRACK & MUSIC PLAYER COMPONENTS
   justify-content: center;
   align-items: center;
   gap: 16px;
-  margin-top: 2px;
+  margin: 1px 2px;
   scale: 0.8;
 }
 
