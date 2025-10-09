@@ -66,7 +66,7 @@ function parseResponse(rssRaw) {
   }
 
   console.log(newFeed);
-  Object.assign(feed, newFeed);
+  feed.splice(0, feed.length, ...newFeed);
 }
 
 function handleError(message) {
