@@ -30,3 +30,12 @@ import {
     <button class="submit-button" :disabled="!canSubmit">Read RSS Feed</button>
   </form>
 </template>
+
+<style scoped>
+.user-feed-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+}
+</style>

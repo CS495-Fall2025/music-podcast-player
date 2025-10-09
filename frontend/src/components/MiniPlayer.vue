@@ -147,3 +147,121 @@ const onCanPlay = () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.player-box {
+  background-color: var(--player-background);
+  padding: 10px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: var(--player-z);
+  max-height: var(--player-height);
+  justify-content: center;
+}
+
+.player-box p {
+  margin: 10px 0 0 0;
+  white-space: nowrap;
+  max-width: 100ch;
+  color: var(--light-orange);
+  font-size: large;
+  font-weight: bold;
+  text-align: center;
+}
+
+.player-info-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.track-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 125px;
+  max-width: 125px;
+  min-height: 60px;
+  max-height: 60px;
+  color: var(--light-text);
+  font-weight: bold;
+}
+
+.track-info p {
+  margin: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 125px;
+  color: var(--light-orange);
+  font-size: large;
+  text-align: center;
+}
+
+.track-thumbnail {
+  border-radius: var(--border-radius);
+  vertical-align: middle;
+  width: 100%;
+  height: auto;
+  max-width: 100px;
+}
+
+.progress-bar {
+  flex: 1;
+  color: var(--light-text);
+  margin: 16px 20px 0 20px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+}
+
+.progress-bar input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  accent-color: var(--light-orange);
+}
+
+.button-row-1 {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 1px 2px;
+  transform: scale(0.8);
+}
+
+.play-button {
+  background-color: var(--cream);
+  border: var(--border-thick) var(--orange);
+  border-radius: var(--border-radius-lg);
+  color: black;
+  font-size: 18px;
+  height: 50px;
+  width: 100px;
+}
+
+.play-button:disabled {
+  background-color: grey;
+  border-color: grey;
+}
+
+.play-button:hover:enabled,
+.play-button:active:enabled {
+  background-color: var(--lighter-orange);
+}
+
+.play-button:focus {
+  outline: none;
+}
+</style>
