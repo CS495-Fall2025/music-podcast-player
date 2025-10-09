@@ -18,6 +18,7 @@ export function requestFeeds(query) {
 function parseResponse(response) {
   console.log(response["feeds"]);
 	Object.assign(searchedFeeds, response["feeds"]);
+  searchedFeeds.splice(0, searchedFeeds.length, ...response["feeds"]);
 }
 
 function handleError(message) {
