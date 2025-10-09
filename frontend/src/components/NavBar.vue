@@ -3,13 +3,7 @@
     <div class="nav-left">
       <div class="brand">RSS Music Player</div>
 
-      <button
-        class="navbar-toggle"
-        @click="isOpen = !isOpen"
-        aria-label="Toggle navigation"
-      >
-        ☰
-      </button>
+      <button class="navbar-toggle" @click="isOpen = !isOpen" aria-label="Toggle navigation" />
 
       <div :class="['nav-links', { 'is-open': isOpen }]">
         <a href="#" class="nav-link">Home</a>
@@ -20,10 +14,7 @@
 
     <div class="nav-right">
       <div class="nav-dropdown" ref="dropdownRef">
-        <button
-          class="dropdown-toggle"
-          @click.stop="dropdownOpen = !dropdownOpen"
-        >
+        <button class="dropdown-toggle" @click.stop="dropdownOpen = !dropdownOpen">
           Account ▾
         </button>
         <div v-if="dropdownOpen" class="dropdown-menu">
