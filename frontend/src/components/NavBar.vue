@@ -1,40 +1,43 @@
 <template>
-  <BNavbar class="navbar" toggleable="lg">
-    <BNavbarBrand href="#" class="brand">RSS Music Player</BNavbarBrand>
+  <nav class="navbar">
+    <div class="nav-left">
+      <div class="brand">RSS Music Player</div>
 
-    <BNavbarToggle target="nav-collapse" />
+      <button
+        class="navbar-toggle"
+        @click="isOpen = !isOpen"
+        aria-label="Toggle navigation"
+      />
 
-    <BCollapse id="nav-collapse" is-nav>
-      <BNavbarNav>
-        <BNavItem href="#" class="nav-link">Home</BNavItem>
-        <BNavItem href="#" class="nav-link">About</BNavItem>
-        <BNavItem href="#" class="nav-link">Contact</BNavItem>
-      </BNavbarNav>
+      <div :class="['nav-links', { 'is-open': isOpen }]">
+        <a href="#" class="nav-link">Home</a>
+        <a href="#" class="nav-link">About</a>
+        <a href="#" class="nav-link">Contact</a>
+      </div>
+    </div>
 
-      <BNavbarNav class="ms-auto">
-        <BNavItemDropdown text="Account" class="nav-link">
-          <BDropdownItem @click="onLogin">Login</BDropdownItem>
-          <BDropdownItem @click="onLogout">Logout</BDropdownItem>
-        </BNavItemDropdown>
-      </BNavbarNav>
-    </BCollapse>
-  </BNavbar>
+    <div class="nav-right">
+      <div class="nav-dropdown" ref="dropdownRef">
+        <button
+          class="dropdown-toggle"
+          @click.stop="dropdownOpen = !dropdownOpen"
+        >
+          Account ▾
+        </button>
+        <div v-if="dropdownOpen" class="dropdown-menu">
+          <button class="dropdown-item" @click="handleLogin">Login</button>
+          <button class="dropdown-item" @click="handleLogout">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
 </template>
 
 <script setup>
-import {
-  BNavbar,
-  BNavbarBrand,
-  BNavbarToggle,
-  BCollapse,
-  BNavbarNav,
-  BNavItem,
-  BNavItemDropdown,
-  BDropdownItem,
-} from "bootstrap-vue-next";
+import useNavbar from "./navBar.js";
 
-import navbarLogic from "./navBar.js";
-const { onLogin, onLogout } = navbarLogic;
+const { isOpen, dropdownOpen, dropdownRef, handleLogin, handleLogout } =
+  useNavbar();
 </script>
 
 <style src="../style.css" />
