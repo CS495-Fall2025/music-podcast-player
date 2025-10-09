@@ -10,9 +10,11 @@
       />
 
       <div :class="['nav-links', { 'is-open': isOpen }]">
-        <a href="#" class="nav-link">Home</a>
-        <a href="#" class="nav-link">About</a>
-        <a href="#" class="nav-link">Contact</a>
+				<router-link to="/" class="nav-link">Home</router-link>
+				<router-link to="/" class="nav-link">About</router-link>
+				<router-link to="/" class="nav-link">Contact</router-link>
+				<router-link to="/search" class="nav-link">Search Feeds</router-link>
+				<router-link to="/" class="nav-link">Input Feed</router-link>
       </div>
     </div>
 
