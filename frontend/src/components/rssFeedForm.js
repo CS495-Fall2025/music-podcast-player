@@ -41,7 +41,7 @@ export function onUserFeedFormSubmit(event) {
   if (canSubmit.value) {
     event.target.reset();
     requestFeedFromURL(data.get("userFeedUrl"));
-		router.push("/view");
+    router.push("/view");
   }
 }
 

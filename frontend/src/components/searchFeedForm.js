@@ -1,7 +1,5 @@
 import { computed, reactive } from "vue";
 
-import router from "../router";
-
 import { requestFeeds } from "./backendFeedParser.js";
 
 // true for a given input's name when the value inside it is valid, false otherwise.
@@ -40,16 +38,16 @@ export function onUserFormSubmit(event) {
 
   if (canSubmit.value) {
     event.target.reset();
-		requestFeeds(data.get("query"))
-		console.log(data.get("query"))
-		//router.push("/view");
+    requestFeeds(data.get("query"));
+    console.log(data.get("query"));
+    //router.push("/view");
   }
 }
 
 // Limits length to 255 characters, disallows "--", and only allows letters, numbers,
 // and simple punctuation.
 function validateUserSearchQuery(feed) {
-	return /^(?!.*--)[\w !'?.-]{1,255}$/.test(feed);
+  return /^(?!.*--)[\w !'?.-]{1,255}$/.test(feed);
 }
 
 function checkCanSubmit(validationData) {

@@ -14,8 +14,8 @@ export default {
 
   methods: {
     selectTrack() {
-			requestFeedFromURL(this.feed.url);
-			router.push("/view");
+      requestFeedFromURL(this.feed.url);
+      router.push("/view");
     },
   },
 };

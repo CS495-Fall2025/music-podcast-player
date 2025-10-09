@@ -24,7 +24,8 @@ import {
         @input="onUserInputInput"
       />
       <span class="error-message" v-if="!canSubmit"
-        >Search query has incorrect length or is using disallowed characters.</span
+        >Search query has incorrect length or is using disallowed
+        characters.</span
       >
     </div>
     <button class="submit-button" :disabled="!canSubmit">Search Feeds</button>

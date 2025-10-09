@@ -4,8 +4,8 @@ import SearchedFeedsDisplay from "../components/SearchedFeedsDisplay.vue";
 </script>
 
 <template>
-	<SearchFeedForm />
-	<SearchedFeedsDisplay />
+  <SearchFeedForm />
+  <SearchedFeedsDisplay />
 </template>
 
 <style scoped></style>
