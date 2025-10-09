@@ -1,5 +1,7 @@
 import { computed, reactive } from "vue";
 
+import router from "../router";
+
 import { requestFeedFromURL } from "./rssParsing.js";
 
 // true for a given input's name when the value inside it is valid, false otherwise.
@@ -39,6 +41,7 @@ export function onUserFeedFormSubmit(event) {
   if (canSubmit.value) {
     event.target.reset();
     requestFeedFromURL(data.get("userFeedUrl"));
+		router.push("/view");
   }
 }
 
