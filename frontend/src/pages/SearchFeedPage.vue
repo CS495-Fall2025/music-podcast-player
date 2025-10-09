@@ -1,8 +1,9 @@
 <script setup>
+import SearchFeedForm from "../components/SearchFeedForm.vue";
 </script>
 
 <template>
-	<p>Hello</p>
+	<SearchFeedForm />
 </template>
 
 <style scoped></style>

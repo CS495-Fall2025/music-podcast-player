@@ -7,3 +7,6 @@ export const feed = reactive([]);
 // This will be updated with a url to fetch the audio currently being streamed. When
 // this is an empty string, no audio is being streamed.
 export const currentTrack = ref("");
+
+// Populate with feeds found using the backend.
+export const searchedFeeds = reactive([]);
