@@ -16,4 +16,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: pip install --root-user-action ignore -r dev-requirements.txt 
+      - run: pip install --root-user-action ignore -e . 
       - run: python -m pytest
