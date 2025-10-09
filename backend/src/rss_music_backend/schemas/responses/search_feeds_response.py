@@ -1,5 +1,4 @@
 from enum import Enum, IntEnum
-import re
 
 from marshmallow import Schema, fields, validate
 
@@ -7,6 +6,7 @@ from marshmallow import Schema, fields, validate
 class PodcastIndexFeedType(IntEnum):
     RSS = 0
     ATOM = 1
+
 
 # Defined here: https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/tags/medium.md
 class Medium(Enum):
@@ -19,6 +19,7 @@ class Medium(Enum):
     BLOG = "blog"
     PUBLISHER = "publisher"
     COURSE = "course"
+
 
 # Description from https://podcastindex-org.github.io/docs-api/#get-/search/music/byterm
 class PodcastIndexFeedSchema(Schema):
@@ -40,12 +41,16 @@ class PodcastIndexFeedSchema(Schema):
     # These were not documented to be here, but are anyways. There are documented in the
     # response here: https://podcastindex-org.github.io/docs-api/#post-/podcasts/batch/byguid
     inPollingQueue = fields.Bool(required=True, allow_none=True)
-    priority = fields.Int(required=True, validate=validate.Range(min=-1,max=5))
+    priority = fields.Int(required=True, validate=validate.Range(min=-1, max=5))
 
     lastGoodHttpStatusTime = fields.Int(required=True, validate=validate.Range(min=0))
-    lastHttpStatus = fields.Int(required=True, validate=validate.Range(min=100, max=999))
+    lastHttpStatus = fields.Int(
+        required=True, validate=validate.Range(min=100, max=999)
+    )
     contentType = fields.Str(required=True, validate=validate.Length(min=0, max=255))
-    itunesId = fields.Int(required=True, allow_none=True, validate=validate.Range(min=0))
+    itunesId = fields.Int(
+        required=True, allow_none=True, validate=validate.Range(min=0)
+    )
     generator = fields.Str(required=True, validate=validate.Length(min=0, max=255))
     language = fields.Str(required=True, validate=validate.Length(min=0, max=255))
     explicit = fields.Bool(required=True)
@@ -56,12 +61,12 @@ class PodcastIndexFeedSchema(Schema):
     crawlErrors = fields.Int(required=True, validate=validate.Range(min=0))
     parseErrors = fields.Int(required=True, validate=validate.Range(min=0))
     categories = fields.Dict(
-            required=True,
-            allow_none=True,
-            # Currently there are 112 categories, but this might change so I've limited
-            # this to 200. The longest is 16 characters.
-            keys=fields.Int(required=True, validate=validate.Range(min=0, max=200)),
-            values=fields.Str(required=True, validate=validate.Length(min=1, max=63))
+        required=True,
+        allow_none=True,
+        # Currently there are 112 categories, but this might change so I've limited
+        # this to 200. The longest is 16 characters.
+        keys=fields.Int(required=True, validate=validate.Range(min=0, max=200)),
+        values=fields.Str(required=True, validate=validate.Length(min=1, max=63)),
     )
     locked = fields.Bool(required=True)
     imageUrlHash = fields.Int(required=True)

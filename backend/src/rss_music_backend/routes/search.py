@@ -1,6 +1,5 @@
 from flask import Blueprint, request
 from marshmallow import ValidationError
-from werkzeug.exceptions import BadRequest
 
 from rss_music_backend.errors import RequestError, get_error_response
 from rss_music_backend.external_apis.concrete import PodcastIndexAPI
@@ -16,7 +15,7 @@ def get_search_feeds() -> dict:
     try:
         data = request.args
         validated_request = SearchFeedsRequestSchema().load(data)
-        
+
         feeds = PodcastIndexAPI.search_music_feeds(
             validated_request["query"],
             validated_request["count"],
@@ -31,5 +30,3 @@ def get_search_feeds() -> dict:
         "code": 200,
         "feeds": feeds,
     }
-
-

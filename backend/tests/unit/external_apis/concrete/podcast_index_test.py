@@ -1,6 +1,3 @@
-import json
-from unittest import mock
-
 from rss_music_backend.external_apis.concrete import PodcastIndexAPI
 
 AUTHENTICATION_HEADERS = {"User-Agent", "X-Auth-Key", "X-Auth-Date", "Authorization"}
@@ -62,7 +59,9 @@ def test_search_feed_request_http_method() -> None:
 
 
 def test_search_feed_request_url_correct() -> None:
-    expected_url = "https://api.podcastindex.org/api/1.0/search/music/byterm?q=query&max=15"
+    expected_url = (
+        "https://api.podcastindex.org/api/1.0/search/music/byterm?q=query&max=15"
+    )
 
     request, context = PodcastIndexAPI._make_search_request("query", 10, 5)
 
@@ -76,6 +75,7 @@ def test_search_feed_request_includes_auth_headers() -> None:
         assert header in request.headers, (
             f"Authentication header '{header}' not found in request headers"
         )
+
 
 def test_search_feed_context_matches_paging_args() -> None:
     request, context = PodcastIndexAPI._make_search_request("query", 8, 12)

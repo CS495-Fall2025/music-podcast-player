@@ -19,7 +19,7 @@ def client():
         assert False, (
             "Program attempted to make a network request when it shouldn't have"
         )
-    
+
     with mock.patch("requests.Session.send", side_effect=fail_request) as _:
         yield app.test_client()
 

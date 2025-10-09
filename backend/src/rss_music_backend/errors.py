@@ -6,6 +6,7 @@ class RequestError(Enum):
     INVALID_ARGUMENT = auto()
     EXTERNAL_API_UNAVALIABLE = auto()
 
+
 _ERROR_RESPONSE_VALUES = {
     RequestError.INVALID_FORMAT: {
         "error": "InvalidFormat",
@@ -23,7 +24,7 @@ _ERROR_RESPONSE_VALUES = {
             "The external API we use to process this request is currently unavaliable"
         ),
         "code": 503,
-    }
+    },
 }
 
 
