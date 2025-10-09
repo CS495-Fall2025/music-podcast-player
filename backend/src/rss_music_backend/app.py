@@ -30,10 +30,10 @@ def create_app() -> Flask:
 
 
 def apply_blueprints(app: Flask) -> None:
-    from rss_music_backend.routes.math import MATH_BP
+    from rss_music_backend.routes.search import SEARCH_BP
 
     blueprints = [
-        MATH_BP,
+        SEARCH_BP,
     ]
 
     for blueprint in blueprints:

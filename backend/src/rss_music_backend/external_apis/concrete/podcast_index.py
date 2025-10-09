@@ -3,6 +3,7 @@ import os
 import time
 from urllib.parse import urljoin
 
+from marshmallow import ValidationError
 import requests
 
 from rss_music_backend.data import Feed
@@ -17,20 +18,22 @@ TIMEOUT = (3, 10) # 3 Seconds to connect, 10 seconds to recieve response.
 class PodcastIndexAPI:
     # Using https://podcastindex-org.github.io/docs-api/#get-/search/music/byterm
     @classmethod
-    def search_music_feeds(cls, query: str, count: int, start: int) -> list[Feed]:
+    def search_music_feeds(
+            cls, query: str, count: int = 25, start: int = 0
+    ) -> list[Feed]:
         with requests.Session() as session:
             request, context = cls._make_search_request(query, count, start)
 
             try:
                 response = session.send(request, timeout=TIMEOUT)
             except requests.Timeout:
-                raise errors.TimeoutError("PodcastIndexAPI")
+                raise errors.ExternalAPITimeoutError("PodcastIndexAPI")
             except requests.RequestException:
                 raise errors.ExternalAPITransportError(
                     "An error occurred while sending a request to the PodcastIndexAPI"
                 )
 
-        return cls._parse_search_response(response, context)
+        return cls._parse_search_response(response, context)[start:(start + count)]
 
 
     @classmethod
@@ -44,7 +47,7 @@ class PodcastIndexAPI:
         }
         headers = cls._create_current_auth_headers()
 
-        request = requests.Request("GET", url, headers, json=data)
+        request = requests.Request("GET", url, headers, params=data)
 
         return (request.prepare(), {"count": count, "start": start})
 
@@ -69,18 +72,27 @@ class PodcastIndexAPI:
         try:
             data = response.json()
             validated_response = SearchFeedsResponseSchema().load(data)
-
         except requests.JSONDecodeError:
             raise errors.ExternalAPIInvalidResponseFormatError(
                 "Could not parse non-json response from the PodcastIndex API"
             )
-        except ValidationError:
+        except ValidationError as e:
             raise errors.ExternalAPIInvalidResponseDataError(
                 "PodcastIndex API response did not match expected schema"
             )
 
-        # Continue processing the response here, convert it into a bunch of Feeds and 
-        # return them.
+        feeds = []
+        for feed_data in validated_response["feeds"]:
+            # It may be better to use a schema for this in the future, but this 
+            # should be good for now.
+            feeds.append(Feed(
+                url=feed_data["url"],
+                art_url=feed_data["artwork"],
+                title=feed_data["title"],
+                artist=feed_data["author"],
+            ))
+
+        return feeds
 
     # Follows https://podcastindex-org.github.io/docs-api/#auth
     @classmethod

@@ -1,4 +1,5 @@
 import json
+from unittest import mock
 
 from rss_music_backend.external_apis.concrete import PodcastIndexAPI
 
@@ -61,7 +62,7 @@ def test_search_feed_request_http_method() -> None:
 
 
 def test_search_feed_request_url_correct() -> None:
-    expected_url = "https://api.podcastindex.org/api/1.0/search/music/byterm"
+    expected_url = "https://api.podcastindex.org/api/1.0/search/music/byterm?q=query&max=15"
 
     request, context = PodcastIndexAPI._make_search_request("query", 10, 5)
 
@@ -75,32 +76,6 @@ def test_search_feed_request_includes_auth_headers() -> None:
         assert header in request.headers, (
             f"Authentication header '{header}' not found in request headers"
         )
-
-def test_search_feed_request_has_correct_query() -> None:
-    query = "test_query"
-
-    request, context = PodcastIndexAPI._make_search_request(query, 10, 5)
-
-    assert "Content-Type" in request.headers
-    assert "application/json" == request.headers["Content-Type"]
-    
-    data = json.loads(request.body)
-
-    assert "q" in data
-    assert query == data["q"]
-
-
-def test_search_feed_request_sets_maximum_for_paging() -> None:
-    request, context = PodcastIndexAPI._make_search_request("query", 8, 12)
-
-    assert "Content-Type" in request.headers
-    assert "application/json" == request.headers["Content-Type"]
-    
-    data = json.loads(request.body)
-
-    assert "max" in data
-    assert 20 == data["max"]
-
 
 def test_search_feed_context_matches_paging_args() -> None:
     request, context = PodcastIndexAPI._make_search_request("query", 8, 12)

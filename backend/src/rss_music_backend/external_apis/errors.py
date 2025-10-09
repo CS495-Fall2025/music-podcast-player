@@ -36,11 +36,11 @@ class ExternalAPIResponseError(ExternalAPIError):
         super().__init__(message)
 
 
-class ExternalAPIInvalidReponseFormatError(ExternalAPIResponseError):
+class ExternalAPIInvalidResponseFormatError(ExternalAPIResponseError):
     def __init__(self, message: str):
         super().__init__(message)
 
 
-class ExternalAPIInvalidReponseDataError(ExternalAPIResponseError):
+class ExternalAPIInvalidResponseDataError(ExternalAPIResponseError):
     def __init__(self, message: str):
         super().__init__(message)

@@ -14,8 +14,8 @@ _ERROR_RESPONSE_VALUES = {
     },
     RequestError.INVALID_ARGUMENT: {
         "error": "InvalidArgument",
-        "message": "One or more arguments had a value that isn't allowed",
-        "code": 422,
+        "message": "Arguments did not match expected schema",
+        "code": 400,
     },
     RequestError.EXTERNAL_API_UNAVALIABLE: {
         "error": "ExternalApiUnavaliable",

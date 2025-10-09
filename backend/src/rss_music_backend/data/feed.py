@@ -7,4 +7,3 @@ class Feed:
     art_url: str
     title: str
     artist: str
-    locked: bool

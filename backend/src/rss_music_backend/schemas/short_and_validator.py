@@ -1,4 +1,4 @@
-from marshmallow import Validator
+from marshmallow.validate import Validator
 
 
 class SAnd(Validator):
