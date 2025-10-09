@@ -1,3 +1,5 @@
+<style src="../style.css"></style>
+
 <script setup>
 import { ref, computed, watch } from "vue";
 
@@ -86,8 +88,9 @@ const onCanPlay = () => {
   ready.value = true;
 };
 </script>
+
 <template>
-  <div id="player-box" v-if="currentTrack">
+  <div class="player-box" v-if="currentTrack">
     <audio
       ref="audioRef"
       :src="currentTrack"
@@ -95,42 +98,46 @@ const onCanPlay = () => {
       @canplay="onCanPlay"
       @timeupdate="onTimeUpdate"
     ></audio>
-    <img
-      id="track-thumbnail"
-      :src="currentTrackObj?.image"
-      alt="Track Thumbnail"
-      width="300"
-      height="300"
-      v-if="currentTrackObj"
-    />
     <p>{{ currentTrackObj?.title }}</p>
 
-    <div id="progress-bar">
-      <span>{{ formatTime(currentTime) }}</span>
-      <input
-        type="range"
-        min="0"
-        :max="duration"
-        step="1"
-        v-model="currentTime"
-        @input="audioRef.currentTime = currentTime"
-      />
-      <span id="timeSpan">{{ formatTime(duration) }}</span>
+    <div class="player-info-row">
+      <div class="track-info">
+        <img
+          class="track-thumbnail"
+          :src="currentTrackObj?.image"
+          alt="Track Thumbnail"
+          v-if="currentTrackObj"
+        />
+      </div>
+
+      <div class="progress-bar">
+        <span>{{ formatTime(currentTime) }}</span>
+        <input
+          type="range"
+          min="0"
+          :max="duration"
+          step="1"
+          v-model="currentTime"
+          @input="audioRef.currentTime = currentTime"
+        />
+        <span class="timeSpan">{{ formatTime(duration) }}</span>
+      </div>
     </div>
-    <div id="button-row-1">
+
+    <div class="button-row-1">
       <button
-        id="skip-back-button"
+        class="skip-back-button"
         @click="skipToLastTrack"
         vmodel="ready"
         :disabled="!ready"
       >
         Back
       </button>
-      <button id="play-button" @click="togglePlay" :disabled="!ready">
+      <button class="play-button" @click="togglePlay" :disabled="!ready">
         {{ isPlaying ? "Pause" : "Play" }}
       </button>
       <button
-        id="skip-button"
+        class="skip-button"
         @click="skipToNextTrack"
         vmodel="ready"
         :disabled="!ready"
@@ -140,76 +147,3 @@ const onCanPlay = () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-#player-box {
-  background-color: #090909;
-  padding: 24px;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-#button-row-1 {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  margin-top: 16px;
-}
-
-#progress-bar {
-  margin: 16px auto 0 auto;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  max-width: 600px;
-  margin-top: 16px;
-}
-
-#progress-bar input[type="range"] {
-  flex: 1;
-  min-width: 0;
-  max-width: 100%;
-  accent-color: #fc766a;
-}
-
-#track-thumbnail {
-  border-radius: 8px;
-  vertical-align: middle;
-}
-
-#play-button {
-  background-color: black;
-  border: red solid 2px;
-  border-radius: 10px;
-  color: white;
-  cursor: pointer;
-  font-size: 16px;
-  height: 50px;
-  width: 100px;
-  margin-top: 16px;
-}
-
-#play-button:disabled {
-  background-color: grey;
-  border: grey solid 2px;
-  cursor: not-allowed;
-}
-#play-button:hover:enabled {
-  background-color: #fc766a;
-  border: #fc766a solid 2px;
-}
-
-#play-button:active:enabled {
-  background-color: #d94f4a;
-  border: #d94f4a solid 2px;
-}
-#play-button:focus {
-  outline: none;
-}
-</style>

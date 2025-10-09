@@ -1,3 +1,5 @@
+<style src="../style.css"></style>
+
 <script setup>
 import {
   canSubmit,
@@ -8,7 +10,7 @@ import {
 </script>
 
 <template>
-  <form id="user-feed-form" @submit="onUserFeedFormSubmit">
+  <form class="user-feed-form" @submit="onUserFeedFormSubmit">
     <div class="input-div">
       <label for="user-feed-input" class="input-label">
         Input a URL to an RSS Feed:
@@ -25,30 +27,6 @@ import {
         >Please enter a valid URL.</span
       >
     </div>
-    <button id="submit-button" :disabled="!canSubmit">Read RSS Feed</button>
+    <button class="submit-button" :disabled="!canSubmit">Read RSS Feed</button>
   </form>
 </template>
-
-<style scoped>
-.error-message {
-  color: #fc766a;
-}
-.input-div {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.input-label {
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-#user-feed-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px;
-}
-#submit-button {
-  margin: 16px;
-}
-</style>
