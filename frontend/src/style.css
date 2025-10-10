@@ -264,9 +264,6 @@ li {
     background-color: var(--white);
     --body-background: var(--light-blue);
 
-    --button-background: var(--cream);
-    --button-text: var(--dark-text);
-
     --h-background: var(--white);
     --h-text: var(--dark-text);
 
@@ -283,8 +280,11 @@ li {
   :root {
     color: var(--light-text);
     background-color: var(--dark-navy);
-
     --body-background: var(--dark-navy);
+
+    --h-background: var(--dark-navy);
+    --h-text: var(--dark-text);
+
     --track-background: var(--dark-blue);
 
     --player-background: #131d28;
