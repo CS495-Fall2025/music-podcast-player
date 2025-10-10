@@ -42,9 +42,6 @@ const { isOpen, dropdownOpen, dropdownRef, handleLogin, handleLogout } =
 
 <style src="../style.css" />
 <style scoped>
-/* ========================================
-   NAVBAR
-   ======================================== */
 .navbar {
   background-color: var(--nav-bg);
   padding: 1.25rem 1.5rem;
