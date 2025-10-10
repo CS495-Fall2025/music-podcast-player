@@ -275,7 +275,15 @@ li {
 
     --track-background: var(--white);
 
+    /* MiniPlayer Color Variables */
     --player-background: var(--dark-navy);
+    --player-p: var(--light-orange);
+    --track-info-color: var(--light-text);
+    --track-info-p: var(--light-orange);
+    --progress-bar: var(--light-text);
+    --progress-bar-accent: var(--light-orange);
+    --play-button-bg: var(--cream);
+    --play-button-border: var(--orange);
   }
 }
 
@@ -286,5 +294,15 @@ li {
 
     --body-background: var(--dark-navy);
     --track-background: var(--dark-blue);
+
+    /* MiniPlayer Color Variables */
+    --player-background: #131d28;
+    --player-p: var(--light-orange);
+    --track-info-color: var(--light-text);
+    --track-info-p: var(--light-orange);
+    --progress-bar: var(--light-text);
+    --progress-bar-accent: var(--light-orange);
+    --play-button-bg: var(--cream);
+    --play-button-border: var(--orange);
   }
 }
