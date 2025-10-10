@@ -168,7 +168,7 @@ const onCanPlay = () => {
   margin: 10px 0 0 0;
   white-space: nowrap;
   max-width: 100ch;
-  color: var(--player-p);
+  color: var(--light-orange);
   font-size: large;
   font-weight: bold;
   text-align: center;
@@ -191,7 +191,7 @@ const onCanPlay = () => {
   max-width: 125px;
   min-height: 60px;
   max-height: 60px;
-  color: var(--track-info-color);
+  color: var(--light-text);
   font-weight: bold;
 }
 
@@ -201,7 +201,7 @@ const onCanPlay = () => {
   overflow-wrap: break-word;
   word-break: break-word;
   max-width: 125px;
-  color: var(--track-info-p);
+  color: var(--light-orange);
   font-size: large;
   text-align: center;
 }
@@ -216,7 +216,7 @@ const onCanPlay = () => {
 
 .progress-bar {
   flex: 1;
-  color: var(--progress-bar);
+  color: var(--light-text);
   margin: 16px 20px 0 20px;
   display: flex;
   align-items: center;
@@ -228,7 +228,7 @@ const onCanPlay = () => {
   flex: 1;
   min-width: 0;
   max-width: 100%;
-  accent-color: var(--progress-bar-accent);
+  accent-color: var(--light-orange);
 }
 
 .button-row-1 {
@@ -242,8 +242,8 @@ const onCanPlay = () => {
 }
 
 .play-button {
-  background-color: var(--play-button-bg);
-  border: var(--border-thick) var(--play-button-border);
+  background-color: var(--cream);
+  border: var(--border-thick) var(--orange);
   border-radius: var(--border-radius-lg);
   color: black;
   font-size: 18px;
@@ -258,7 +258,7 @@ const onCanPlay = () => {
 
 .play-button:hover:enabled,
 .play-button:active:enabled {
-  background-color: var(--player-background);
+  background-color: var(--lighter-orange);
 }
 
 .play-button:focus {

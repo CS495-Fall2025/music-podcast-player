@@ -162,8 +162,8 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: var(--button-background);
-  color: var(--button-text);
+  background-color: var(--lighter-orange);
+  color: var(--dark-text);
   cursor: pointer;
   box-shadow: var(--shadow-md);
   border: var(--border-thick) #d89461b4;
@@ -175,8 +175,8 @@ button {
 }
 
 button:hover {
-  background-color: var(--button-bg-hover);
-  border-color: var(--button-border-hover);
+  background-color: var(--lighter-orange);
+  border-color: var(--orange);
   transform: scale(1.05);
 }
 
@@ -270,20 +270,12 @@ li {
     --h-background: var(--white);
     --h-text: var(--dark-text);
 
-    --button-bg-hover: var(--lighter-orange);
-    --button-border-hover: var(--orange);
-
     --track-background: var(--white);
 
-    /* MiniPlayer Color Variables */
     --player-background: var(--dark-navy);
-    --player-p: var(--light-orange);
-    --track-info-color: var(--light-text);
-    --track-info-p: var(--light-orange);
-    --progress-bar: var(--light-text);
-    --progress-bar-accent: var(--light-orange);
-    --play-button-bg: var(--cream);
-    --play-button-border: var(--orange);
+
+    --nav-bg: var(--dark-navy);
+
   }
 }
 
@@ -295,14 +287,8 @@ li {
     --body-background: var(--dark-navy);
     --track-background: var(--dark-blue);
 
-    /* MiniPlayer Color Variables */
     --player-background: #131d28;
-    --player-p: var(--light-orange);
-    --track-info-color: var(--light-text);
-    --track-info-p: var(--light-orange);
-    --progress-bar: var(--light-text);
-    --progress-bar-accent: var(--light-orange);
-    --play-button-bg: var(--cream);
-    --play-button-border: var(--orange);
+
+    --nav-bg: #131d28;
   }
 }

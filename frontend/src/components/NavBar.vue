@@ -46,7 +46,7 @@ const { isOpen, dropdownOpen, dropdownRef, handleLogin, handleLogout } =
    NAVBAR
    ======================================== */
 .navbar {
-  background-color: var(--dark-navy);
+  background-color: var(--nav-bg);
   padding: 1.25rem 1.5rem;
   font-family: var(--font-helvetica);
   display: flex;
