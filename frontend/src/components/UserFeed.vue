@@ -1,3 +1,5 @@
+<style src="../style.css"></style>
+
 <script src="./userFeed.js"></script>
 
 <template>
@@ -11,5 +13,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
+  justify-content: center;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 10px;
 }
 </style>
