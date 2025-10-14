@@ -1,3 +1,5 @@
+<style src="../style.css"></style>
+
 <script setup>
 import { ref, watch } from "vue";
 
@@ -102,8 +104,9 @@ const onEnded = () => {
   }
 };
 </script>
+
 <template>
-  <div id="player-box" v-if="currentTrack">
+  <div class="player-box" v-if="currentTrack">
     <audio
       ref="audioRef"
       :src="currentTrack"
@@ -112,44 +115,45 @@ const onEnded = () => {
       @timeupdate="onTimeUpdate"
       @ended="onEnded"
     ></audio>
-    <img
-      id="track-thumbnail"
-      :src="currentTrackObj?.image"
-      alt="Track Thumbnail"
-      width="300"
-      height="300"
-      v-if="currentTrackObj"
-    />
     <p>{{ currentTrackObj?.title }}</p>
-    <div id="progress-bar">
-      <span>{{ formatTime(currentTime) }}</span>
-      <input
-        type="range"
-        min="0"
-        :max="duration"
-        step="1"
-        v-model="currentTime"
-        @input="audioRef.currentTime = currentTime"
-      />
-      <span id="timeSpan">{{ formatTime(duration) }}</span>
+    <div class="player-info-row">
+      <div class="track-info">
+        <img
+          class="track-thumbnail"
+          :src="currentTrackObj?.image"
+          alt="Track Thumbnail"
+          v-if="currentTrackObj"
+        />
+      </div>
+
+      <div class="progress-bar">
+        <span>{{ formatTime(currentTime) }}</span>
+        <input
+          type="range"
+          min="0"
+          :max="duration"
+          step="1"
+          v-model="currentTime"
+          @input="audioRef.currentTime = currentTime"
+        />
+        <span class="timeSpan">{{ formatTime(duration) }}</span>
+      </div>
     </div>
-    <div id="button-row-1">
-      <button id="repeat-button" @click="repeatTrack">
-        {{ repeat ? "Stop Repeat" : "Repeat" }}
-      </button>
+
+    <div class="button-row-1">
       <button
-        id="skip-back-button"
+        class="skip-back-button"
         @click="skipToLastTrack"
         vmodel="ready"
         :disabled="!ready"
       >
         Back
       </button>
-      <button id="play-button" @click="togglePlay" :disabled="!ready">
+      <button class="play-button" @click="togglePlay" :disabled="!ready">
         {{ isPlaying ? "Pause" : "Play" }}
       </button>
       <button
-        id="skip-button"
+        class="skip-button"
         @click="skipToNextTrack"
         vmodel="ready"
         :disabled="!ready"
@@ -161,74 +165,119 @@ const onEnded = () => {
 </template>
 
 <style scoped>
-#player-box {
-  background-color: #090909;
-  padding: 24px;
+.player-box {
+  background-color: var(--player-background);
+  padding: 10px;
   position: fixed;
   bottom: 0;
-  width: 100%;
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  z-index: var(--player-z);
+  max-height: var(--player-height);
+  justify-content: center;
 }
 
-#button-row-1 {
+.player-box p {
+  margin: 10px 0 0 0;
+  white-space: nowrap;
+  max-width: 100ch;
+  color: var(--light-orange);
+  font-size: large;
+  font-weight: bold;
+  text-align: center;
+}
+
+.player-info-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.track-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 125px;
+  max-width: 125px;
+  min-height: 60px;
+  max-height: 60px;
+  color: var(--light-text);
+  font-weight: bold;
+}
+
+.track-info p {
+  margin: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 125px;
+  color: var(--light-orange);
+  font-size: large;
+  text-align: center;
+}
+
+.track-thumbnail {
+  border-radius: var(--border-radius);
+  vertical-align: middle;
+  width: 100%;
+  height: auto;
+  max-width: 100px;
+}
+
+.progress-bar {
+  flex: 1;
+  color: var(--light-text);
+  margin: 16px 20px 0 20px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+}
+
+.progress-bar input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  accent-color: var(--light-orange);
+}
+
+.button-row-1 {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   gap: 16px;
-  margin-top: 16px;
+  margin: 1px 2px;
+  transform: scale(0.8);
 }
 
-#progress-bar {
-  margin: 16px auto 0 auto;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  max-width: 600px;
-  margin-top: 16px;
-}
-
-#progress-bar input[type="range"] {
-  flex: 1;
-  min-width: 0;
-  max-width: 100%;
-  accent-color: #fc766a;
-}
-
-#track-thumbnail {
-  border-radius: 8px;
-  vertical-align: middle;
-}
-
-#play-button {
-  background-color: black;
-  border: red solid 2px;
-  border-radius: 10px;
-  color: white;
-  cursor: pointer;
-  font-size: 16px;
+.play-button {
+  background-color: var(--cream);
+  border: var(--border-thick) var(--orange);
+  border-radius: var(--border-radius-lg);
+  color: black;
+  font-size: 18px;
   height: 50px;
   width: 100px;
-  margin-top: 16px;
 }
 
-#play-button:disabled {
+.play-button:disabled {
   background-color: grey;
-  border: grey solid 2px;
-  cursor: not-allowed;
-}
-#play-button:hover:enabled {
-  background-color: #fc766a;
-  border: #fc766a solid 2px;
+  border-color: grey;
 }
 
-#play-button:active:enabled {
-  background-color: #d94f4a;
-  border: #d94f4a solid 2px;
+.play-button:hover:enabled,
+.play-button:active:enabled {
+  background-color: var(--lighter-orange);
 }
-#play-button:focus {
+
+.play-button:focus {
   outline: none;
 }
 </style>
