@@ -1,7 +1,7 @@
 <style src="../style.css"></style>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, computed, watch } from "vue";
 
 import { currentTrack, feed } from "./localFeedStore.js";
 
@@ -11,6 +11,10 @@ const audioRef = ref(null); // Reference to the audio element
 const currentTime = ref(0); // Current time of the audio
 const duration = ref(0); // Duration of the audio
 const repeat = ref(false); // Track if audio is set to repeat
+
+const currentTrackObj = computed(() =>
+  feed.find((track) => track.audio === currentTrack.value),
+);
 
 watch(currentTrack, () => {
   isPlaying.value = false; // Reset playing state when track changes
@@ -111,6 +115,7 @@ const onEnded = () => {
       ref="audioRef"
       :src="currentTrack"
       preload="auto"
+      :repeat="repeat"
       @canplay="onCanPlay"
       @timeupdate="onTimeUpdate"
       @ended="onEnded"
@@ -139,8 +144,16 @@ const onEnded = () => {
         <span class="timeSpan">{{ formatTime(duration) }}</span>
       </div>
     </div>
-
     <div class="button-row-1">
+      <button
+        class="repeat-button"
+        @click="repeatTrack"
+        :class="{ active: repeat }"
+        vmodel="ready"
+        :disabled="!ready"
+      >
+        Repeat
+      </button>
       <button
         class="skip-back-button"
         @click="skipToLastTrack"
