@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, watch } from "vue";
 
 import { currentTrack, feed } from "./localFeedStore.js";
 
@@ -9,14 +9,6 @@ const audioRef = ref(null); // Reference to the audio element
 const currentTime = ref(0); // Current time of the audio
 const duration = ref(0); // Duration of the audio
 const repeat = ref(false); // Track if audio is set to repeat
-
-const currentIndex = feed.findIndex(
-  (track) => track.audio === currentTrack.value,
-);
-
-const currentTrackObj = computed(() => {
-  return feed.find((track) => track.audio === currentTrack.value);
-});
 
 watch(currentTrack, () => {
   isPlaying.value = false; // Reset playing state when track changes
@@ -54,7 +46,9 @@ const togglePlay = () => {
 };
 
 const skipToNextTrack = () => {
-  // Logic to skip to the next track in the feed
+  const currentIndex = feed.findIndex(
+    (track) => track.audio === currentTrack.value,
+  );
   const nextIndex = (currentIndex + 1) % feed.length;
   currentTrack.value = feed[nextIndex].audio;
   isPlaying.value = false; // Reset playing state
@@ -63,8 +57,10 @@ const skipToNextTrack = () => {
 };
 
 const skipToLastTrack = () => {
-  const lastIndex = currentIndex === -1 ? 0 : currentIndex;
-  currentTrack.value = feed[lastIndex - 1].audio;
+  const currentIndex = feed.findIndex(
+    (track) => track.audio === currentTrack.value,
+  );
+  currentTrack.value = feed[currentIndex - 1].audio;
   isPlaying.value = false; // Reset playing state
   ready.value = false; // Reset ready state until new track is loaded
   repeat.value = false; // Turn off repeat when skipping to last track
@@ -74,6 +70,9 @@ const onTimeUpdate = () => {
   if (audioRef.value) {
     currentTime.value = audioRef.value.currentTime;
     duration.value = audioRef.value.duration;
+  }
+  if (currentTime.value >= duration.value && !repeat.value) {
+    isPlaying.value = false; // Stop playing when track ends and repeat is off
   }
 };
 
