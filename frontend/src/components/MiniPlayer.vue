@@ -152,7 +152,7 @@ const onEnded = () => {
         vmodel="ready"
         :disabled="!ready"
       >
-        Repeat
+        {{ repeat ? "Repeating" : "Not Repeating" }}
       </button>
       <button
         class="skip-back-button"
