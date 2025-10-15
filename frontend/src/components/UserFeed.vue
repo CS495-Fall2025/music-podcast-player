@@ -11,9 +11,9 @@
 <style scoped>
 .user-feed {
   display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  align-items: stretch;
   max-height: 400px;
   overflow-y: auto;
   overflow-x: hidden;
