@@ -6,15 +6,20 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
-# Copy in the app source directory
-COPY app /app/app
+# Copy in the src directory and pyproject.toml
+COPY src ./
+COPY pyproject.toml ./
+
+# Install the backend as a package
+RUN pip3 install .
 
 # Expose the port for the backend
 EXPOSE 5000
 
-# Tell flask to host on 0.0.0.0 and what module the app is in
-ENV FLASK_APP=app.app:create_app
+# Configure the environment
+ENV FLASK_APP=rss_music_backend:create_app
 ENV FLASK_RUN_HOST=0.0.0.0
+ENV ALLOWED_ORIGINS=http://localhost:5173
 
 # Run the backend
 CMD ["python3", "-m", "flask", "run"]
