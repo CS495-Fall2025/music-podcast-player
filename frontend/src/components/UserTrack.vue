@@ -4,48 +4,62 @@
 
 <template>
   <div class="track" @click="selectTrack">
-    <img class="track-image" :src="track.image" :alt="track.title" />
-    <div class="track-title">{{ track.title }}</div>
+    <div class="track-info">
+      <img class="track-image" :src="track.image" :alt="track.title" />
+      <div class="track-title">{{ track.title }}</div>
+    </div>
+    <div class="track-description">Track description</div>
   </div>
 </template>
 
 <style scoped>
 .track {
-  cursor: pointer;
-  text-align: center;
+  display: flex;
+  flex-direction: row;
+  margin: 5px 30px;
+  padding: 0;
   background-color: var(--track-background);
-  margin: 5px;
-  box-shadow: var(--shadow-md);
   border-radius: var(--border-radius-sm);
-  transition:
-    transform 0.2s ease,
-    background-color 0.2s ease,
-    color 0.2s ease;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
 .track:hover {
   background-color: var(--hover-blue);
   color: var(--dark-blue);
-  transform: scale(1.05);
+  transform: scale(1.025);
   z-index: var(--track-hover-z);
+}
+
+.track-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 200px;
+  margin: 10px;
 }
 
 .track-image {
   width: 100px;
   height: 100px;
-  object-fit: cover;
-  border-radius: var(--border-radius);
   margin-top: 10px;
+  border-radius: var(--border-radius);
+  object-fit: cover;
 }
 
 .track-title {
+  inline-size: 125px;
+  margin: 1px;
   font-size: 16px;
   font-weight: bold;
-  margin: 1px;
-  inline-size: 125px;
+  text-align: center;
   overflow-wrap: break-word;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.track-description {
+  width: 100%;
+  margin: 10px;
+  font-size: 16px;
 }
 </style>
