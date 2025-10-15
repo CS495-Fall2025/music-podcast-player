@@ -22,7 +22,10 @@
   border-radius: var(--border-radius-sm);
   box-shadow: var(--shadow-md);
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .track:hover {
