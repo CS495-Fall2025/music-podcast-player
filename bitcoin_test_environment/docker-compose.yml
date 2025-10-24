@@ -1,0 +1,93 @@
+services:
+  bitcoind:
+    build: ./images/bitcoind
+    container_name: bitcoind
+    environment:
+      RPCAUTH: user:648906acdb3f780c9a1f0de1372d7914$$e536a695488e922f58c50189120d897137199a7ec4d0929c7c68b443a0f20ffb
+      RPCUSER: user
+      RPCPASSWORD: ZVCOeKFGba3Y3foUg2ltrL-27EZA8RraVgGnyOEY-UE
+      FUNDED_NODES: lnd-listener,lnd-artist
+    volumes:
+      - address-vol:/mnt/addresses
+
+  lnd-listener:
+    container_name: lnd-listener
+    build: ./images/lnd 
+    depends_on:
+      - bitcoind
+    environment:
+      - RPC_USER=user
+      - RPC_PASS=ZVCOeKFGba3Y3foUg2ltrL-27EZA8RraVgGnyOEY-UE
+      - BITCOIND_HOST=bitcoind
+      - BITCOIND_PORT=18443
+      - TLS_NAME=lnd-listener
+    volumes:
+      - lnd-listener-vol:/mnt/lnd
+      - address-vol:/mnt/addresses
+  
+  lnd-artist:
+    container_name: lnd-artist
+    build: ./images/lnd 
+    depends_on:
+      - bitcoind
+    environment:
+      - RPC_USER=user
+      - RPC_PASS=ZVCOeKFGba3Y3foUg2ltrL-27EZA8RraVgGnyOEY-UE
+      - BITCOIND_HOST=bitcoind
+      - BITCOIND_PORT=18443
+      - TLS_NAME=lnd-artist
+    volumes:
+      - lnd-artist-vol:/mnt/lnd
+      - address-vol:/mnt/addresses
+
+
+  #nostr-relay:
+  #  image: scsibug/nostr-rs-relay:0.9.0
+  #  container_name: nostr-relay
+
+  lnbits-listener:
+    image: lnbits/lnbits:v1.3.1
+    container_name: lnbits-listener
+    depends_on:
+      - bitcoind
+      - lnd-listener
+#      - nostr-relay
+    ports:
+      - 4000:5000
+    environment:
+      - LNBITS_BACKEND_WALLET_CLASS=LndWallet
+      - LND_GRPC_ENDPOINT=lnd-listener
+      - LND_GRPC_PORT=10009
+      - LNBITS_ADMIN_USER=listener
+      - LNBITS_ADMIN_PASS=password
+      - LNBITS_ALLOWED_ORIGINS=http://localhost:4000
+      - LND_GRPC_CERT=/mnt/lnd/tls.cert
+      - LND_GRPC_MACAROON=/mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon
+    volumes:
+      - lnd-listener-vol:/mnt/lnd:ro
+
+  lnbits-artist:
+    image: lnbits/lnbits:v1.3.1
+    container_name: lnbits-artist
+    depends_on:
+      - bitcoind
+      - lnd-artist
+#      - nostr-relay
+    ports:
+      - 4001:5000
+    environment:
+      - LNBITS_BACKEND_WALLET_CLASS=LndWallet
+      - LND_GRPC_ENDPOINT=lnd-artist
+      - LND_GRPC_PORT=10009
+      - LNBITS_ADMIN_USER=artist
+      - LNBITS_ADMIN_PASS=password
+      - LNBITS_ALLOWED_ORIGINS=http://localhost:4001
+      - LND_GRPC_CERT=/mnt/lnd/tls.cert
+      - LND_GRPC_MACAROON=/mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon
+    volumes:
+      - lnd-artist-vol:/mnt/lnd:ro
+
+volumes:
+  lnd-listener-vol: {}
+  lnd-artist-vol: {}
+  address-vol: {}
