@@ -3,91 +3,169 @@ services:
     build: ./images/bitcoind
     container_name: bitcoind
     environment:
-      RPCAUTH: user:648906acdb3f780c9a1f0de1372d7914$$e536a695488e922f58c50189120d897137199a7ec4d0929c7c68b443a0f20ffb
-      RPCUSER: user
-      RPCPASSWORD: ZVCOeKFGba3Y3foUg2ltrL-27EZA8RraVgGnyOEY-UE
       FUNDED_NODES: lnd-listener,lnd-artist
+    healthcheck:
+      test: [
+        "CMD",
+        "bitcoin-cli",
+        "-regtest",
+        "-rpccookiefile=/mnt/cookie/.cookie",
+        "getblockchaininfo"
+      ]
+      interval: 2s
+      timeout: 5s
+      retries: 3
     volumes:
-      - address-vol:/mnt/addresses
+      - cookie-vol:/mnt/cookie
+      - address-vol:/mnt/addresses:ro
+      - channel-signal:/mnt/channels:ro
 
   lnd-listener:
     container_name: lnd-listener
     build: ./images/lnd 
     depends_on:
-      - bitcoind
+      bitcoind:
+        condition: service_healthy
     environment:
-      - RPC_USER=user
-      - RPC_PASS=ZVCOeKFGba3Y3foUg2ltrL-27EZA8RraVgGnyOEY-UE
-      - BITCOIND_HOST=bitcoind
-      - BITCOIND_PORT=18443
-      - TLS_NAME=lnd-listener
+      BITCOIND_HOST: bitcoind
+      BITCOIND_PORT: 18443
+      TLS_NAME: lnd-listener
+      CHANNEL_PEER_NAME: lnd-artist
+      CHANNEL_LIQUIDITY: 10000000
+      CONNECT: true
+    healthcheck:
+      test: [
+        "CMD",
+        "lncli",
+        "--network=regtest",
+        "--tlscertpath=/mnt/lnd/tls.cert",
+        "--macaroonpath=/mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon",
+        "getinfo"
+      ]
+      interval: 2s
+      timeout: 5s
+      retries: 3
     volumes:
+      - cookie-vol:/mnt/cookie:ro
       - lnd-listener-vol:/mnt/lnd
       - address-vol:/mnt/addresses
+      - public-keys:/mnt/pubkeys
+      - channel-signal:/mnt/channels
   
   lnd-artist:
     container_name: lnd-artist
     build: ./images/lnd 
     depends_on:
-      - bitcoind
+      bitcoind:
+        condition: service_healthy
     environment:
-      - RPC_USER=user
-      - RPC_PASS=ZVCOeKFGba3Y3foUg2ltrL-27EZA8RraVgGnyOEY-UE
-      - BITCOIND_HOST=bitcoind
-      - BITCOIND_PORT=18443
-      - TLS_NAME=lnd-artist
+      BITCOIND_HOST: bitcoind
+      BITCOIND_PORT: 18443
+      TLS_NAME: lnd-artist
+      CHANNEL_PEER_NAME: lnd-listener
+      CHANNEL_LIQUIDITY: 10000000
+      CONNECT: false
+    healthcheck:
+      test: [
+        "CMD",
+        "lncli",
+        "--network=regtest",
+        "--tlscertpath=/mnt/lnd/tls.cert",
+        "--macaroonpath=/mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon",
+        "getinfo"
+      ]
+      interval: 2s
+      timeout: 5s
+      retries: 3
     volumes:
+      - cookie-vol:/mnt/cookie:ro
       - lnd-artist-vol:/mnt/lnd
       - address-vol:/mnt/addresses
+      - public-keys:/mnt/pubkeys
+      - channel-signal:/mnt/channels
 
-
-  #nostr-relay:
-  #  image: scsibug/nostr-rs-relay:0.9.0
-  #  container_name: nostr-relay
+  nostr-relay:
+    image: scsibug/nostr-rs-relay:0.9.0
+    container_name: nostr-relay
+    ports:
+      - 8080:8080
+    environment:
+      NOSTR_RELAY_PORT: 8080
+      NOSTR_RELAY_HOST: 0.0.0.0
+      NOSTR_RELAY_PUBLIC: true
+    healthcheck:
+      test: [
+        "CMD",
+        "echo",
+        ">",
+        "/dev/tcp/localhost/8080"
+      ]
+      interval: 2s
+      timeout: 5s
+      retries: 3
 
   lnbits-listener:
-    image: lnbits/lnbits:v1.3.1
+    build: ./images/lnbits
     container_name: lnbits-listener
     depends_on:
-      - bitcoind
-      - lnd-listener
-#      - nostr-relay
+      lnd-listener:
+        condition: service_healthy
+      nostr-relay:
+        condition: service_healthy
     ports:
       - 4000:5000
     environment:
-      - LNBITS_BACKEND_WALLET_CLASS=LndWallet
-      - LND_GRPC_ENDPOINT=lnd-listener
-      - LND_GRPC_PORT=10009
-      - LNBITS_ADMIN_USER=listener
-      - LNBITS_ADMIN_PASS=password
-      - LNBITS_ALLOWED_ORIGINS=http://localhost:4000
-      - LND_GRPC_CERT=/mnt/lnd/tls.cert
-      - LND_GRPC_MACAROON=/mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon
+      LNBITS_BACKEND_WALLET_CLASS: LndWallet
+      LND_GRPC_ENDPOINT: lnd-listener
+      LND_GRPC_PORT: 10009
+      LNBITS_ALLOWED_ORIGINS: http://localhost:4000
+      LND_GRPC_CERT: /mnt/lnd/tls.cert
+      LND_GRPC_MACAROON: /mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon
+      LNBITS_ADMIN_UI: false
+      LNBITS_ALLOW_NEW_ACCOUNTS: false
+      LNBITS_USER_DEFAULT_EXTENSIONS: nwcprovider
+      NWC_RELAY_URL: ws://192.168.1.27:8080
+      NWC_SECRET_KEY: AofWMUdY3cpqR++BSLCYKKrQPH1dTQ7zJnGyslyN+do=
+      USERNAME: listener 
+      PASSWORD: password
+      WALLET_NAME: Listener
     volumes:
       - lnd-listener-vol:/mnt/lnd:ro
+    extra_hosts:
+      - host-lan:${HOST_LAN_IP}
 
   lnbits-artist:
-    image: lnbits/lnbits:v1.3.1
+    build: ./images/lnbits
     container_name: lnbits-artist
     depends_on:
-      - bitcoind
-      - lnd-artist
-#      - nostr-relay
+      lnd-artist:
+        condition: service_healthy
+      nostr-relay:
+        condition: service_healthy
     ports:
       - 4001:5000
     environment:
-      - LNBITS_BACKEND_WALLET_CLASS=LndWallet
-      - LND_GRPC_ENDPOINT=lnd-artist
-      - LND_GRPC_PORT=10009
-      - LNBITS_ADMIN_USER=artist
-      - LNBITS_ADMIN_PASS=password
-      - LNBITS_ALLOWED_ORIGINS=http://localhost:4001
-      - LND_GRPC_CERT=/mnt/lnd/tls.cert
-      - LND_GRPC_MACAROON=/mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon
+      LNBITS_BACKEND_WALLET_CLASS: LndWallet
+      LND_GRPC_ENDPOINT: lnd-artist
+      LND_GRPC_PORT: 10009
+      LNBITS_ALLOWED_ORIGINS: http://localhost:4001
+      LND_GRPC_CERT: /mnt/lnd/tls.cert
+      LND_GRPC_MACAROON: /mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon
+      LNBITS_ADMIN_UI: false
+      LNBITS_ALLOW_NEW_ACCOUNTS: false
+      LNBITS_USER_DEFAULT_EXTENSIONS: nwcprovider
+      USERNAME: artist
+      PASSWORD: password
+      WALLET_NAME: Artist
     volumes:
       - lnd-artist-vol:/mnt/lnd:ro
+    extra_hosts:
+      - host-lan:${HOST_LAN_IP}
 
 volumes:
   lnd-listener-vol: {}
   lnd-artist-vol: {}
   address-vol: {}
+  cookie-vol: {}
+  public-keys: {}
+  channel-signal: {}

@@ -4,8 +4,8 @@ set -e
 
 DATADIR="/home/bitcoin/.bitcoin"
 
-echo "Clearing addresses volume"
-rm -rf /mnt/addresses/*
+echo "Clearing cookie volume"
+rm -rf /mnt/cookie/*
 
 echo "Starting bitcoind..."
 bitcoind \
@@ -13,9 +13,8 @@ bitcoind \
 	-server=1 \
 	-rpcbind=0.0.0.0 \
 	-rpcport=18443 \
-	-rpcallowip=172.0.0.1 \
-	-rpcallowip=172.22.0.0/16 \
-	-rpcauth=${RPCAUTH} \
+	-rpcallowip=0.0.0.0/0 \
+	-rpccookiefile=/mnt/cookie/.cookie \
 	-fallbackfee=0.0002 \
 	-daemon \
 	-zmqpubrawblock=tcp://0.0.0.0:28332 \
@@ -23,15 +22,15 @@ bitcoind \
 
 # Wait for RPC to be ready
 echo "Waiting for bitcoind RPC..."
-until bitcoin-cli -regtest -rpcuser=${RPCUSER} -rpcpassword=${RPCPASSWORD} getblockchaininfo > /dev/null 2>&1; do
+until bitcoin-cli -regtest -rpccookiefile=/mnt/cookie/.cookie getblockchaininfo > /dev/null 2>&1; do
 	sleep 1s
 done
 
 echo "Creating wallet 'miner'..."
-bitcoin-cli -regtest -rpcuser=${RPCUSER} -rpcpassword=${RPCPASSWORD} createwallet "miner"
+bitcoin-cli -regtest -rpccookiefile=/mnt/cookie/.cookie createwallet "miner"
 echo "Funding wallet 'miner'..."
-miner_address=$(bitcoin-cli -regtest -rpcuser=${RPCUSER} -rpcpassword=${RPCPASSWORD} -rpcwallet=miner getnewaddress)
-bitcoin-cli -regtest -rpcuser=${RPCUSER} -rpcpassword=${RPCPASSWORD} generatetoaddress 200 ${miner_address}
+miner_address=$(bitcoin-cli -regtest -rpccookiefile=/mnt/cookie/.cookie -rpcwallet=miner getnewaddress)
+bitcoin-cli -regtest -rpccookiefile=/mnt/cookie/.cookie generatetoaddress 200 ${miner_address}
 
 OLD_IFS=$IFS
 IFS=","
@@ -49,12 +48,21 @@ echo "Funding nodes"
 for NODE in "$@"; do
 	address=$(cat "/mnt/addresses/${NODE}.txt")
 	echo "Funding ${address} with 1.0 BTC"
-	bitcoin-cli -regtest -rpcuser=${RPCUSER} -rpcpassword=${RPCPASSWORD} sendtoaddress "${address}" 1.0
+	bitcoin-cli -regtest -rpccookiefile=/mnt/cookie/.cookie sendtoaddress "${address}" 1.0
 done
 
 echo "Mining to confirm"
-bitcoin-cli -regtest -rpcuser=${RPCUSER} -rpcpassword=${RPCPASSWORD} generatetoaddress 6 ${miner_address}
+bitcoin-cli -regtest -rpccookiefile=/mnt/cookie/.cookie generatetoaddress 6 ${miner_address}
 
+echo "Waiting for LND channels"
+for NODE in "$@"; do
+	until [ -f "/mnt/channels/${NODE}" ]; do
+		sleep 1
+	done
+done
+
+echo "Mining to confirm channels"
+bitcoin-cli -regtest -rpccookiefile=/mnt/cookie/.cookie generatetoaddress 6 ${miner_address}
 
 # Keep the container alive and print logs
 tail -f ~/.bitcoin/regtest/debug.log
