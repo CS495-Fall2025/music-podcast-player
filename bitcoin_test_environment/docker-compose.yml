@@ -104,63 +104,51 @@ services:
       timeout: 5s
       retries: 3
 
-  lnbits-listener:
-    build: ./images/lnbits
-    container_name: lnbits-listener
+  alby-listener:
+    image: ghcr.io/getalby/hub:latest
+    container_name: alby-listener
     depends_on:
       lnd-listener:
         condition: service_healthy
       nostr-relay:
         condition: service_healthy
     ports:
-      - 4000:5000
+      - 4000:8080
     environment:
-      LNBITS_BACKEND_WALLET_CLASS: LndWallet
-      LND_GRPC_ENDPOINT: lnd-listener
-      LND_GRPC_PORT: 10009
-      LNBITS_ALLOWED_ORIGINS: http://localhost:4000
-      LND_GRPC_CERT: /mnt/lnd/tls.cert
-      LND_GRPC_MACAROON: /mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon
-      LNBITS_ADMIN_UI: false
-      LNBITS_ALLOW_NEW_ACCOUNTS: false
-      LNBITS_USER_DEFAULT_EXTENSIONS: nwcprovider
-      NWC_RELAY_URL: ws://192.168.1.27:8080
-      NWC_SECRET_KEY: AofWMUdY3cpqR++BSLCYKKrQPH1dTQ7zJnGyslyN+do=
-      USERNAME: listener 
-      PASSWORD: password
-      WALLET_NAME: Listener
+      NETWORK: regtest
+      AUTO_UNLOCK_PASSWORD: password
+      AUTO_LINK_ALBY_ACCOUNT: false
+      LN_BACKEND_TYPE: LND
+      LND_ADDRESS: lnd-listener:10009
+      LND_CERT_FILE: /mnt/lnd/tls.cert
+      LND_MACAROON_FILE: /mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon
+      RELAY: ws://${HOST_LAN_IP}:8080
+      DISABLE_ADVANCED_SETUP: true
     volumes:
       - lnd-listener-vol:/mnt/lnd:ro
-    extra_hosts:
-      - host-lan:${HOST_LAN_IP}
-
-  lnbits-artist:
-    build: ./images/lnbits
-    container_name: lnbits-artist
+  
+  alby-artist:
+    image: ghcr.io/getalby/hub:latest
+    container_name: alby-artist
     depends_on:
       lnd-artist:
         condition: service_healthy
       nostr-relay:
         condition: service_healthy
     ports:
-      - 4001:5000
+      - 4001:8080
     environment:
-      LNBITS_BACKEND_WALLET_CLASS: LndWallet
-      LND_GRPC_ENDPOINT: lnd-artist
-      LND_GRPC_PORT: 10009
-      LNBITS_ALLOWED_ORIGINS: http://localhost:4001
-      LND_GRPC_CERT: /mnt/lnd/tls.cert
-      LND_GRPC_MACAROON: /mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon
-      LNBITS_ADMIN_UI: false
-      LNBITS_ALLOW_NEW_ACCOUNTS: false
-      LNBITS_USER_DEFAULT_EXTENSIONS: nwcprovider
-      USERNAME: artist
-      PASSWORD: password
-      WALLET_NAME: Artist
+      NETWORK: regtest
+      AUTO_UNLOCK_PASSWORD: password
+      AUTO_LINK_ALBY_ACCOUNT: false
+      LN_BACKEND_TYPE: LND
+      LND_ADDRESS: lnd-artist:10009
+      LND_CERT_FILE: /mnt/lnd/tls.cert
+      LND_MACAROON_FILE: /mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon
+      RELAY: ws://${HOST_LAN_IP}:8080
+      DISABLE_ADVANCED_SETUP: true
     volumes:
       - lnd-artist-vol:/mnt/lnd:ro
-    extra_hosts:
-      - host-lan:${HOST_LAN_IP}
 
 volumes:
   lnd-listener-vol: {}
