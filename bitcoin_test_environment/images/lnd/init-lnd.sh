@@ -62,19 +62,23 @@ PEER_KEY=$(< "/mnt/pubkeys/${CHANNEL_PEER_NAME}.txt")
 sleep 5s
 
 if [ "$CONNECT" = "true" ]; then
-	lncli \
+	until lncli \
 		--tlscertpath=/mnt/lnd/tls.cert \
 		--macaroonpath=/mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon connect \
 		${PEER_KEY}@${CHANNEL_PEER_NAME}:9735
-else
-	sleep 2s
+	do
+		sleep 1s
+	done
 fi
 
-lncli \
+until lncli \
 	--tlscertpath=/mnt/lnd/tls.cert \
 	--macaroonpath=/mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon openchannel \
 	--node_key=${PEER_KEY} \
 	--local_amt=${CHANNEL_LIQUIDITY}
+do
+	sleep 1s
+done
 
 echo "Notifying bitcoind that a channel has been created"
 touch /mnt/channels/${TLS_NAME}
