@@ -8,7 +8,13 @@ export default defineConfig([
     files: ["**/*.{js,mjs,cjs,vue}"],
     plugins: { js },
     extends: ["js/recommended"],
-    languageOptions: { globals: globals.browser },
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        __NAME__: "readonly",
+        __VERSION__: "readonly",
+      },
+		},
   },
   pluginVue.configs["flat/essential"],
 ]);

@@ -2,11 +2,13 @@ import { createRouter, createWebHistory } from "vue-router";
 import InputFeedPage from "../pages/InputFeedPage.vue";
 import SearchFeedPage from "../pages/SearchFeedPage.vue";
 import ViewFeedPage from "../pages/ViewFeedPage.vue";
+import BoostTestPage from "../pages/BoostTestPage.vue";
 
 const routes = [
   { path: "/", component: InputFeedPage },
   { path: "/search", component: SearchFeedPage },
   { path: "/view", component: ViewFeedPage },
+  { path: "/boost", component: BoostTestPage},
 ];
 
 const router = createRouter({

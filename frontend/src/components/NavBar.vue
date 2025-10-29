@@ -15,6 +15,7 @@
         <router-link to="/" class="nav-link">Contact</router-link>
         <router-link to="/search" class="nav-link">Search Feeds</router-link>
         <router-link to="/" class="nav-link">Input Feed</router-link>
+        <router-link to="/boost" class="nav-link">Test Boostagram</router-link>
       </div>
     </div>
 
