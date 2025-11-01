@@ -10,7 +10,7 @@ import {
 </script>
 
 <template>
-  <form class="user-feed-form" @submit="onUserFormSubmit">
+  <form class="search-feed-form" @submit="onUserFormSubmit">
     <div class="input-div">
       <label for="query-input" class="input-label">
         Search the PodcastIndex for feeds:
@@ -31,3 +31,12 @@ import {
     <button class="submit-button" :disabled="!canSubmit">Search Feeds</button>
   </form>
 </template>
+
+<style scoped>
+.search-feed-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+}
+</style>
