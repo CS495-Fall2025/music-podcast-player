@@ -1,6 +1,7 @@
 import pytest
+from unittest import mock
 
-from app.app import create_app
+from rss_music_backend import create_app
 
 
 @pytest.fixture
@@ -14,6 +15,12 @@ def client():
         }
     )
 
-    yield app.test_client()
+    def fail_request(*args, **kwargs):
+        assert False, (
+            "Program attempted to make a network request when it shouldn't have"
+        )
+
+    with mock.patch("requests.Session.send", side_effect=fail_request) as _:
+        yield app.test_client()
 
     # Reset any persisted resources here.

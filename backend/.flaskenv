@@ -1,0 +1,2 @@
+FLASK_APP=rss_music_backend:create_app
+FLASK_ENV=development

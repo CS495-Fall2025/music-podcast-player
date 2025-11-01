@@ -1,38 +1,36 @@
 import { computed, reactive } from "vue";
 
-import router from "../router";
-
-import { requestFeedFromURL } from "./rssParsing.js";
+import { requestFeeds } from "./backendFeedParser.js";
 
 // true for a given input's name when the value inside it is valid, false otherwise.
 // We assume everything is correct until the user clicks off the input for the first
 // time. We will also check validation on submitting.
 const formValidation = reactive({
-  userFeedUrl: true,
+  query: true,
 });
 
 // true when all inputs to the form are valid, allows the user to submit the form.
 export const canSubmit = computed(() => checkCanSubmit(formValidation));
 
-export function onUserFeedInputBlur(event) {
+export function onUserInputBlur(event) {
   if (!canSubmit.value) {
     return;
   }
 
-  let valid = validateUserRSSFeed(event.target.value);
+  let valid = validateUserSearchQuery(event.target.value);
   formValidation.userFeedUrl = valid;
 }
 
-export function onUserFeedInputInput(event) {
+export function onUserInputInput(event) {
   if (canSubmit.value) {
     return;
   }
 
-  let valid = validateUserRSSFeed(event.target.value);
+  let valid = validateUserSearchQuery(event.target.value);
   formValidation.userFeedUrl = valid;
 }
 
-export function onUserFeedFormSubmit(event) {
+export function onUserFormSubmit(event) {
   event.preventDefault();
   let data = new FormData(event.target);
 
@@ -40,15 +38,16 @@ export function onUserFeedFormSubmit(event) {
 
   if (canSubmit.value) {
     event.target.reset();
-    requestFeedFromURL(data.get("userFeedUrl"));
-    router.push("/view");
+    requestFeeds(data.get("query"));
+    console.log(data.get("query"));
+    //router.push("/view");
   }
 }
 
-// Checks that the feed (string) is a URL using HTTP/HTTPS. Does not check if the URL is
-// reachable or points to a valid RSS feed.
-function validateUserRSSFeed(feed) {
-  return /(http|https):\/\/[\w-]+\.[\w-]+(\/.*)?/.test(feed);
+// Limits length to 255 characters, disallows "--", and only allows letters, numbers,
+// and simple punctuation.
+function validateUserSearchQuery(feed) {
+  return /^(?!.*--)[\w !'?.-]{1,255}$/.test(feed);
 }
 
 function checkCanSubmit(validationData) {
@@ -63,5 +62,5 @@ function checkCanSubmit(validationData) {
 
 // When more inputs are added to this form, this can check all of them.
 function validateAll(formData) {
-  formValidation.userFeedUrl = validateUserRSSFeed(formData.get("userFeedUrl"));
+  formValidation.query = validateUserSearchQuery(formData.get("query"));
 }

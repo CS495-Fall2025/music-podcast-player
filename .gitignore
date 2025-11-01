@@ -1,1 +1,2 @@
-secrets/backend.env
+# Docker secrets directory
+secrets/
