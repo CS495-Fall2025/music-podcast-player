@@ -62,7 +62,7 @@ const skipToNextTrack = () => {
   repeat.value = false; // Turn off repeat when skipping to next track
 };
 
-const skipToLastTrack = () => {
+const skipToPreviousTrack = () => {
   const currentIndex = feed.findIndex(
     (track) => track.audio === currentTrack.value,
   );
@@ -156,7 +156,7 @@ const onEnded = () => {
       </button>
       <button
         class="skip-back-button"
-        @click="skipToLastTrack"
+        @click="skipToPreviousTrack"
         vmodel="ready"
         :disabled="!ready"
       >
