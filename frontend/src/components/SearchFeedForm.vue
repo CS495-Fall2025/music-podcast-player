@@ -6,7 +6,7 @@ import {
   onUserInputBlur,
   onUserInputInput,
   onUserFormSubmit,
-} from "./searchFeedForm.js";
+} from "../controllers/searchFeedForm.js";
 </script>
 
 <template>
@@ -15,18 +15,10 @@ import {
       <label for="query-input" class="input-label">
         Search the PodcastIndex for feeds:
       </label>
-      <input
-        type="text"
-        id="query-input"
-        name="query"
-        placeholder="Search"
-        @blur="onUserInputBlur"
-        @input="onUserInputInput"
-      />
-      <span class="error-message" v-if="!canSubmit"
-        >Search query has incorrect length or is using disallowed
-        characters.</span
-      >
+      <input type="text" id="query-input" name="query" placeholder="Search" @blur="onUserInputBlur"
+        @input="onUserInputInput" />
+      <span class="error-message" v-if="!canSubmit">Search query has incorrect length or is using disallowed
+        characters.</span>
     </div>
     <button class="submit-button" :disabled="!canSubmit">Search Feeds</button>
   </form>

@@ -6,7 +6,7 @@ import {
   onUserFeedInputBlur,
   onUserFeedInputInput,
   onUserFeedFormSubmit,
-} from "./rssFeedForm.js";
+} from "../controllers/rssFeedForm.js";
 </script>
 
 <template>
@@ -15,17 +15,9 @@ import {
       <label for="user-feed-input" class="input-label">
         Input a URL to an RSS Feed:
       </label>
-      <input
-        type="text"
-        id="user-feed-input"
-        name="userFeedUrl"
-        placeholder="https://example.com/feed.rss"
-        @blur="onUserFeedInputBlur"
-        @input="onUserFeedInputInput"
-      />
-      <span class="error-message" v-if="!canSubmit"
-        >Please enter a valid URL.</span
-      >
+      <input type="text" id="user-feed-input" name="userFeedUrl" placeholder="https://example.com/feed.rss"
+        @blur="onUserFeedInputBlur" @input="onUserFeedInputInput" />
+      <span class="error-message" v-if="!canSubmit">Please enter a valid URL.</span>
     </div>
     <button class="submit-button" :disabled="!canSubmit">Read RSS Feed</button>
   </form>

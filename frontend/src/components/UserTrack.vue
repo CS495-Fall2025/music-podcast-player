@@ -1,6 +1,6 @@
 <style src="../style.css"></style>
 
-<script src="./userTrack.js"></script>
+<script src="../controllers/userTrack.js"></script>
 
 <template>
   <div class="track" @click="selectTrack">

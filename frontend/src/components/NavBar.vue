@@ -3,11 +3,7 @@
     <div class="nav-left">
       <div class="brand">RSS Music Player</div>
 
-      <button
-        class="navbar-toggle"
-        @click="isOpen = !isOpen"
-        aria-label="Toggle navigation"
-      />
+      <button class="navbar-toggle" @click="isOpen = !isOpen" aria-label="Toggle navigation" />
 
       <div :class="['nav-links', { 'is-open': isOpen }]">
         <router-link to="/" class="nav-link">Home</router-link>
@@ -20,10 +16,7 @@
 
     <div class="nav-right">
       <div class="nav-dropdown" ref="dropdownRef">
-        <button
-          class="dropdown-toggle"
-          @click.stop="dropdownOpen = !dropdownOpen"
-        >
+        <button class="dropdown-toggle" @click.stop="dropdownOpen = !dropdownOpen">
           Account ▾
         </button>
         <div v-if="dropdownOpen" class="dropdown-menu">
@@ -36,7 +29,7 @@
 </template>
 
 <script setup>
-import useNavbar from "./navBar.js";
+import useNavbar from "../controllers/navBar.js";
 
 const { isOpen, dropdownOpen, dropdownRef, handleLogin, handleLogout } =
   useNavbar();
