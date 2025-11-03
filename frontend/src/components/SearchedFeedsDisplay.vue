@@ -4,7 +4,11 @@
 
 <template>
   <div class="feeds">
-    <FeedCard v-for="(item, index) in searchedFeeds" :key="index" :feed="item" />
+    <FeedCard
+      v-for="(item, index) in searchedFeeds"
+      :key="index"
+      :feed="item"
+    />
   </div>
 </template>
 
