@@ -21,6 +21,13 @@ class Medium(Enum):
     COURSE = "course"
 
 
+# From https://podcastindex-org.github.io/docs-api/#get-/podcasts/byfeedurl
+# Not described in the response for searching music feeds, but shows up anyways.
+class FeedFundingSchema(Schema):
+    url = fields.URL(required=True, allow_none=True)
+    message = fields.Str(required=True, validate=validate.Length(min=1, max=255))
+
+
 # Description from https://podcastindex-org.github.io/docs-api/#get-/search/music/byterm
 class PodcastIndexFeedSchema(Schema):
     id = fields.Int(required=True, validate=validate.Range(min=0))
@@ -71,6 +78,7 @@ class PodcastIndexFeedSchema(Schema):
     locked = fields.Bool(required=True)
     imageUrlHash = fields.Int(required=True)
     newestItemPubdate = fields.Int(required=True, validate=validate.Range(min=0))
+    funding = fields.Nested(FeedFundingSchema)
 
 
 class SearchFeedsResponseSchema(Schema):
