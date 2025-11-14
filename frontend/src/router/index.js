@@ -8,10 +8,10 @@ const routes = [
   { path: "/", component: InputFeedPage },
   { path: "/search", component: SearchFeedPage },
   { path: "/view", component: ViewFeedPage },
-	// Development tool pages
-  ...(import.meta.env.VITE_INCLUDE_DEV_FEATURES !== "yes" ? [] : [
-		{ path: "/boost", component: BoostTestPage}
-	]),
+  // Development tool pages
+  ...(import.meta.env.VITE_INCLUDE_DEV_FEATURES !== "yes"
+    ? []
+    : [{ path: "/boost", component: BoostTestPage }]),
 ];
 
 const router = createRouter({

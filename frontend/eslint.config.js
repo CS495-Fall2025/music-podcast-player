@@ -14,7 +14,7 @@ export default defineConfig([
         __NAME__: "readonly",
         __VERSION__: "readonly",
       },
-		},
+    },
   },
   pluginVue.configs["flat/essential"],
 ]);

@@ -1,13 +1,16 @@
 <script setup>
-import { onTestBoostSubmitted, onConnectWalletClicked } from "../components/boostTestForm.js";
+import {
+  onTestBoostSubmitted,
+  onConnectWalletClicked,
+} from "../components/boostTestForm.js";
 import { walletConnected } from "../components/lightningPayments.js";
 </script>
 
 <template>
-	<div>Test Boostagram</div>
-	<button @click="onConnectWalletClicked">
-		{{ walletConnected ? "Change Wallet" : "Connect Wallet" }}
-	</button>
+  <div>Test Boostagram</div>
+  <button @click="onConnectWalletClicked">
+    {{ walletConnected ? "Change Wallet" : "Connect Wallet" }}
+  </button>
   <form @submit="onTestBoostSubmitted">
     <div class="input-div">
       <label for="recipient-address-input" class="input-label">
@@ -22,12 +25,7 @@ import { walletConnected } from "../components/lightningPayments.js";
       <label for="sats-input" class="input-label">
         Input the amount of sats to send:
       </label>
-      <input
-        type="text"
-        id="sats-input"
-        name="sats"
-        placeholder="500"
-      />
+      <input type="text" id="sats-input" name="sats" placeholder="500" />
       <label for="message-input" class="input-label">
         Input the message to send to the recipient:
       </label>
@@ -39,7 +37,7 @@ import { walletConnected } from "../components/lightningPayments.js";
       />
     </div>
     <button class="submit-button">Send Payment</button>
-	</form>
+  </form>
 </template>
 
 <style scoped></style>
