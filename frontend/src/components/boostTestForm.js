@@ -1,60 +1,54 @@
-	import {
-		init,
-		launchModal,
-		requestProvider,
-	} from '@getalby/bitcoin-connect';
+import {
+	connectWallet,
+	makeBoostMeta,
+	makeValueMeta,
+	sendBoost,
+} from './lightningPayments.js';
 
 
 export async function onTestBoostSubmitted(event) {
-  event.preventDefault();
-  let data = new FormData(event.target);
+	event.preventDefault();
+	let data = new FormData(event.target);
 
-	console.log(data)
+	console.log(data);
 
-	const provider = await requestProvider();
-	
-	const records = {
-		"podcast": "Jazz No Es Polca",
-		"feedID": 7427670,
-		"url": "https://wavlake.com/feed/music/960ee35a-10a5-4769-858f-7e32afc1a298",
-		"guid": "fc1fc86b-ab84-5db8-a532-05c9f1ec4f36",
-		"episode_guid": "36d61e40-7a95-4275-9cc1-839f26efd774",
-		"time": 90,
-		"action": "boost",
-		"app_name": "RSSMusicPlayer",
-		"name": "Juanjo Corbalán via Wavlake",
-	};
+	const boostMeta = makeBoostMeta(
+		"Jazz No Es Polca",
+		"fc1fc86b-ab84-5db8-a532-05c9f1ec4f36",
+		"El Polquero",
+		"f3de2def-77d0-4f4b-ad38-e2bee1adac31",
+		data.get("message"),
+		"Sender name"
+	);
 
-	const boost = {
-		destination: data.get("recipientAddress"),
-		amount: String(data.get("sats")),
-		customRecords: {
-			"7629169": formatPodcastJSON(records)
-		}
-	}
+	const valueMeta = makeValueMeta(
+		parseInt(data.get("sats")),
+		[
+			{
+				name: "Artist 1",
+				address: data.get("recipientAddress"),
+				split: 33,
+			},
+			{
+				name: "Artist 2",
+				address: data.get("recipientAddress"),
+				split: 33,
+			},
+			{
+				name: "Artist 3",
+				address: data.get("recipientAddress"),
+				split: 33,
+			}
+		]
+	);
 
-	console.log(boost);
+	console.log(boostMeta);
+	console.log(valueMeta);
 
-	provider.keysend(boost);
+	sendBoost(boostMeta, valueMeta);
 }
 
 
 export async function onConnectWalletClicked() {
-	// Initialize Bitcoin Connect
-	init({
-		appName: 'RSS Music Player', // your app name
-	});
-
-	await launchModal();
+	await connectWallet();
 }
-
-
-function formatPodcastJSON(obj) {
-	let json = JSON.stringify(obj);
-
-	json = json.replace(/:(?=(?:[^"]*"[^"]*")*[^"]*$)/g, ': ');
-	json = json.replace(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/g, ', ');
-
-	return json;
-}
-
