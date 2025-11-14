@@ -1,10 +1,13 @@
 <script setup>
-import { onTestBoostSubmitted, onConnectWalletClicked } from "../components/boostTestForm.js"
+import { onTestBoostSubmitted, onConnectWalletClicked } from "../components/boostTestForm.js";
+import { walletConnected } from "../components/lightningPayments.js";
 </script>
 
 <template>
 	<div>Test Boostagram</div>
-	<button @click="onConnectWalletClicked">Connect Wallet</button>
+	<button @click="onConnectWalletClicked">
+		{{ walletConnected ? "Change Wallet" : "Connect Wallet" }}
+	</button>
   <form @submit="onTestBoostSubmitted">
     <div class="input-div">
       <label for="recipient-address-input" class="input-label">
