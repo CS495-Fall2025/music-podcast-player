@@ -1,6 +1,4 @@
 import os
-
-from apig_wsgi import make_lambda_handler
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
@@ -39,6 +37,3 @@ def apply_blueprints(app: Flask) -> None:
 
     for blueprint in blueprints:
         app.register_blueprint(blueprint)
-
-
-lambda_handler = make_lambda_handler(create_app())
