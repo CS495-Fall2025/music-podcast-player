@@ -20,5 +20,6 @@
   overflow-x: hidden;
   margin-bottom: var(--player-height);
   padding-bottom: 10px;
+  padding-top: 10px
 }
 </style>
