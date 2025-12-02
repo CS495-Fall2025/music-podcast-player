@@ -1,11 +1,8 @@
 <template>
   <div>
-    <button @click="openModal">
-      Boost!
-    </button>
+    <button @click="openModal">Boost!</button>
 
     <div v-if="isOpen">
-    
       <div @click="closeModal"></div>
 
       <div>
@@ -16,7 +13,9 @@
 
         <div>
           <button @click="toggleWallet">
-            {{ walletConnected ? "Wallet connected" : "Connect Lightning Wallet" }}
+            {{
+              walletConnected ? "Wallet connected" : "Connect Lightning Wallet"
+            }}
           </button>
 
           <div>
@@ -49,9 +48,7 @@
             <p v-if="messageError">{{ messageError }}</p>
           </div>
 
-          <div>
-            You must connect your wallet before you can send a boost.
-          </div>
+          <div>You must connect your wallet before you can send a boost.</div>
 
           <div>
             <button @click="closeModal">Close</button>
@@ -96,7 +93,7 @@ const fetchPrice = async () => {
   loadingPrice.value = true;
   try {
     const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
     );
     const data = await res.json();
     satPrice.value = data.bitcoin.usd / 100000000;
@@ -142,7 +139,7 @@ const sendBoost = () => {
       amount_sats: Number(sats.value),
       message: message.value,
       timestamp: new Date().toISOString(),
-    })
+    }),
   );
 
   closeModal();

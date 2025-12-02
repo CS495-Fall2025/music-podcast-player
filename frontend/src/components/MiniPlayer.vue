@@ -145,13 +145,13 @@ const onCanPlay = () => {
       >
         Skip
       </button>
-      <button 
+      <button
         class="play-button"
         style="width: 100px"
         @click="showBoost = true"
-        >
+      >
         Boost
-      </button> 
+      </button>
       <BoostModal v-if="showBoost" @close="showBoost = false" />
     </div>
   </div>

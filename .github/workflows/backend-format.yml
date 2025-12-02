@@ -15,5 +15,5 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v3
-      - run: pip install --root-user-action ignore -r dev-requirements.txt 
+      - run: pip install --root-user-action ignore -r dev-requirements.txt
       - run: python -m ruff format --check
