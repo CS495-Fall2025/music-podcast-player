@@ -2,12 +2,12 @@ import { vi, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
 
 /**
  * Global test setup config for vitest
- * 
+ *
  * This configures the testing environment with:
  * - fake timers for controlling async operations
  * - mock browser APIs (window, document, FormData)
  * - automatic cleanup between tests
- * 
+ *
  * all tests will run with these mocks applied automatically.
  */
 

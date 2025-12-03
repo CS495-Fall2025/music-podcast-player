@@ -1,6 +1,6 @@
 /**
  * Global DOM mocks for testing
- * 
+ *
  * Provides mock implementations of browser window and document objects.
  * These mocks are available globally in all test files.
  */

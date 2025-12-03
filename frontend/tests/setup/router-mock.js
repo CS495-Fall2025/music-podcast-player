@@ -1,6 +1,6 @@
 /**
  * Mock router for testing
- * 
+ *
  * Provides a mock Vue Router instance with spies on all navigation methods.
  * This mock is automatically applied to all tests that import vue-router.
  */
