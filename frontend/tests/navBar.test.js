@@ -7,17 +7,15 @@ describe("useNavbar", () => {
   let unmountCallbacks = [];
   let clickHandler = null;
 
+  // Setup mocks and import navbar controller before each test
   beforeEach(async () => {
-    // Reset
     mountedCallbacks = [];
     unmountCallbacks = [];
     clickHandler = null;
 
-    // Setup alert mock
     alertMock = vi.fn();
     vi.stubGlobal("alert", alertMock);
 
-    // Spy on document.addEventListener to capture the click handler
     const addEventListenerSpy = vi.spyOn(document, "addEventListener");
     addEventListenerSpy.mockImplementation((event, handler) => {
       if (event === "click") {
@@ -25,14 +23,12 @@ describe("useNavbar", () => {
       }
     });
 
-    // Mock Vue lifecycle hooks
     vi.doMock("vue", async () => {
       const actual = await vi.importActual("vue");
       return {
         ...actual,
         onMounted: (callback) => {
           mountedCallbacks.push(callback);
-          // Execute immediately in tests
           callback();
         },
         onBeforeUnmount: (callback) => {
@@ -41,25 +37,26 @@ describe("useNavbar", () => {
       };
     });
 
-    // Import after mocking
     const { default: useNavbar } = await import("../src/controllers/navBar.js");
     navbar = useNavbar();
   });
 
+  // Clean up mocks after each test
   afterEach(() => {
-    // Trigger cleanup
     unmountCallbacks.forEach((cb) => cb());
     vi.doUnmock("vue");
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
+  // Test initial state of navbar
   it("initializes with default values", () => {
     expect(navbar.isOpen.value).toBe(false);
     expect(navbar.dropdownOpen.value).toBe(false);
     expect(navbar.dropdownRef.value).toBe(null);
   });
 
+  // Test dropdown closes when clicking outside the element
   it("closes dropdown when clicking outside", () => {
     navbar.dropdownOpen.value = true;
     const mockDiv = document.createElement("div");
@@ -67,12 +64,12 @@ describe("useNavbar", () => {
 
     const mockTarget = document.createElement("div");
 
-    // Directly call the click handler
     clickHandler({ target: mockTarget });
 
     expect(navbar.dropdownOpen.value).toBe(false);
   });
 
+  // Test dropdown stays open when clicking inside the element
   it("keeps dropdown open when clicking inside", () => {
     navbar.dropdownOpen.value = true;
     const mockDiv = document.createElement("div");
@@ -88,6 +85,7 @@ describe("useNavbar", () => {
     expect(navbar.dropdownOpen.value).toBe(true);
   });
 
+  // Test login handler shows alert and closes dropdown
   it("handleLogin shows alert and closes dropdown", () => {
     navbar.dropdownOpen.value = true;
     navbar.handleLogin();
@@ -96,6 +94,7 @@ describe("useNavbar", () => {
     expect(navbar.dropdownOpen.value).toBe(false);
   });
 
+  // Test logout handler shows alert and closes dropdown
   it("handleLogout shows alert and closes dropdown", () => {
     navbar.dropdownOpen.value = true;
     navbar.handleLogout();

@@ -16,12 +16,12 @@ describe("rssParsing controller", () => {
     </rss>
   `;
 
+  // Setup mocks and reset state before each test
   beforeEach(() => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     feed.splice(0, feed.length);
     vi.stubGlobal("fetch", vi.fn());
 
-    // Mock DOMParser more accurately
     vi.stubGlobal(
       "DOMParser",
       class {
@@ -62,11 +62,13 @@ describe("rssParsing controller", () => {
     );
   });
 
+  // Clean up mocks after each test
   afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
 
+  // Test fetch is called with CORS proxy URL
   it("requestFeedFromURL makes fetch request with CORS proxy", async () => {
     fetch.mockResolvedValueOnce({
       ok: true,
@@ -84,6 +86,7 @@ describe("rssParsing controller", () => {
     });
   });
 
+  // Test RSS feed is parsed and stored correctly
   it("handles successful RSS feed parsing", async () => {
     fetch.mockResolvedValueOnce({
       ok: true,
@@ -104,6 +107,7 @@ describe("rssParsing controller", () => {
     });
   });
 
+  // Test fetch error handling
   it("handles fetch error gracefully", async () => {
     const consoleSpy = vi.spyOn(console, "log");
     fetch.mockResolvedValueOnce({
@@ -117,10 +121,11 @@ describe("rssParsing controller", () => {
     await vi.waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith("Request returned status 404");
     });
-    feed.splice(0, feed.length); // Clean up feed before checking length
+    feed.splice(0, feed.length);
     expect(feed).toHaveLength(0);
   });
 
+  // Test parsing error handling
   it("handles parsing error gracefully", async () => {
     const consoleSpy = vi.spyOn(console, "log");
     const mockError = new Error("Parse error");

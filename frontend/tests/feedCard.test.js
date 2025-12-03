@@ -1,9 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
-import feedCard from "../src/controllers/feedCard.js";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { requestFeedFromURL } from "../src/controllers/rssParsing.js";
-import router from "../src/router";
 
-vi.mock("../router", () => ({
+vi.mock("../src/router", () => ({
   default: {
     push: vi.fn(),
   },
@@ -13,7 +11,15 @@ vi.mock("../src/controllers/rssParsing.js", () => ({
   requestFeedFromURL: vi.fn(),
 }));
 
+// import after mocks are defined
+import router from "../src/router";
+import feedCard from "../src/controllers/feedCard.js";
+
 describe("feedCard controller", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("has correct component name", () => {
     expect(feedCard.name).toBe("feedCard");
   });
@@ -32,6 +38,6 @@ describe("feedCard controller", () => {
     feedCard.methods.selectTrack.call(component);
 
     expect(requestFeedFromURL).toHaveBeenCalledWith(mockFeed.url);
-    expect(vi.mocked(router).push).toHaveBeenCalledWith("/view");
+    expect(router.push).toHaveBeenCalledWith("/view");
   });
 });

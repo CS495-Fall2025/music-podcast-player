@@ -18,11 +18,11 @@ describe("rssFeedForm controller", () => {
     onUserFeedFormSubmit;
   let requestFeedFromURL;
 
+  // Import fresh modules and reset state before each test
   beforeEach(async () => {
     vi.clearAllMocks();
     vi.resetModules();
 
-    // Import fresh modules for each test to reset state
     const formModule = await import("../src/controllers/rssFeedForm.js");
     const parsingModule = await import("../src/controllers/rssParsing.js");
 
@@ -34,38 +34,36 @@ describe("rssFeedForm controller", () => {
   });
 
   describe("URL validation", () => {
+    // Test validation accepts http protocol
     it("accepts valid http URLs", () => {
       const event = {
         target: { value: "http://example.com/feed" },
       };
 
-      // First make canSubmit false by entering invalid input
       onUserFeedInputInput({ target: { value: "invalid" } });
-      // Then enter valid input
       onUserFeedInputInput(event);
 
       expect(canSubmit.value).toBe(true);
     });
 
+    // Test validation accepts https protocol
     it("accepts valid https URLs", () => {
       const event = {
         target: { value: "https://example.com/feed" },
       };
 
-      // First make canSubmit false by entering invalid input
       onUserFeedInputInput({ target: { value: "invalid" } });
-      // Then enter valid input
       onUserFeedInputInput(event);
 
       expect(canSubmit.value).toBe(true);
     });
 
+    // Test validation rejects malformed URLs
     it("rejects invalid URLs", () => {
       const event = {
         target: { value: "not-a-url" },
       };
 
-      // Use blur to trigger validation (blur validates when canSubmit is true)
       onUserFeedInputBlur(event);
 
       expect(canSubmit.value).toBe(false);
@@ -73,6 +71,7 @@ describe("rssFeedForm controller", () => {
   });
 
   describe("form submission", () => {
+    // Test preventDefault is called on form submit
     it("prevents default form submission", () => {
       const preventDefault = vi.fn();
       const formData = new Map([["userFeedUrl", "https://example.com/feed"]]);
@@ -84,7 +83,6 @@ describe("rssFeedForm controller", () => {
         },
       };
 
-      // Mock FormData
       global.FormData = vi.fn(() => ({
         get: (key) => formData.get(key),
       }));
@@ -93,6 +91,7 @@ describe("rssFeedForm controller", () => {
       expect(preventDefault).toHaveBeenCalled();
     });
 
+    // Test successful form submission with valid URL
     it("submits form with valid URL", () => {
       const url = "https://example.com/feed";
       const formData = new Map([["userFeedUrl", url]]);
@@ -104,7 +103,6 @@ describe("rssFeedForm controller", () => {
         },
       };
 
-      // Mock FormData
       global.FormData = vi.fn(() => ({
         get: (key) => formData.get(key),
       }));
@@ -116,6 +114,7 @@ describe("rssFeedForm controller", () => {
       expect(router.push).toHaveBeenCalledWith("/view");
     });
 
+    // Test form submission is blocked with invalid URL
     it("does not submit form with invalid URL", () => {
       const url = "not-a-url";
       const formData = new Map([["userFeedUrl", url]]);
@@ -127,7 +126,6 @@ describe("rssFeedForm controller", () => {
         },
       };
 
-      // Mock FormData
       global.FormData = vi.fn(() => ({
         get: (key) => formData.get(key),
       }));
@@ -141,15 +139,13 @@ describe("rssFeedForm controller", () => {
   });
 
   describe("input events", () => {
+    // Test blur event triggers validation
     it("validates on blur", () => {
-      // Initially canSubmit is true, so blur does nothing
-      // We need to make it false first
       const invalidEvent = {
         target: { value: "not-a-url" },
       };
       onUserFeedInputInput(invalidEvent);
 
-      // Now canSubmit is false, blur should validate
       const validEvent = {
         target: { value: "https://example.com/feed" },
       };
@@ -158,13 +154,12 @@ describe("rssFeedForm controller", () => {
       expect(canSubmit.value).toBe(true);
     });
 
+    // Test input event triggers validation
     it("validates on input", () => {
-      // First make it invalid
       onUserFeedInputInput({
         target: { value: "invalid" },
       });
 
-      // Then make it valid
       const event = {
         target: { value: "https://example.com/feed" },
       };

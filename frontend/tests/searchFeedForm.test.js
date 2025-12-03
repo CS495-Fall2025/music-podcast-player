@@ -12,18 +12,20 @@ vi.mock("../src/controllers/backendFeedParser.js", () => ({
 }));
 
 describe("searchFeedForm controller", () => {
+  // Reset mocks before each test
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(console, "log").mockImplementation(() => {});
   });
 
   describe("query validation", () => {
+    // Test valid search query formats
     it("accepts valid search queries", () => {
       const validQueries = [
-        "simple search",
-        "with-numbers123",
-        "punctuation!?.",
-        "a".repeat(255),
+        "simple search", // basic query with spaces
+        "with-numbers123", // alphanumeric with single dash
+        "punctuation!?.", // allowed punctuation marks
+        "a".repeat(255), // maximum allowed length of 255 characters
       ];
 
       validQueries.forEach((query) => {
@@ -35,11 +37,12 @@ describe("searchFeedForm controller", () => {
       });
     });
 
+    // Test invalid search query formats are rejected
     it("rejects invalid search queries", () => {
       const invalidQueries = [
-        "contains--dash", // Contains --
-        "a".repeat(256), // Too long
-        "@#$%^&*()", // Invalid characters
+        "contains--dash", // double dash not allowed
+        "a".repeat(256), // exceeds maximum character length (255)
+        "@#$%^&*()", // special characters not allowed
       ];
 
       invalidQueries.forEach((query) => {
@@ -53,6 +56,7 @@ describe("searchFeedForm controller", () => {
   });
 
   describe("form submission", () => {
+    // Test preventDefault is called on form submit
     it("prevents default form submission", () => {
       const query = "valid search";
       const formData = new FormData();
@@ -74,6 +78,7 @@ describe("searchFeedForm controller", () => {
       vi.unstubAllGlobals();
     });
 
+    // Test successful form submission with valid query
     it("submits form with valid query", () => {
       const query = "valid search";
       const formData = new FormData();
@@ -101,6 +106,7 @@ describe("searchFeedForm controller", () => {
       vi.unstubAllGlobals();
     });
 
+    // Test form submission is blocked with invalid query
     it("does not submit form with invalid query", () => {
       const query = "--invalid--";
       const formData = new FormData();
@@ -130,6 +136,7 @@ describe("searchFeedForm controller", () => {
   });
 
   describe("input events", () => {
+    // Test blur event triggers validation
     it("validates on blur", () => {
       const mockEvent = new Event("blur");
       Object.defineProperty(mockEvent, "target", {
@@ -138,6 +145,7 @@ describe("searchFeedForm controller", () => {
       onUserInputBlur(mockEvent);
     });
 
+    // Test input event triggers validation
     it("validates on input", () => {
       const mockEvent = new Event("input");
       Object.defineProperty(mockEvent, "target", {
