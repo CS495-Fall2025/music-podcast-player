@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import useNavbar from "./navBar.js";
+import useNavbar from "../controllers/navBar.js";
 
 const { isOpen, dropdownOpen, dropdownRef, handleLogin, handleLogout } =
   useNavbar();

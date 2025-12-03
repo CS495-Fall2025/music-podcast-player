@@ -1,6 +1,6 @@
 <style src="../style.css"></style>
 
-<script src="./feedCard.js"></script>
+<script src="../controllers/feedCard.js"></script>
 
 <template>
   <div class="feed" @click="selectTrack">

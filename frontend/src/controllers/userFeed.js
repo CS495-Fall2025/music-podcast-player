@@ -1,4 +1,4 @@
-import Track from "./UserTrack.vue";
+import Track from "../components/UserTrack.vue";
 import { feed } from "./localFeedStore.js";
 
 export default {

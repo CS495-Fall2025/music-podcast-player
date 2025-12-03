@@ -3,7 +3,7 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 
-import { currentTrack, feed } from "./localFeedStore.js";
+import { currentTrack, feed } from "../controllers/localFeedStore.js";
 
 const isPlaying = ref(false); // Track if audio is playing
 const ready = ref(false); // Track if audio is ready to play

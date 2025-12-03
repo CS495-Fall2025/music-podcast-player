@@ -6,7 +6,7 @@ import {
   onUserInputBlur,
   onUserInputInput,
   onUserFormSubmit,
-} from "./searchFeedForm.js";
+} from "../controllers/searchFeedForm.js";
 </script>
 
 <template>
