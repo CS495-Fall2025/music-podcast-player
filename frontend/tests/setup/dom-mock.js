@@ -21,5 +21,5 @@ const documentMock = {
   }),
 };
 
-global.window = windowMock;
-global.document = documentMock;
+globalThis.window = windowMock;
+globalThis.document = documentMock;

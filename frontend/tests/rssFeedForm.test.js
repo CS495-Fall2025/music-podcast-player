@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import router from "../src/router";
 
 vi.mock("../src/router", () => ({
@@ -83,7 +83,7 @@ describe("rssFeedForm controller", () => {
         },
       };
 
-      global.FormData = vi.fn(() => ({
+      globalThis.FormData = vi.fn(() => ({
         get: (key) => formData.get(key),
       }));
 
@@ -103,7 +103,7 @@ describe("rssFeedForm controller", () => {
         },
       };
 
-      global.FormData = vi.fn(() => ({
+      globalThis.FormData = vi.fn(() => ({
         get: (key) => formData.get(key),
       }));
 
@@ -126,7 +126,7 @@ describe("rssFeedForm controller", () => {
         },
       };
 
-      global.FormData = vi.fn(() => ({
+      globalThis.FormData = vi.fn(() => ({
         get: (key) => formData.get(key),
       }));
 

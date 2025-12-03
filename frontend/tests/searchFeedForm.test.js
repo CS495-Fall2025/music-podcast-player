@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
-  canSubmit,
   onUserInputBlur,
   onUserInputInput,
   onUserFormSubmit,
@@ -94,7 +93,7 @@ describe("searchFeedForm controller", () => {
       vi.stubGlobal(
         "FormData",
         vi.fn(() => ({
-          get: (key) => query,
+          get: (_key) => query,
         })),
       );
 
@@ -122,7 +121,7 @@ describe("searchFeedForm controller", () => {
       vi.stubGlobal(
         "FormData",
         vi.fn(() => ({
-          get: (key) => query,
+          get: (_key) => query,
         })),
       );
 

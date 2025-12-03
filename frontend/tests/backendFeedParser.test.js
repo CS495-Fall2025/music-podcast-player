@@ -8,7 +8,7 @@ describe("backendFeedParser controller", () => {
     searchedFeeds.splice(0, searchedFeeds.length);
 
     vi.spyOn(console, "log").mockImplementation(() => {});
-    global.fetch = vi.fn();
+    globalThis.fetch = vi.fn();
   });
 
   // Test successful API call and data storage

@@ -25,10 +25,10 @@ describe("rssParsing controller", () => {
     vi.stubGlobal(
       "DOMParser",
       class {
-        parseFromString(str) {
+        parseFromString(_str) {
           return {
-            querySelector: (selector) => ({
-              querySelectorAll: (itemSelector) => [
+            querySelector: (_selector) => ({
+              querySelectorAll: (_itemSelector) => [
                 {
                   querySelector: (selector) => {
                     if (selector === "title")
