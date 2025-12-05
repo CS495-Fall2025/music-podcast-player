@@ -1,0 +1,159 @@
+services:
+  bitcoind:
+    build: ./images/bitcoind
+    container_name: bitcoind
+    environment:
+      FUNDED_NODES: lnd-listener,lnd-artist
+    healthcheck:
+      test: [
+        "CMD",
+        "bitcoin-cli",
+        "-regtest",
+        "-rpccookiefile=/mnt/cookie/.cookie",
+        "getblockchaininfo"
+      ]
+      interval: 2s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - cookie-vol:/mnt/cookie
+      - address-vol:/mnt/addresses:ro
+      - channel-signal:/mnt/channels:ro
+
+  lnd-listener:
+    container_name: lnd-listener
+    build: ./images/lnd 
+    depends_on:
+      bitcoind:
+        condition: service_healthy
+    environment:
+      BITCOIND_HOST: bitcoind
+      BITCOIND_PORT: 18443
+      TLS_NAME: lnd-listener
+      CHANNEL_PEER_NAME: lnd-artist
+      CHANNEL_LIQUIDITY: 10000000
+      CONNECT: true
+    healthcheck:
+      test: [
+        "CMD",
+        "lncli",
+        "--network=regtest",
+        "--tlscertpath=/mnt/lnd/tls.cert",
+        "--macaroonpath=/mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon",
+        "getinfo"
+      ]
+      interval: 2s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - cookie-vol:/mnt/cookie:ro
+      - lnd-listener-vol:/mnt/lnd
+      - address-vol:/mnt/addresses
+      - public-keys:/mnt/pubkeys
+      - channel-signal:/mnt/channels
+  
+  lnd-artist:
+    container_name: lnd-artist
+    build: ./images/lnd 
+    depends_on:
+      bitcoind:
+        condition: service_healthy
+    environment:
+      BITCOIND_HOST: bitcoind
+      BITCOIND_PORT: 18443
+      TLS_NAME: lnd-artist
+      CHANNEL_PEER_NAME: lnd-listener
+      CHANNEL_LIQUIDITY: 10000000
+      CONNECT: false
+    healthcheck:
+      test: [
+        "CMD",
+        "lncli",
+        "--network=regtest",
+        "--tlscertpath=/mnt/lnd/tls.cert",
+        "--macaroonpath=/mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon",
+        "getinfo"
+      ]
+      interval: 2s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - cookie-vol:/mnt/cookie:ro
+      - lnd-artist-vol:/mnt/lnd
+      - address-vol:/mnt/addresses
+      - public-keys:/mnt/pubkeys
+      - channel-signal:/mnt/channels
+
+  nostr-relay:
+    image: scsibug/nostr-rs-relay:0.9.0
+    container_name: nostr-relay
+    ports:
+      - 8080:8080
+    environment:
+      NOSTR_RELAY_PORT: 8080
+      NOSTR_RELAY_HOST: 0.0.0.0
+      NOSTR_RELAY_PUBLIC: true
+    healthcheck:
+      test: [
+        "CMD",
+        "echo",
+        ">",
+        "/dev/tcp/localhost/8080"
+      ]
+      interval: 2s
+      timeout: 5s
+      retries: 3
+
+  alby-listener:
+    image: ghcr.io/getalby/hub:latest
+    container_name: alby-listener
+    depends_on:
+      lnd-listener:
+        condition: service_healthy
+      nostr-relay:
+        condition: service_healthy
+    ports:
+      - 4000:8080
+    environment:
+      NETWORK: regtest
+      AUTO_UNLOCK_PASSWORD: password
+      AUTO_LINK_ALBY_ACCOUNT: false
+      LN_BACKEND_TYPE: LND
+      LND_ADDRESS: lnd-listener:10009
+      LND_CERT_FILE: /mnt/lnd/tls.cert
+      LND_MACAROON_FILE: /mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon
+      RELAY: ws://${HOST_LAN_IP}:8080
+      DISABLE_ADVANCED_SETUP: true
+    volumes:
+      - lnd-listener-vol:/mnt/lnd:ro
+  
+  alby-artist:
+    image: ghcr.io/getalby/hub:latest
+    container_name: alby-artist
+    depends_on:
+      lnd-artist:
+        condition: service_healthy
+      nostr-relay:
+        condition: service_healthy
+    ports:
+      - 4001:8080
+    environment:
+      NETWORK: regtest
+      AUTO_UNLOCK_PASSWORD: password
+      AUTO_LINK_ALBY_ACCOUNT: false
+      LN_BACKEND_TYPE: LND
+      LND_ADDRESS: lnd-artist:10009
+      LND_CERT_FILE: /mnt/lnd/tls.cert
+      LND_MACAROON_FILE: /mnt/lnd/data/chain/bitcoin/regtest/admin.macaroon
+      RELAY: ws://${HOST_LAN_IP}:8080
+      DISABLE_ADVANCED_SETUP: true
+    volumes:
+      - lnd-artist-vol:/mnt/lnd:ro
+
+volumes:
+  lnd-listener-vol: {}
+  lnd-artist-vol: {}
+  address-vol: {}
+  cookie-vol: {}
+  public-keys: {}
+  channel-signal: {}
