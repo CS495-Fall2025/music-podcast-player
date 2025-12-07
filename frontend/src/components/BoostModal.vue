@@ -1,62 +1,64 @@
 <template>
   <div>
-    <button @click="openModal">Boost!</button>
+    <button @click="openModal">Boost</button>
 
-    <div v-if="isOpen">
-      <div @click="closeModal"></div>
+		<teleport to="body">
+			<div class="modal" v-if="isOpen">
+				<div @click="closeModal"></div>
 
-      <div>
-        <div>
-          <h3>Send a Boost</h3>
-          <button @click="closeModal">Close</button>
-        </div>
+				<div>
+					<div>
+						<h1>Send a Boost</h1>
+						<button @click="closeModal">Close</button>
+					</div>
 
-        <div>
-          <button @click="toggleWallet">
-            {{
-              walletConnected ? "Wallet connected" : "Connect Lightning Wallet"
-            }}
-          </button>
+					<div>
+						<button @click="toggleWallet">
+							{{
+								walletConnected ? "Wallet connected" : "Connect Lightning Wallet"
+							}}
+						</button>
 
-          <div>
-            <label>Amount (sats)</label>
-            <input type="number" min="0" v-model="sats" />
+						<div>
+							<label>Amount (sats)</label>
+							<input type="number" min="0" v-model="sats" />
 
-            <div>
-              <span>{{ priceMessage }}</span>
-              <span v-if="usdEquivalent > 0">
-                ${{ usdEquivalent.toFixed(2) }} USD
-              </span>
-            </div>
+							<div>
+								<span>{{ priceMessage }}</span>
+								<span v-if="usdEquivalent > 0">
+									${{ usdEquivalent.toFixed(2) }} USD
+								</span>
+							</div>
 
-            <p v-if="satsError">{{ satsError }}</p>
-          </div>
+							<p v-if="satsError">{{ satsError }}</p>
+						</div>
 
-          <div>
-            <label>Message (optional)</label>
-            <textarea
-              v-model="message"
-              maxlength="255"
-              rows="3"
-              placeholder="Say something nice... (max 255 chars)"
-            ></textarea>
+						<div>
+							<label>Message (optional)</label>
+							<textarea
+								v-model="message"
+								maxlength="255"
+								rows="3"
+								placeholder="Say something nice... (max 255 chars)"
+							></textarea>
 
-            <div>
-              <span>{{ message.length }}/255</span>
-            </div>
+							<div>
+								<span>{{ message.length }}/255</span>
+							</div>
 
-            <p v-if="messageError">{{ messageError }}</p>
-          </div>
+							<p v-if="messageError">{{ messageError }}</p>
+						</div>
 
-          <div>You must connect your wallet before you can send a boost.</div>
+						<div>You must connect your wallet before you can send a boost.</div>
 
-          <div>
-            <button @click="closeModal">Close</button>
-            <button @click="sendBoost">Send Boost!</button>
-          </div>
-        </div>
-      </div>
-    </div>
+						<div>
+							<button @click="closeModal">Close</button>
+							<button @click="sendBoost">Send Boost!</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</teleport>
   </div>
 </template>
 
@@ -145,3 +147,17 @@ const sendBoost = () => {
   closeModal();
 };
 </script>
+
+<style scoped>
+.modal {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, 0.25);
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+</style>
