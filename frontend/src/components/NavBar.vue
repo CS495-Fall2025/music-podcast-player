@@ -3,13 +3,13 @@
     <div class="nav-left">
       <div class="brand">RSS Music Player</div>
 
-<button
-  class="navbar-toggle"
-  @click="isOpen = !isOpen"
-  aria-label="Toggle navigation"
->
-  <span class="hamburger-icon"></span>
-</button>
+      <button
+        class="navbar-toggle"
+        @click="isOpen = !isOpen"
+        aria-label="Toggle navigation"
+      >
+        <span class="hamburger-icon"></span>
+      </button>
 
       <div :class="['nav-links', { 'is-open': isOpen }]">
         <router-link to="/" class="nav-link">Home</router-link>

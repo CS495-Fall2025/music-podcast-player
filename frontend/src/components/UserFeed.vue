@@ -19,6 +19,6 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: 10px;
-  padding-top: 10px
+  padding-top: 10px;
 }
 </style>
