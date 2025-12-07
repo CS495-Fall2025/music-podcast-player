@@ -16,7 +16,7 @@
         <router-link to="/search" class="nav-link">Search Feeds</router-link>
         <router-link to="/" class="nav-link">Input Feed</router-link>
         <template v-if="includeDevPages">
-					<!-- No dev pages currently. -->
+          <!-- No dev pages currently. -->
         </template>
       </div>
     </div>

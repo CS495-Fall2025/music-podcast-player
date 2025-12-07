@@ -62,7 +62,7 @@ export function makeBoostMeta(
   trackGuid,
   message,
 ) {
-	const boostMeta = {
+  const boostMeta = {
     podcast: podcastName,
     guid: podcastGuid,
     episode: trackName,
@@ -73,14 +73,14 @@ export function makeBoostMeta(
     message: message,
   };
 
-	if (podcastGuid) {
-		boostMeta.guid = podcastGuid;
-	}
-	if (trackGuid) {
-		boostMeta.episode_guid = trackGuid;
-	}
+  if (podcastGuid) {
+    boostMeta.guid = podcastGuid;
+  }
+  if (trackGuid) {
+    boostMeta.episode_guid = trackGuid;
+  }
 
-	return boostMeta;
+  return boostMeta;
 }
 
 // Ensure value type is keysend and recipient type is node before passing recipients
@@ -127,11 +127,11 @@ export function makeValueMeta(totalSats, recipients) {
     // seperate them.
     valueMeta.push({
       address: recipient.address,
-			customRecord: recipient.customRecord,
+      customRecord: recipient.customRecord,
       meta: {
         name: recipient.name,
         value_msat: truncatedValueRecieved * 1000,
-				total_value_msat: totalSats * 1000,
+        total_value_msat: totalSats * 1000,
       },
     });
 
@@ -168,26 +168,25 @@ export function sendBoost(boostMeta, valueMeta) {
     const metaString = JSON.stringify({ ...boostMeta, ...valueMetaEntry.meta });
     const sats = valueMetaEntry.meta.value_msat / 1000;
 
-		// Sends payment to override address if set. (For testing purposes only!)
-		const address = import.meta.env.VITE_LIGHTNING_RECIPIENT_OVERRIDE
-			? import.meta.env.VITE_LIGHTNING_RECIPIENT_OVERRIDE
-			: valueMetaEntry.address;
+    // Sends payment to override address if set. (For testing purposes only!)
+    const address = import.meta.env.VITE_LIGHTNING_RECIPIENT_OVERRIDE
+      ? import.meta.env.VITE_LIGHTNING_RECIPIENT_OVERRIDE
+      : valueMetaEntry.address;
 
-		const payment = {
+    const payment = {
       destination: address,
       amount: String(sats),
       customRecords: {
-				7629169: metaString,
-				...valueMetaEntry.customRecord,
-			},
-    }
+        7629169: metaString,
+        ...valueMetaEntry.customRecord,
+      },
+    };
 
-		if (import.meta.env.VITE_BLOCK_LIGHTNING_PAYMENTS === "yes") {
-			console.log(payment);
-		}
-		else {
-			wallet.value.keysend(payment);
-		}
+    if (import.meta.env.VITE_BLOCK_LIGHTNING_PAYMENTS === "yes") {
+      console.log(payment);
+    } else {
+      wallet.value.keysend(payment);
+    }
   }
 
   return true;

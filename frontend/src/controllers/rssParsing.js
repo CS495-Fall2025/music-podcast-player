@@ -19,16 +19,15 @@ export function requestFeedFromURL(url) {
 }
 
 function resolveNamespace(prefix) {
-	switch (prefix) {
-		case "podcast":
-			return "https://podcastindex.org/namespace/1.0";
-		default:
-			return null;
-	}
+  switch (prefix) {
+    case "podcast":
+      return "https://podcastindex.org/namespace/1.0";
+    default:
+      return null;
+  }
 }
 
 function parseResponse(rssRaw) {
-
   let newFeed = [];
 
   const parser = new DOMParser();
@@ -41,31 +40,31 @@ function parseResponse(rssRaw) {
     ? overallImageElement.attributes.href.textContent
     : null;
 
-	const overallValueElement = rss.evaluate(
-		"podcast:value",
-		channel,
-		resolveNamespace,
-		XPathResult.FIRST_ORDERED_NODE_TYPE,
-		null
-	).singleNodeValue;
-	const overallValueData = parseValue(rss, overallValueElement);
+  const overallValueElement = rss.evaluate(
+    "podcast:value",
+    channel,
+    resolveNamespace,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  ).singleNodeValue;
+  const overallValueData = parseValue(rss, overallValueElement);
 
-	const feedGuidElement = rss.evaluate(
-		"podcast:guid",
-		channel,
-		resolveNamespace,
-		XPathResult.FIRST_ORDERED_NODE_TYPE,
-		null
-	).singleNodeValue;
-	const feedGuid = feedGuidElement ? feedGuidElement.textContent : null;
+  const feedGuidElement = rss.evaluate(
+    "podcast:guid",
+    channel,
+    resolveNamespace,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  ).singleNodeValue;
+  const feedGuid = feedGuidElement ? feedGuidElement.textContent : null;
 
-	const feedTitleElement = channel.querySelector("title");
-	const feedTitle = feedTitleElement.textContent;
+  const feedTitleElement = channel.querySelector("title");
+  const feedTitle = feedTitleElement.textContent;
 
   for (const item of items) {
     const trackObject = {
       type: "track",
-			feedTitle: feedTitle,
+      feedTitle: feedTitle,
     };
 
     trackObject.title = item.querySelector("title").textContent;
@@ -74,18 +73,18 @@ function parseResponse(rssRaw) {
     const image = imageElement
       ? imageElement.attributes.href.textContent
       : null;
-	
-		const valueElement = rss.evaluate(
-			"podcast:value",
-			item,
-			resolveNamespace,
-			XPathResult.FIRST_ORDERED_NODE_TYPE,
-			null
-		).singleNodeValue;
-		const valueData = parseValue(rss, valueElement);
-	
-		const trackGuidElement = item.querySelector("guid");
-		const trackGuid = trackGuidElement ? trackGuidElement.textContent : null;
+
+    const valueElement = rss.evaluate(
+      "podcast:value",
+      item,
+      resolveNamespace,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue;
+    const valueData = parseValue(rss, valueElement);
+
+    const trackGuidElement = item.querySelector("guid");
+    const trackGuid = trackGuidElement ? trackGuidElement.textContent : null;
 
     if (image) {
       trackObject.image = image;
@@ -95,20 +94,20 @@ function parseResponse(rssRaw) {
       trackObject.image = null;
     }
 
-		if (valueData) {
-			trackObject.value = valueData;
-		} else if (overallValueData) {
-			trackObject.value = overallValueData;
-		} else {
-			trackObject.value = [];
-		}
-		
-		if (feedGuid) {
-			trackObject.feedGuid = feedGuid;
-		}
-		if (trackGuid) {
-			trackObject.guid = trackGuid;
-		}
+    if (valueData) {
+      trackObject.value = valueData;
+    } else if (overallValueData) {
+      trackObject.value = overallValueData;
+    } else {
+      trackObject.value = [];
+    }
+
+    if (feedGuid) {
+      trackObject.feedGuid = feedGuid;
+    }
+    if (trackGuid) {
+      trackObject.guid = trackGuid;
+    }
 
     const linkType =
       item.querySelector("enclosure").attributes.type.textContent;
@@ -130,55 +129,54 @@ function parseResponse(rssRaw) {
 
 // [{name, address, split, customRecord: {customKey: customValue}}]
 function parseValue(rss, valueTag) {
-	if (!valueTag) {
-		return [];
-	}
+  if (!valueTag) {
+    return [];
+  }
 
-	const type = valueTag.getAttribute("type");
-	const method = valueTag.getAttribute("method");
+  const type = valueTag.getAttribute("type");
+  const method = valueTag.getAttribute("method");
 
-	if (type !== "lightning" || method !== "keysend") {
-		return [];
-	}
+  if (type !== "lightning" || method !== "keysend") {
+    return [];
+  }
 
-	const recipientElements = rss.evaluate(
-		"podcast:valueRecipient",
-		valueTag,
-		resolveNamespace,
-		XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-		null
-	);
+  const recipientElements = rss.evaluate(
+    "podcast:valueRecipient",
+    valueTag,
+    resolveNamespace,
+    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+    null,
+  );
 
-	const recipients = [];
+  const recipients = [];
 
-	for (let i = 0; i < recipientElements.snapshotLength; i++) {
-		const recipientElement = recipientElements.snapshotItem(i);
-		
-		const name = recipientElement.getAttribute("name") ?? "Unnamed Recipient";
-		const type = recipientElement.getAttribute("type");
-		const address = recipientElement.getAttribute("address");
-		const split = recipientElement.getAttribute("split");
-		const customKey = recipientElement.getAttribute("customKey");
-		const customValue = recipientElement.getAttribute("customValue");
+  for (let i = 0; i < recipientElements.snapshotLength; i++) {
+    const recipientElement = recipientElements.snapshotItem(i);
 
-		if (type !== "node") {
-			continue;
-		}
+    const name = recipientElement.getAttribute("name") ?? "Unnamed Recipient";
+    const type = recipientElement.getAttribute("type");
+    const address = recipientElement.getAttribute("address");
+    const split = recipientElement.getAttribute("split");
+    const customKey = recipientElement.getAttribute("customKey");
+    const customValue = recipientElement.getAttribute("customValue");
 
-		const recipientData = {
-			name: name,
-			address: address,
-			split: split,
-		};
+    if (type !== "node") {
+      continue;
+    }
 
-		recipientData.customRecord = customKey && customValue
-			? { [customKey]: customValue }
-			: {};
+    const recipientData = {
+      name: name,
+      address: address,
+      split: split,
+    };
 
-		recipients.push(recipientData);
-	}
+    recipientData.customRecord =
+      customKey && customValue ? { [customKey]: customValue } : {};
 
-	return recipients;
+    recipients.push(recipientData);
+  }
+
+  return recipients;
 }
 
 function handleError(message) {

@@ -1,7 +1,7 @@
 <style src="../style.css"></style>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, watch } from "vue";
 import BoostModal from "./BoostModal.vue";
 import { currentTrack, feed } from "../controllers/localFeedStore.js";
 

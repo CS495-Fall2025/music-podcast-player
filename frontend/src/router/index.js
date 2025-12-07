@@ -8,9 +8,7 @@ const routes = [
   { path: "/search", component: SearchFeedPage },
   { path: "/view", component: ViewFeedPage },
   // Development tool pages, add paths to the else condition.
-  ...(import.meta.env.VITE_INCLUDE_DEV_FEATURES !== "yes"
-    ? []
-    : []),
+  ...(import.meta.env.VITE_INCLUDE_DEV_FEATURES !== "yes" ? [] : []),
 ];
 
 const router = createRouter({
