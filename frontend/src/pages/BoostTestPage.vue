@@ -2,8 +2,8 @@
 import {
   onTestBoostSubmitted,
   onConnectWalletClicked,
-} from "../components/boostTestForm.js";
-import { walletConnected } from "../components/lightningPayments.js";
+} from "../controllers/boostTestForm.js";
+import { walletConnected } from "../controllers/lightningPayments.js";
 </script>
 
 <template>
