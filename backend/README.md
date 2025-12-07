@@ -37,17 +37,20 @@ deactivate
 ```
 
 ## Run the backend (debug mode)
+
 ```bash
 python3 run_debug.py
 ```
 
 ## Send requests to the backend (examples using Curl)
+
 ```bash
 curl -X GET http://localhost:5000/endpoint
 curl -X POST -H "Content-Type: application/json" -d '{"json": "data"}' http://localhost:5000/endpoint
 ```
 
 ## Run linting, formatting, testing
+
 ```bash
 # Linting
 python -m ruff check

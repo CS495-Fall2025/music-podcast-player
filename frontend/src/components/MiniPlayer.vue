@@ -2,18 +2,20 @@
 
 <script setup>
 import { ref, computed, watch } from "vue";
-
+import BoostModal from "./BoostModal.vue";
 import { currentTrack, feed } from "../controllers/localFeedStore.js";
 
+const showBoost = ref(false);
 const isPlaying = ref(false); // Track if audio is playing
 const ready = ref(false); // Track if audio is ready to play
 const audioRef = ref(null); // Reference to the audio element
 const currentTime = ref(0); // Current time of the audio
 const duration = ref(0); // Duration of the audio
+const repeat = ref(false); // Track if audio is set to repeat
 
-const currentTrackObj = computed(() => {
-  return feed.find((track) => track.audio === currentTrack.value);
-});
+const currentTrackObj = computed(() =>
+  feed.find((track) => track.audio === currentTrack.value),
+);
 
 watch(currentTrack, () => {
   isPlaying.value = false; // Reset playing state when track changes
@@ -51,29 +53,33 @@ const togglePlay = () => {
 };
 
 const skipToNextTrack = () => {
-  // Logic to skip to the next track in the feed
   const currentIndex = feed.findIndex(
     (track) => track.audio === currentTrack.value,
   );
-  currentTrack.value = feed[(currentIndex + 1) % feed.length].audio;
+  const nextIndex = (currentIndex + 1) % feed.length;
+  currentTrack.value = feed[nextIndex].audio;
   isPlaying.value = false; // Reset playing state
   ready.value = false; // Reset ready state until new track is loade
+  repeat.value = false; // Turn off repeat when skipping to next track
 };
 
-const skipToLastTrack = () => {
-  // Logic to skip to the previous track in the feed
+const skipToPreviousTrack = () => {
   const currentIndex = feed.findIndex(
     (track) => track.audio === currentTrack.value,
   );
-  currentTrack.value = feed[(currentIndex - 1) % feed.length].audio;
+  currentTrack.value = feed[currentIndex - 1].audio;
   isPlaying.value = false; // Reset playing state
   ready.value = false; // Reset ready state until new track is loaded
+  repeat.value = false; // Turn off repeat when skipping to last track
 };
 
 const onTimeUpdate = () => {
   if (audioRef.value) {
     currentTime.value = audioRef.value.currentTime;
     duration.value = audioRef.value.duration;
+  }
+  if (currentTime.value >= duration.value && !repeat.value) {
+    isPlaying.value = false; // Stop playing when track ends and repeat is off
   }
 };
 
@@ -83,23 +89,39 @@ const formatTime = (time) => {
   return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 };
 
+const repeatTrack = () => {
+  repeat.value = !repeat.value;
+};
+
 // Event handler for when audio can play
 const onCanPlay = () => {
   ready.value = true;
 };
+
+const onEnded = () => {
+  if (repeat.value && audioRef.value) {
+    audioRef.value.currentTime = 0;
+    audioRef.value.play().catch((error) => {
+      console.error("Error playing audio:", error);
+    });
+  } else {
+    skipToNextTrack();
+  }
+};
 </script>
 
 <template>
-  <div class="player-box" v-if="currentTrack">
+  <div class="player-box" v-if="currentTrackObj">
     <audio
       ref="audioRef"
       :src="currentTrack"
       preload="auto"
+      :repeat="repeat"
       @canplay="onCanPlay"
       @timeupdate="onTimeUpdate"
+      @ended="onEnded"
     ></audio>
     <p>{{ currentTrackObj?.title }}</p>
-
     <div class="player-info-row">
       <div class="track-info">
         <img
@@ -123,11 +145,19 @@ const onCanPlay = () => {
         <span class="timeSpan">{{ formatTime(duration) }}</span>
       </div>
     </div>
-
     <div class="button-row-1">
       <button
+        class="repeat-button"
+        @click="repeatTrack"
+        :class="{ active: repeat }"
+        vmodel="ready"
+        :disabled="!ready"
+      >
+        {{ repeat ? "Repeating" : "Not Repeating" }}
+      </button>
+      <button
         class="skip-back-button"
-        @click="skipToLastTrack"
+        @click="skipToPreviousTrack"
         vmodel="ready"
         :disabled="!ready"
       >
@@ -144,6 +174,14 @@ const onCanPlay = () => {
       >
         Skip
       </button>
+      <button
+        class="play-button"
+        style="width: 100px"
+        @click="showBoost = true"
+      >
+        Boost
+      </button>
+      <BoostModal v-if="showBoost" @close="showBoost = false" />
     </div>
   </div>
 </template>
