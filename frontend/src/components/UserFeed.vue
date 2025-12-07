@@ -1,6 +1,6 @@
 <style src="../style.css"></style>
 
-<script src="./userFeed.js"></script>
+<script src="../controllers/userFeed.js"></script>
 
 <template>
   <div class="user-feed">

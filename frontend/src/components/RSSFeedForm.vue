@@ -6,7 +6,7 @@ import {
   onUserFeedInputBlur,
   onUserFeedInputInput,
   onUserFeedFormSubmit,
-} from "./rssFeedForm.js";
+} from "../controllers/rssFeedForm.js";
 </script>
 
 <template>

@@ -1,4 +1,4 @@
-import FeedCard from "./FeedCard.vue";
+import FeedCard from "../components/FeedCard.vue";
 import { searchedFeeds } from "./localFeedStore.js";
 
 export default {
