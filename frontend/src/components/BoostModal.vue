@@ -7,7 +7,7 @@
 				<div>
 					<h3>Send a Boost</h3>
 
-					<button @click="toggleWallet">
+					<button @click="onConnectWallet">
 						{{
 							walletConnected ? "Wallet connected" : "Connect Lightning Wallet"
 						}}
@@ -46,10 +46,11 @@
 <script setup>
 import { ref, computed } from "vue";
 
+import { connectWallet, walletConnected } from "../controllers/lightningPayments.js";
+
 const isOpen = ref(false);
 const sats = ref(0);
 const message = ref("");
-const walletConnected = ref(false);
 const satPrice = ref(null);
 const loadingPrice = ref(false);
 const satsError = ref("");
@@ -66,8 +67,9 @@ const closeModal = () => {
   satsError.value = "";
 };
 
-const toggleWallet = () => {
-  walletConnected.value = !walletConnected.value;
+const onConnectWallet = async () => {
+	console.log("Connect attempt.");
+	await connectWallet();
 };
 
 const fetchPrice = async () => {
