@@ -1,4 +1,4 @@
-import { currentTrack as currentTrackRef } from "./localFeedStore.js";
+import { currentTrack } from "./localFeedStore.js";
 
 export default {
   name: "userTrack",
@@ -12,7 +12,7 @@ export default {
 
   methods: {
     selectTrack() {
-      currentTrackRef.value = this.track.audio;
+      currentTrack.value = this.track;
     },
   },
 };

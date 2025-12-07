@@ -12,10 +12,6 @@ const currentTime = ref(0); // Current time of the audio
 const duration = ref(0); // Duration of the audio
 const repeat = ref(false); // Track if audio is set to repeat
 
-const currentTrackObj = computed(() =>
-  feed.find((track) => track.audio === currentTrack.value),
-);
-
 watch(currentTrack, () => {
   isPlaying.value = false; // Reset playing state when track changes
   ready.value = false; // Reset ready state until new track is loaded
@@ -53,10 +49,10 @@ const togglePlay = () => {
 
 const skipToNextTrack = () => {
   const currentIndex = feed.findIndex(
-    (track) => track.audio === currentTrack.value,
+    (track) => track.audio === currentTrack.value.audio,
   );
   const nextIndex = (currentIndex + 1) % feed.length;
-  currentTrack.value = feed[nextIndex].audio;
+  currentTrack.value = feed[nextIndex];
   isPlaying.value = false; // Reset playing state
   ready.value = false; // Reset ready state until new track is loade
   repeat.value = false; // Turn off repeat when skipping to next track
@@ -64,9 +60,9 @@ const skipToNextTrack = () => {
 
 const skipToPreviousTrack = () => {
   const currentIndex = feed.findIndex(
-    (track) => track.audio === currentTrack.value,
+    (track) => track.audio === currentTrack.value.audio,
   );
-  currentTrack.value = feed[currentIndex - 1].audio;
+  currentTrack.value = feed[currentIndex - 1];
   isPlaying.value = false; // Reset playing state
   ready.value = false; // Reset ready state until new track is loaded
   repeat.value = false; // Turn off repeat when skipping to last track
@@ -110,24 +106,24 @@ const onEnded = () => {
 </script>
 
 <template>
-  <div class="player-box" v-if="currentTrackObj">
+  <div class="player-box" v-if="currentTrack">
     <audio
       ref="audioRef"
-      :src="currentTrack"
+      :src="currentTrack.audio"
       preload="auto"
       :repeat="repeat"
       @canplay="onCanPlay"
       @timeupdate="onTimeUpdate"
       @ended="onEnded"
     ></audio>
-    <p>{{ currentTrackObj?.title }}</p>
+    <p>{{ currentTrack?.title }}</p>
     <div class="player-info-row">
       <div class="track-info">
         <img
           class="track-thumbnail"
-          :src="currentTrackObj?.image"
+          :src="currentTrack?.image"
           alt="Track Thumbnail"
-          v-if="currentTrackObj"
+          v-if="currentTrack"
         />
       </div>
 

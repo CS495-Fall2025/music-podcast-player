@@ -4,9 +4,9 @@ import { reactive, ref } from "vue";
 // audio url.
 export const feed = reactive([]);
 
-// This will be updated with a url to fetch the audio currently being streamed. When
-// this is an empty string, no audio is being streamed.
-export const currentTrack = ref("");
+// Holds the current track's object (element of feed). If none is selected it will be
+// null. Make sure to update the whole object rather than a field.
+export const currentTrack = ref(null);
 
 // Populate with feeds found using the backend.
 export const searchedFeeds = reactive([]);
