@@ -2,9 +2,10 @@
 
 <script setup>
 import { ref, computed, watch } from "vue";
-
+import BoostModal from "./BoostModal.vue";
 import { currentTrack, feed } from "../controllers/localFeedStore.js";
 
+const showBoost = ref(false);
 const isPlaying = ref(false); // Track if audio is playing
 const ready = ref(false); // Track if audio is ready to play
 const audioRef = ref(null); // Reference to the audio element
@@ -110,7 +111,7 @@ const onEnded = () => {
 </script>
 
 <template>
-  <div class="player-box" v-if="currentTrack">
+  <div class="player-box" v-if="currentTrackObj">
     <audio
       ref="audioRef"
       :src="currentTrack"
@@ -173,6 +174,14 @@ const onEnded = () => {
       >
         Skip
       </button>
+      <button
+        class="play-button"
+        style="width: 100px"
+        @click="showBoost = true"
+      >
+        Boost
+      </button>
+      <BoostModal v-if="showBoost" @close="showBoost = false" />
     </div>
   </div>
 </template>
