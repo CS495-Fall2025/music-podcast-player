@@ -15,10 +15,9 @@
   gap: 2px;
   align-items: stretch;
   flex: 1;
-  min-height: 0;
+  height: calc(86vh - var(--player-height));
   overflow-y: auto;
   overflow-x: hidden;
-  margin-bottom: var(--player-height);
   padding-bottom: 10px;
   padding-top: 10px
 }
