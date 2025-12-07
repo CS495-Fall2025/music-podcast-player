@@ -4,57 +4,38 @@
 
 		<teleport to="body">
 			<div class="modal" v-if="isOpen">
-				<div @click="closeModal"></div>
-
 				<div>
+					<h3>Send a Boost</h3>
+
+					<button @click="toggleWallet">
+						{{
+							walletConnected ? "Wallet connected" : "Connect Lightning Wallet"
+						}}
+					</button>
+
+					<label>Amount (sats)</label>
+					<input type="number" min="0" step="100" v-model="sats" />
+
 					<div>
-						<h1>Send a Boost</h1>
-						<button @click="closeModal">Close</button>
+						<span>{{ priceMessage }}</span>
+						<span v-if="usdEquivalent > 0">
+							${{ usdEquivalent.toFixed(2) }} USD
+						</span>
 					</div>
 
-					<div>
-						<button @click="toggleWallet">
-							{{
-								walletConnected ? "Wallet connected" : "Connect Lightning Wallet"
-							}}
-						</button>
+					<p class="error-message" v-if="satsError">{{ satsError }}</p>
 
-						<div>
-							<label>Amount (sats)</label>
-							<input type="number" min="0" v-model="sats" />
+					<label>Message ({{ message.length }}/255)</label>
+					<textarea
+						v-model="message"
+						maxlength="255"
+						rows="3"
+						placeholder="Say something nice! (max 255 chars)"
+					></textarea>
 
-							<div>
-								<span>{{ priceMessage }}</span>
-								<span v-if="usdEquivalent > 0">
-									${{ usdEquivalent.toFixed(2) }} USD
-								</span>
-							</div>
-
-							<p v-if="satsError">{{ satsError }}</p>
-						</div>
-
-						<div>
-							<label>Message (optional)</label>
-							<textarea
-								v-model="message"
-								maxlength="255"
-								rows="3"
-								placeholder="Say something nice... (max 255 chars)"
-							></textarea>
-
-							<div>
-								<span>{{ message.length }}/255</span>
-							</div>
-
-							<p v-if="messageError">{{ messageError }}</p>
-						</div>
-
-						<div>You must connect your wallet before you can send a boost.</div>
-
-						<div>
-							<button @click="closeModal">Close</button>
-							<button @click="sendBoost">Send Boost!</button>
-						</div>
+					<div class="button-row">
+						<button @click="closeModal">Close</button>
+						<button @click="sendBoost" :disabled="!walletConnected">Send Boost!</button>
 					</div>
 				</div>
 			</div>
@@ -72,7 +53,6 @@ const walletConnected = ref(false);
 const satPrice = ref(null);
 const loadingPrice = ref(false);
 const satsError = ref("");
-const messageError = ref("");
 
 const openModal = async () => {
   isOpen.value = true;
@@ -84,7 +64,6 @@ const closeModal = () => {
   sats.value = 0;
   message.value = "";
   satsError.value = "";
-  messageError.value = "";
 };
 
 const toggleWallet = () => {
@@ -119,14 +98,9 @@ const usdEquivalent = computed(() => {
 const validate = () => {
   let valid = true;
   satsError.value = "";
-  messageError.value = "";
 
   if (!Number.isInteger(Number(sats.value)) || sats.value <= 0) {
     satsError.value = "Enter a positive integer amount of sats.";
-    valid = false;
-  }
-  if (message.value.length > 255) {
-    messageError.value = "Message must be 255 characters or fewer.";
     valid = false;
   }
 
@@ -159,5 +133,25 @@ const sendBoost = () => {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	z-index: var(--modal-z);
 }
+
+.modal > div {
+	background-color: var(--body-background);
+	padding: 16px;
+	border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+
+.button-row {
+	display: flex;
+	gap: 16px;
+	margin: 4px;
+}
+
+
 </style>
