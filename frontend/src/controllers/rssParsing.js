@@ -59,9 +59,13 @@ function parseResponse(rssRaw) {
 	).singleNodeValue;
 	const feedGuid = feedGuidElement ? feedGuidElement.textContent : null;
 
+	const feedTitleElement = channel.querySelector("title");
+	const feedTitle = feedTitleElement.textContent;
+
   for (const item of items) {
     const trackObject = {
       type: "track",
+			feedTitle: feedTitle,
     };
 
     trackObject.title = item.querySelector("title").textContent;
@@ -167,9 +171,9 @@ function parseValue(rss, valueTag) {
 			split: split,
 		};
 
-		if (customKey && customValue) {
-			recipientData.customRecord = { [customKey]: customValue };
-		}
+		recipientData.customRecord = customKey && customValue
+			? { [customKey]: customValue }
+			: {};
 
 		recipients.push(recipientData);
 	}

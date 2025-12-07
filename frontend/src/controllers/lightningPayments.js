@@ -61,9 +61,8 @@ export function makeBoostMeta(
   trackName,
   trackGuid,
   message,
-  senderName,
 ) {
-  return {
+	const boostMeta = {
     podcast: podcastName,
     guid: podcastGuid,
     episode: trackName,
@@ -72,15 +71,25 @@ export function makeBoostMeta(
     app_name: __NAME__,
     app_version: __VERSION__,
     message: message,
-    sender_name: senderName,
   };
+
+	if (podcastGuid) {
+		boostMeta.guid = podcastGuid;
+	}
+	if (trackGuid) {
+		boostMeta.episode_guid = trackGuid;
+	}
+
+	return boostMeta;
 }
 
 // Ensure value type is keysend and recipient type is node before passing recipients
 // into this function. This will not check the address for validity.
 // Note that this function will give leftover sats from rounding error to the first-
 // listed recipient with the largest split.
-// Recipients format: [{name: str, address: str, split: str(number)}]
+// Recipients format: [{
+//   name: str, address: str, split: str(number), customRecord?: {key(str): value(str)}
+// }]
 export function makeValueMeta(totalSats, recipients) {
   if (recipients.length === 0) {
     throw RangeError("Must have at least one value recipient to boost");
@@ -118,25 +127,20 @@ export function makeValueMeta(totalSats, recipients) {
     // seperate them.
     valueMeta.push({
       address: recipient.address,
+			customRecord: recipient.customRecord,
       meta: {
         name: recipient.name,
         value_msat: truncatedValueRecieved * 1000,
-        total_value_msat: totalSats * 1000,
+				total_value_msat: totalSats * 1000,
       },
     });
 
     totalSatsAfterTruncation += truncatedValueRecieved;
-
-    console.log(
-      `${recipient.address}: ${truncatedValueRecieved}/${totalSats} (${recipient.split}/${valueSum})`,
-    );
   }
 
   // If we have leftover sats after truncation, give them to the main recipient.
   const extraSats = totalSats - totalSatsAfterTruncation;
   valueMeta[mainRecipient].meta.value_msat += extraSats * 1000;
-
-  console.log(`${valueMeta[mainRecipient].address}: +${extraSats}`);
 
   // If the payment is small enough, its possible some recipients will not have a large
   // enough split to recieve a sat, so, in the case of a Boost, we prioritize the main
@@ -161,14 +165,29 @@ export function sendBoost(boostMeta, valueMeta) {
   }
 
   for (const valueMetaEntry of valueMeta) {
-    const metaString = JSON.stringify({ ...boostMeta, ...valueMetaEntry });
+    const metaString = JSON.stringify({ ...boostMeta, ...valueMetaEntry.meta });
     const sats = valueMetaEntry.meta.value_msat / 1000;
 
-    wallet.value.keysend({
-      destination: valueMetaEntry.address,
+		// Sends payment to override address if set. (For testing purposes only!)
+		const address = import.meta.env.VITE_LIGHTNING_RECIPIENT_OVERRIDE
+			? import.meta.env.VITE_LIGHTNING_RECIPIENT_OVERRIDE
+			: valueMetaEntry.address;
+
+		const payment = {
+      destination: address,
       amount: String(sats),
-      customRecords: { 7629169: metaString },
-    });
+      customRecords: {
+				7629169: metaString,
+				...valueMetaEntry.customRecord,
+			},
+    }
+
+		if (import.meta.env.VITE_BLOCK_LIGHTNING_PAYMENTS === "yes") {
+			console.log(payment);
+		}
+		else {
+			wallet.value.keysend(payment);
+		}
   }
 
   return true;
