@@ -32,7 +32,6 @@
   background-color: var(--hover-blue);
   color: var(--dark-blue);
   transform: scale(1.025);
-  z-index: var(--track-hover-z);
 }
 
 .track-info {

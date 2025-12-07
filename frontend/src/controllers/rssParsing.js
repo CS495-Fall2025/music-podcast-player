@@ -18,6 +18,15 @@ export function requestFeedFromURL(url) {
     .catch((message) => handleError(message));
 }
 
+function resolveNamespace(prefix) {
+  switch (prefix) {
+    case "podcast":
+      return "https://podcastindex.org/namespace/1.0";
+    default:
+      return null;
+  }
+}
+
 function parseResponse(rssRaw) {
   let newFeed = [];
 
@@ -31,9 +40,31 @@ function parseResponse(rssRaw) {
     ? overallImageElement.attributes.href.textContent
     : null;
 
+  const overallValueElement = rss.evaluate(
+    "podcast:value",
+    channel,
+    resolveNamespace,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  ).singleNodeValue;
+  const overallValueData = parseValue(rss, overallValueElement);
+
+  const feedGuidElement = rss.evaluate(
+    "podcast:guid",
+    channel,
+    resolveNamespace,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  ).singleNodeValue;
+  const feedGuid = feedGuidElement ? feedGuidElement.textContent : null;
+
+  const feedTitleElement = channel.querySelector("title");
+  const feedTitle = feedTitleElement.textContent;
+
   for (const item of items) {
-    let trackObject = {
+    const trackObject = {
       type: "track",
+      feedTitle: feedTitle,
     };
 
     trackObject.title = item.querySelector("title").textContent;
@@ -43,12 +74,39 @@ function parseResponse(rssRaw) {
       ? imageElement.attributes.href.textContent
       : null;
 
+    const valueElement = rss.evaluate(
+      "podcast:value",
+      item,
+      resolveNamespace,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue;
+    const valueData = parseValue(rss, valueElement);
+
+    const trackGuidElement = item.querySelector("guid");
+    const trackGuid = trackGuidElement ? trackGuidElement.textContent : null;
+
     if (image) {
       trackObject.image = image;
     } else if (overallImage) {
       trackObject.image = overallImage;
     } else {
       trackObject.image = null;
+    }
+
+    if (valueData) {
+      trackObject.value = valueData;
+    } else if (overallValueData) {
+      trackObject.value = overallValueData;
+    } else {
+      trackObject.value = [];
+    }
+
+    if (feedGuid) {
+      trackObject.feedGuid = feedGuid;
+    }
+    if (trackGuid) {
+      trackObject.guid = trackGuid;
     }
 
     const linkType =
@@ -67,6 +125,58 @@ function parseResponse(rssRaw) {
 
   console.log(newFeed);
   feed.splice(0, feed.length, ...newFeed);
+}
+
+// [{name, address, split, customRecord: {customKey: customValue}}]
+function parseValue(rss, valueTag) {
+  if (!valueTag) {
+    return [];
+  }
+
+  const type = valueTag.getAttribute("type");
+  const method = valueTag.getAttribute("method");
+
+  if (type !== "lightning" || method !== "keysend") {
+    return [];
+  }
+
+  const recipientElements = rss.evaluate(
+    "podcast:valueRecipient",
+    valueTag,
+    resolveNamespace,
+    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+    null,
+  );
+
+  const recipients = [];
+
+  for (let i = 0; i < recipientElements.snapshotLength; i++) {
+    const recipientElement = recipientElements.snapshotItem(i);
+
+    const name = recipientElement.getAttribute("name") ?? "Unnamed Recipient";
+    const type = recipientElement.getAttribute("type");
+    const address = recipientElement.getAttribute("address");
+    const split = recipientElement.getAttribute("split");
+    const customKey = recipientElement.getAttribute("customKey");
+    const customValue = recipientElement.getAttribute("customValue");
+
+    if (type !== "node") {
+      continue;
+    }
+
+    const recipientData = {
+      name: name,
+      address: address,
+      split: split,
+    };
+
+    recipientData.customRecord =
+      customKey && customValue ? { [customKey]: customValue } : {};
+
+    recipients.push(recipientData);
+  }
+
+  return recipients;
 }
 
 function handleError(message) {

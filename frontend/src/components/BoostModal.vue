@@ -1,79 +1,81 @@
 <template>
   <div>
-    <button @click="openModal">Boost!</button>
+    <button @click="openModal">Boost</button>
 
-    <div v-if="isOpen">
-      <div @click="closeModal"></div>
-
-      <div>
+    <teleport to="body">
+      <div class="modal" v-if="isOpen">
         <div>
           <h3>Send a Boost</h3>
-          <button @click="closeModal">Close</button>
-        </div>
 
-        <div>
-          <button @click="toggleWallet">
+          <button @click="onConnectWallet">
             {{
               walletConnected ? "Wallet connected" : "Connect Lightning Wallet"
             }}
           </button>
 
+          <label>Amount (sats)</label>
+          <input type="number" min="0" step="100" v-model="sats" />
+
           <div>
-            <label>Amount (sats)</label>
-            <input type="number" min="0" v-model="sats" />
-
-            <div>
-              <span>{{ priceMessage }}</span>
-              <span v-if="usdEquivalent > 0">
-                ${{ usdEquivalent.toFixed(2) }} USD
-              </span>
-            </div>
-
-            <p v-if="satsError">{{ satsError }}</p>
+            <span>{{ priceMessage }}</span>
+            <span v-if="usdEquivalent > 0">
+              ${{ usdEquivalent.toFixed(2) }} USD
+            </span>
           </div>
 
-          <div>
-            <label>Message (optional)</label>
-            <textarea
-              v-model="message"
-              maxlength="255"
-              rows="3"
-              placeholder="Say something nice... (max 255 chars)"
-            ></textarea>
+          <p class="error-message" v-if="satsError">{{ satsError }}</p>
 
-            <div>
-              <span>{{ message.length }}/255</span>
-            </div>
+          <label>Message ({{ message.length }}/255)</label>
+          <textarea
+            v-model="message"
+            maxlength="255"
+            rows="3"
+            placeholder="Say something nice! (max 255 chars)"
+          ></textarea>
 
-            <p v-if="messageError">{{ messageError }}</p>
-          </div>
-
-          <div>You must connect your wallet before you can send a boost.</div>
-
-          <div>
+          <div class="button-row">
             <button @click="closeModal">Close</button>
-            <button @click="sendBoost">Send Boost!</button>
+            <button
+              @click="onSendBoost"
+              :disabled="!walletConnected || recipients.value.length === 0"
+            >
+              Send Boost!
+            </button>
           </div>
+
+          <p class="error-message" v-if="recipients.value.length === 0">
+            Unable to boost this feed.
+          </p>
         </div>
       </div>
-    </div>
+    </teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
 
+import {
+  connectWallet,
+  walletConnected,
+  makeBoostMeta,
+  makeValueMeta,
+  sendBoost,
+} from "../controllers/lightningPayments.js";
+import { currentTrack } from "../controllers/localFeedStore.js";
+
 const isOpen = ref(false);
 const sats = ref(0);
 const message = ref("");
-const walletConnected = ref(false);
 const satPrice = ref(null);
 const loadingPrice = ref(false);
 const satsError = ref("");
-const messageError = ref("");
+const recipients = ref([]);
 
 const openModal = async () => {
   isOpen.value = true;
+  // Will be [] if no recipients or recipients with unsupported payment methods.
+  recipients.value = currentTrack.value;
   await fetchPrice();
 };
 
@@ -82,11 +84,10 @@ const closeModal = () => {
   sats.value = 0;
   message.value = "";
   satsError.value = "";
-  messageError.value = "";
 };
 
-const toggleWallet = () => {
-  walletConnected.value = !walletConnected.value;
+const onConnectWallet = async () => {
+  await connectWallet();
 };
 
 const fetchPrice = async () => {
@@ -117,31 +118,64 @@ const usdEquivalent = computed(() => {
 const validate = () => {
   let valid = true;
   satsError.value = "";
-  messageError.value = "";
 
   if (!Number.isInteger(Number(sats.value)) || sats.value <= 0) {
     satsError.value = "Enter a positive integer amount of sats.";
-    valid = false;
-  }
-  if (message.value.length > 255) {
-    messageError.value = "Message must be 255 characters or fewer.";
     valid = false;
   }
 
   return valid;
 };
 
-const sendBoost = () => {
+const onSendBoost = () => {
   if (!validate()) return;
 
-  console.log(
-    JSON.stringify({
-      amount_sats: Number(sats.value),
-      message: message.value,
-      timestamp: new Date().toISOString(),
-    }),
+  const boostMeta = makeBoostMeta(
+    currentTrack.value.feedTitle,
+    currentTrack.value.feedGuid,
+    currentTrack.value.title,
+    currentTrack.value.guid,
+    message.value,
   );
+
+  // To clarify, the first .value is to get the object from the reference, the second
+  // is to get the value attribute.
+  const valueMeta = makeValueMeta(Number(sats.value), currentTrack.value.value);
+
+  sendBoost(boostMeta, valueMeta);
 
   closeModal();
 };
 </script>
+
+<style scoped>
+.modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.25);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--modal-z);
+}
+
+.modal > div {
+  background-color: var(--body-background);
+  padding: 16px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.button-row {
+  display: flex;
+  gap: 16px;
+  margin: 4px;
+}
+</style>
