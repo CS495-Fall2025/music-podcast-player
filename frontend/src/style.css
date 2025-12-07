@@ -77,8 +77,14 @@
 
 body {
   margin: 0;
-  min-height: 100vh;
+  padding: 0;
+  overflow: hidden;
   background-color: var(--body-background);
+  padding-bottom: var(--player-height, 150px);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 /* ========================================
