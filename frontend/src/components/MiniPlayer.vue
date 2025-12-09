@@ -11,6 +11,49 @@ const audioRef = ref(null); // Reference to the audio element
 const currentTime = ref(0); // Current time of the audio
 const duration = ref(0); // Duration of the audio
 const repeat = ref(false); // Track if audio is set to repeat
+const isShuffle = ref(false); // Shows whether shuffle is enabled
+const shuffleOrder = ref([]); // Array of indices into feed
+const shuffleIndex = ref(-1); // Position in shuffleOrder
+
+const getCurrentIndex = () => {
+  if (!currentTrack.value || !currentTrack.value.audio) return -1;
+  return feed.findIndex((track) => track.audio === currentTrack.value.audio);
+};
+const buildShuffleOrder = () => {
+  if (!feed.length) return [];
+
+  const currentIndex = getCurrentIndex();
+  if (currentIndex === -1) return [];
+  const indices = [];
+
+  for (let i = 0; i < feed.length; i++) {
+    if (i !== currentIndex) {
+      indices.push(i);
+    }
+  }
+
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  indices.push(currentIndex);
+  return indices;
+};
+
+const toggleShuffle = () => {
+  if (!isShuffle.value) {
+    const order = buildShuffleOrder();
+    if (!order.length) return;
+
+    shuffleOrder.value = order;
+    shuffleIndex.value = -1;
+    isShuffle.value = true;
+  } else {
+    isShuffle.value = false;
+    shuffleOrder.value = [];
+    shuffleIndex.value = -1;
+  }
+};
 
 watch(currentTrack, () => {
   isPlaying.value = false; // Reset playing state when track changes
@@ -48,12 +91,23 @@ const togglePlay = () => {
 };
 
 const skipToNextTrack = () => {
-  const currentIndex = feed.findIndex(
-    (track) => track.audio === currentTrack.value.audio,
-  );
-  const nextIndex = (currentIndex + 1) % feed.length;
-  currentTrack.value = feed[nextIndex];
-  isPlaying.value = false; // Reset playing state
+  if (!feed.length) return;
+
+  if (!isShuffle.value || !shuffleOrder.value.length) {
+    const currentIndex = getCurrentIndex();
+    if (currentIndex === -1) return;
+
+    const nextIndex = (currentIndex + 1) % feed.length;
+    currentTrack.value = feed[nextIndex];
+  } else {
+    const nextShuffleIndex =
+      (shuffleIndex.value + 1) % shuffleOrder.value.length;
+    shuffleIndex.value = nextShuffleIndex;
+
+    const feedIndex = shuffleOrder.value[nextShuffleIndex];
+    currentTrack.value = feed[feedIndex];
+  }
+  isPlaying.value = false; // Reset playig state
   ready.value = false; // Reset ready state until new track is loade
   repeat.value = false; // Turn off repeat when skipping to next track
 };
@@ -149,6 +203,14 @@ const onEnded = () => {
         :disabled="!ready"
       >
         {{ repeat ? "Repeating" : "Not Repeating" }}
+      </button>
+      <button
+        class="shuffle-button"
+        @click="toggleShuffle"
+        vmodel="ready"
+        :disabled="!ready || !feed.length"
+      >
+        {{ isShuffle ? "Disable Shuffle" : "Shuffle" }}
       </button>
       <button
         class="skip-back-button"
