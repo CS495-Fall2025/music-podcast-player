@@ -7,7 +7,9 @@
         class="navbar-toggle"
         @click="isOpen = !isOpen"
         aria-label="Toggle navigation"
-      />
+      >
+        <span class="hamburger-icon"></span>
+      </button>
 
       <div :class="['nav-links', { 'is-open': isOpen }]">
         <router-link to="/" class="nav-link">Home</router-link>
@@ -95,6 +97,38 @@ const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
   display: none;
   padding: 0.2rem 0.5rem;
   box-shadow: none;
+}
+
+.hamburger-icon::before {
+  content: "☰";
+  font-size: 1.8rem;
+}
+
+/* Alternative: CSS hamburger icon */
+.hamburger-icon {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background-color: var(--light-blue);
+  position: relative;
+}
+
+.hamburger-icon::before,
+.hamburger-icon::after {
+  content: "";
+  position: absolute;
+  width: 25px;
+  height: 3px;
+  background-color: var(--light-blue);
+  left: 0;
+}
+
+.hamburger-icon::before {
+  top: -8px;
+}
+
+.hamburger-icon::after {
+  top: 8px;
 }
 
 .nav-links {

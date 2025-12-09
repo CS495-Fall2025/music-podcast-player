@@ -14,9 +14,11 @@
   flex-direction: column;
   gap: 2px;
   align-items: stretch;
-  max-height: 400px;
+  flex: 1;
+  height: calc(86vh - var(--player-height));
   overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: 10px;
+  padding-top: 10px;
 }
 </style>
