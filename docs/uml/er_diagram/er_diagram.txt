@@ -1,0 +1,72 @@
+@startuml
+object creators {
+	id: integer (primary key)
+	username: varchar (NN) (unique)
+	wallet_address: varchar (NN)
+	password: varchar (NN)
+	description: varchar
+	follow_count: integer (NN)
+	created_feeds: integer (NN)
+	created_at: timestamp (NN)
+}
+
+object feeds {
+	guid: varchar (primary key)
+	creator_id: integer (foreign key) (NN)
+	url: varchar (NN)
+	description: varchar
+	category: varchar
+	track_count: integer (NN)
+	value_recipient: varchar (NN)
+	publish_date: timestamp
+}
+
+object playlists {
+	id: integer (primary key)
+	title: varchar (NN)
+	track_count: integer (NN)
+	created_by_user_id: integer (foreign key) (NN)
+	created_at: timestamp (NN)
+}
+
+object users {
+	id: integer (primary key)
+	username: varchar (NN) (unique)
+	password: varchar (NN)
+	description: varchar
+	wallet_status: bool (NN)
+	saved_feeds: integer (NN)
+	created_at: timestamp (NN)
+}
+
+object tracks {
+	guid: varchar (primary key)
+	title: varchar (NN)
+	description: varchar
+	duration: integer (NN)
+	category: varchar
+}
+
+object playlist_tracks {
+	id: integer (primary key)
+	playlist_id: integer (foreign key) (NN)
+	track_guid: varchar (foreign key) (NN)
+}
+
+object feed_tracks {
+	id: integer (primary key)
+	track_guid: varchar (foreign key) (NN)
+	feed_guid: varchar (foreign key) (NN)
+}
+
+' One -> many
+creators -- feeds
+users -- playlists
+
+' Many -> many
+playlists -- playlist_tracks
+playlist_tracks -- tracks
+feeds -- feed_tracks
+feed_tracks -- tracks
+
+@enduml
