@@ -11,14 +11,14 @@ Integration testing has been, and will continue to be, implemented in the backen
 User testing will be conducted in the coming semester.
 
 ## Running the frontend tests
-Within the frontend directory, run the following commands:
-`npm install`
+Within the frontend directory, run the following commands:<br/>
+`npm install`<br/>
 `npm run test`
 
 ## Running the backend tests
-Within the backend directory, run the following commands:
-`python -m venv test_venv`
-(Linux, MacOS) `source test_venv/bin/activate`
-(Windows) `.\test_venv\bin\Activate.ps1`
-`pip install dev_requirements.txt`
+Within the backend directory, run the following commands: <br/>
+`python -m venv test_venv`<br/>
+(Linux, MacOS) `source test_venv/bin/activate`<br/>
+(Windows) `.\test_venv\bin\Activate.ps1`<br/>
+`pip install dev_requirements.txt`<br/>
 `python -m pytest`
