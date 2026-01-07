@@ -7,7 +7,7 @@ class Rss:
     description: str
     artist: str
     link: str
-    image_url: str
+    art_url: str
     language: str
     pub_date: str
     last_build_date: str

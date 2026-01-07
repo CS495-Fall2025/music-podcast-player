@@ -2,7 +2,7 @@ import { computed, reactive } from "vue";
 
 import router from "../router";
 
-import { requestFeedFromURL } from "./rssParsing.js";
+import { requestLinkedFeeds } from "./backendLinkParser";
 
 // true for a given input's name when the value inside it is valid, false otherwise.
 // We assume everything is correct until the user clicks off the input for the first
@@ -40,7 +40,7 @@ export function onUserFeedFormSubmit(event) {
 
   if (canSubmit.value) {
     event.target.reset();
-    requestFeedFromURL(data.get("userFeedUrl"));
+    requestLinkedFeeds(data.get("userFeedUrl"));
     router.push("/view");
   }
 }

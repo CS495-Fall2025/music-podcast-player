@@ -20,25 +20,34 @@ function parseResponse(response) {
       ? Array.isArray(response.feed)
         ? response.feed
         : [response.feed]
-      : null);
-  console.log(feeds);
+        : null);
 
+  let newAlbum = [];
   let newFeed = [];
 
   for (const feedItem of feeds) {
-    let trackObject = {
-      type: "track",
-      title: feedItem.title ?? "No title",
-      image: feedItem.image ?? null,
-      audio: feedItem.enclosure?.url ?? null,
-    };
-
-    if (!trackObject.audio) {
-      return;
+    let albumObject = {
+      type: "album",
+      artist: feedItem.artist,
+      title: feedItem.title,
+      description: feedItem.description,
+      link: feedItem.link,
+      art_url: feedItem.art_url,
     }
-    newFeed.push(trackObject);
+    newAlbum.push(albumObject);
+    for (const item of feedItem.items) {
+      let trackObject = {
+        type: "track",
+        title: item.title,
+        description: item.description,
+        audio: item.enclosure_url,
+        image: item.image,
+      }
+      newFeed.push(trackObject);
+    }
   }
   feed.splice(0, feed.length, ...newFeed);
+  console.log(newAlbum);
   console.log(newFeed);
 }
 

@@ -32,7 +32,7 @@ class LinkFunctions:
                         f"Recieved code {response.status_code} from the Link Endpoint"
                     )
                 
-        ITUNES_NS = "http://www.itunes.com/dtds/podcast-1.0"
+        ITUNES_NS = "http://www.itunes.com/dtds/podcast-1.0.dtd"
         def it(tag: str) -> str:
             return f"{{{ITUNES_NS}}}{tag}"
         
@@ -83,11 +83,12 @@ class LinkFunctions:
                 title = (item.findtext('title') or "No Title").strip()
                 link = (item.findtext('link') or "").strip()
                 guid = (item.findtext('guid') or "").strip()
-                description = (item.findtext('description') or "").strip()
+                description = item.findtext('description') or "".strip()
                 pubDate = (item.findtext('pubDate')or "Unknown").strip()
                 enclosure_url = item.find('enclosure').attrib.get('url', '').strip() if item.find('enclosure') is not None else ""
                 enclosure_length = item.find('enclosure').attrib.get('length', '').strip() if item.find('enclosure') is not None else ""
                 enclosure_type = item.find('enclosure').attrib.get('type', '').strip() if item.find('enclosure') is not None else ""
+                image = item.find(it('image')).attrib.get('href', '').strip() if item.find(it('image')) is not None else ""
                 item_data = {
                     "title": title,
                     "link": link,
@@ -97,9 +98,11 @@ class LinkFunctions:
                     "enclosure_url": enclosure_url,
                     "enclosure_length": enclosure_length,
                     "enclosure_type": enclosure_type,
+                    "image": image
                 }
-
                 parsed_items.append(item_data)
+
+                
 
         except ValidationError:
             raise errors.ExternalAPIInvalidResponseDataError(
@@ -112,7 +115,7 @@ class LinkFunctions:
             description=feed_data["description"],
             artist=feed_data["author"],
             link=feed_data["link"],
-            image_url=parsed_image[0]["url"] if parsed_image else "",
+            art_url=parsed_image[0]["url"] if parsed_image else "",
             language=feed_data["language"],
             pub_date=feed_data["pubDate"],
             last_build_date=feed_data["lastBuildDate"],
