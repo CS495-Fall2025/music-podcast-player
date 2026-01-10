@@ -1,9 +1,18 @@
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import {
+  startLogin,
+  logout,
+  isAuthenticated,
+  getCurrentUser,
+} from "../auth/authService";
 
 export default function useNavbar() {
   const isOpen = ref(false);
   const dropdownOpen = ref(false);
   const dropdownRef = ref(null);
+
+  const loggedIn = computed(() => isAuthenticated());
+  const currentUser = computed(() => getCurrentUser());
 
   const handleClickOutside = (event) => {
     if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
@@ -20,19 +29,22 @@ export default function useNavbar() {
   });
 
   const handleLogin = () => {
-    alert("Login clicked");
     dropdownOpen.value = false;
+    startLogin();
   };
 
   const handleLogout = () => {
-    alert("Logout clicked");
     dropdownOpen.value = false;
+    logout();
+    window.location.reload();
   };
 
   return {
     isOpen,
     dropdownOpen,
     dropdownRef,
+    loggedIn,
+    currentUser,
     handleLogin,
     handleLogout,
   };

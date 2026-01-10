@@ -3,11 +3,7 @@
     <div class="nav-left">
       <div class="brand">RSS Music Player</div>
 
-      <button
-        class="navbar-toggle"
-        @click="isOpen = !isOpen"
-        aria-label="Toggle navigation"
-      >
+      <button class="navbar-toggle" @click="isOpen = !isOpen" aria-label="Toggle navigation">
         <span class="hamburger-icon"></span>
       </button>
 
@@ -25,15 +21,18 @@
 
     <div class="nav-right">
       <div class="nav-dropdown" ref="dropdownRef">
-        <button
-          class="dropdown-toggle"
-          @click.stop="dropdownOpen = !dropdownOpen"
-        >
+        <button class="dropdown-toggle" @click.stop="dropdownOpen = !dropdownOpen">
           Account ▾
         </button>
+
         <div v-if="dropdownOpen" class="dropdown-menu">
-          <button class="dropdown-item" @click="handleLogin">Login</button>
-          <button class="dropdown-item" @click="handleLogout">Logout</button>
+          <template v-if="loggedIn">
+            <span class="dropdown-item">Hello, {{ currentUser?.username }}</span>
+            <button class="dropdown-item" @click="handleLogout">Logout</button>
+          </template>
+          <template v-else>
+            <button class="dropdown-item" @click="handleLogin">Login</button>
+          </template>
         </div>
       </div>
     </div>
