@@ -19,6 +19,9 @@ services:
     image: postgres:17
     environment:
       POSTGRES_PASSWORD: dev-db-password
+    # Necessary for updating DB schema with Alembic outside Docker.
+    ports:
+      - "5432:5432"
   # For viewing/administering the local database
   adminer:
     image: adminer
