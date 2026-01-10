@@ -1,4 +1,4 @@
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 // JWT will be stored in localStorage
 const TOKEN_KEY = "access_token";
