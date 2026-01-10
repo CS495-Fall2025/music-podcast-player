@@ -19,7 +19,7 @@ services:
     image: postgres:17
     environment:
       POSTGRES_PASSWORD: dev-db-password
-      # For viewing/administering the local database
+  # For viewing/administering the local database
   adminer:
     image: adminer
     restart: always
@@ -27,9 +27,3 @@ services:
       - "8080:8080"
     environment:
       ADMINER_DEFAULT_SERVER: database
-
-
-      
-
-volumes:
-  music_db_data:
