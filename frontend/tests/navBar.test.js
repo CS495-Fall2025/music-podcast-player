@@ -16,13 +16,22 @@ describe("useNavbar", () => {
     alertMock = vi.fn();
     vi.stubGlobal("alert", alertMock);
 
-    const addEventListenerSpy = vi.spyOn(document, "addEventListener");
-    addEventListenerSpy.mockImplementation((event, handler) => {
-      if (event === "click") {
-        clickHandler = handler;
-      }
+    // Mock window.location for href and reload
+    Object.defineProperty(global.window, "location", {
+      value: {
+        href: "",
+        reload: vi.fn(),
+      },
+      writable: true,
     });
 
+    // Mock addEventListener
+    const addEventListenerSpy = vi.spyOn(document, "addEventListener");
+    addEventListenerSpy.mockImplementation((event, handler) => {
+      if (event === "click") clickHandler = handler;
+    });
+
+    // Mock Vue lifecycle hooks
     vi.doMock("vue", async () => {
       const actual = await vi.importActual("vue");
       return {
@@ -61,7 +70,6 @@ describe("useNavbar", () => {
     navbar.dropdownOpen.value = true;
     const mockDiv = document.createElement("div");
     navbar.dropdownRef.value = mockDiv;
-
     const mockTarget = document.createElement("div");
 
     clickHandler({ target: mockTarget });
@@ -74,10 +82,9 @@ describe("useNavbar", () => {
     navbar.dropdownOpen.value = true;
     const mockDiv = document.createElement("div");
     const originalContains = mockDiv.contains.bind(mockDiv);
-    mockDiv.contains = vi.fn((node) => {
-      return node === mockDiv || originalContains(node);
-    });
-
+    mockDiv.contains = vi.fn(
+      (node) => node === mockDiv || originalContains(node),
+    );
     navbar.dropdownRef.value = mockDiv;
 
     clickHandler({ target: mockDiv });
@@ -92,6 +99,7 @@ describe("useNavbar", () => {
 
     expect(alertMock).toHaveBeenCalledWith("Login clicked");
     expect(navbar.dropdownOpen.value).toBe(false);
+    expect(window.location.href).toBe(""); // ensures window.location.href exists
   });
 
   // Test logout handler shows alert and closes dropdown
@@ -101,5 +109,6 @@ describe("useNavbar", () => {
 
     expect(alertMock).toHaveBeenCalledWith("Logout clicked");
     expect(navbar.dropdownOpen.value).toBe(false);
+    expect(window.location.reload).toBeDefined(); // ensures reload exists
   });
 });
