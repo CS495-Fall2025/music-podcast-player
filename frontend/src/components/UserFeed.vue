@@ -3,13 +3,13 @@
 <script src="../controllers/userFeed.js"></script>
 
 <template>
-  <div class="feed-info">
-    <img class="feed-image" :src="feed.image" :alt="feed.title" />
-    <div class="feed-title"> Feed Title</div>
-
-  </div>
   <div class="user-feed">
-    <Track v-for="(item, index) in feed" :key="index" :track="item" />
+  <div class="feed-info">
+    <img class="feed-image" :src="feedImage"/>
+    <div class="feed-title"> {{ feedTitle }}</div>
+  </div>
+
+      <Track v-for="(item, index) in feed" :key="index" :track="item" />
   </div>
 </template>
 
@@ -31,12 +31,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 5px;
 }
 
 .feed-image{
   margin: 20px 0px 10px 0px;
   height: 200px;
   width: 200px;
+  border: 2px solid black;
 }
 
 .feed-title{
