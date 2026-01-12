@@ -9,13 +9,13 @@ export default {
     feed() {
       return feed;
     },
-    feedImage() {
+    feedImage() { // not yet working, i think it's a parsing thing, will likely need to change some calls
       return this.feed.image?.trim() || '/src/assets/images/default-image.jpg'
     },
-    feedTitle() {
+    feedTitle() { // not yet working, i think it's a parsing thing, will likely need to change some calls
       return this.feed.title?.trim() || 'Unititled Feed'
     },
-    feedArtist() {
+    feedArtist() { // not yet working, i think it's a parsing thing, will likely need to change some calls
       return this.feed.artist?.trim() || 'Feed artist not found'
     }
   }
