@@ -73,10 +73,10 @@
 }
 
 .track-image {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   flex-shrink: 0;
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-sm);
   object-fit: cover;
 }
 
