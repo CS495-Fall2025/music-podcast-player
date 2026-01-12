@@ -4,13 +4,19 @@
 
 <template>
   <div class="track" @click="selectTrack">
-    <img class="track-image" :src="trackImage"/>
+    <img class="track-image" :src="trackImage" />
     <div class="track-info">
       <div class="track-title">{{ trackTitle }}</div>
       <div class="track-artist">{{ trackArtist }}</div>
     </div>
     <!-- <div class="track-description">{{ trackDescription }}</div> -->
-    <div class="track-description">Track description that describes the track by describing information in a descriptive way. This text will often contain a description of the track, but can also contain the transcript. The description may also contain html tags that will be parsed by our app in the future to prevent xss and to allow things like links to be used.</div>
+    <div class="track-description">
+      Track description that describes the track by describing information in a
+      descriptive way. This text will often contain a description of the track,
+      but can also contain the transcript. The description may also contain html
+      tags that will be parsed by our app in the future to prevent xss and to
+      allow things like links to be used.
+    </div>
   </div>
 </template>
 
@@ -27,7 +33,7 @@
   cursor: pointer;
   transition:
     transform 0.2s ease,
-    background-color 0.2s ease
+    background-color 0.2s ease;
 }
 
 .track:hover {
@@ -54,12 +60,12 @@
   white-space: nowrap;
 }
 
-.track:hover .track-title{
+.track:hover .track-title {
   text-overflow: clip;
   white-space: normal;
 }
 
-.track-artist{
+.track-artist {
   font-size: 0.8rem;
   opacity: 0.75;
   text-overflow: ellipsis;
@@ -67,7 +73,7 @@
   white-space: nowrap;
 }
 
-.track:hover .track-artist{
+.track:hover .track-artist {
   text-overflow: clip;
   white-space: normal;
 }
@@ -92,7 +98,7 @@
   overflow: hidden;
 }
 
-.track:hover .track-description{
+.track:hover .track-description {
   line-clamp: 3;
   -webkit-line-clamp: unset;
 }

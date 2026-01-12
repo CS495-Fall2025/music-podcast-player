@@ -18,16 +18,18 @@ export default {
 
   computed: {
     trackImage() {
-      return this.track.image?.trim() || '/src/assets/images/default-image.jpg'
+      return this.track.image?.trim() || "/src/assets/images/default-image.jpg";
     },
-    trackArtist() { // not yet working, i think it's a parsing thing, will likely need to change some calls
-      return this.track.trackArtist?.trim() || 'Track artist not found'
+    trackArtist() {
+      // not yet working, i think it's a parsing thing, will likely need to change some calls
+      return this.track.trackArtist?.trim() || "Track artist not found";
     },
     trackTitle() {
-      return this.track.title?.trim() || 'Track title not found'
+      return this.track.title?.trim() || "Track title not found";
     },
-    trackDescription() { // not yet working, i think it's a parsing thing, will likely need to change some calls
-      return this.track.desc?.trim() || 'Track description not found'
-    }
-  }
+    trackDescription() {
+      // not yet working, i think it's a parsing thing, will likely need to change some calls
+      return this.track.desc?.trim() || "Track description not found";
+    },
+  },
 };

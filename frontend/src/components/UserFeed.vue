@@ -4,13 +4,13 @@
 
 <template>
   <div class="user-feed">
-  <div class="feed-info">
-    <img class="feed-image" :src="feedImage"/>
-    <div class="feed-title"> {{ feedTitle }}</div>
-    <div class="feed-artist"> {{ feedArtist }}</div>
-  </div>
+    <div class="feed-info">
+      <img class="feed-image" :src="feedImage" />
+      <div class="feed-title">{{ feedTitle }}</div>
+      <div class="feed-artist">{{ feedArtist }}</div>
+    </div>
 
-      <Track v-for="(item, index) in feed" :key="index" :track="item" />
+    <Track v-for="(item, index) in feed" :key="index" :track="item" />
   </div>
 </template>
 
@@ -28,7 +28,7 @@
   padding-top: 5px;
 }
 
-.feed-info{
+.feed-info {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -38,7 +38,7 @@
   text-align: center;
 }
 
-.feed-image{
+.feed-image {
   width: 100%;
   max-width: 200px;
   aspect-ratio: 1 / 1;
@@ -48,11 +48,11 @@
   transition: transform 0.2s ease;
 }
 
-.feed-image:hover{
+.feed-image:hover {
   transform: scale(1.0125);
 }
 
-.feed-title{
+.feed-title {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -61,7 +61,7 @@
   white-space: nowrap;
 }
 
-.feed-artist{
+.feed-artist {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
