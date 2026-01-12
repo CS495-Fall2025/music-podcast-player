@@ -18,7 +18,7 @@
 .user-feed {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0.5rem;
   align-items: stretch;
   flex: 1;
   height: calc(86vh - var(--player-height));
@@ -32,6 +32,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 0;
   gap: 0.5rem;
   padding: 0.5rem;
   text-align: center;
@@ -44,17 +45,28 @@
   object-fit: cover;
   border: 2px solid black;
   border-radius: var(--border-radius-sm);
+  transition: transform 0.2s ease;
+}
+
+.feed-image:hover{
+  transform: scale(1.0125);
 }
 
 .feed-title{
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 2rem;
   font-weight: 700;
-  max-width: 90%;
+  white-space: nowrap;
 }
 
 .feed-artist{
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 1.25rem;
   opacity: 0.85;
-  max-width: 100%;
+  white-space: nowrap;
 }
 </style>
