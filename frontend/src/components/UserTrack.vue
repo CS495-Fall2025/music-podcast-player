@@ -9,24 +9,25 @@
       <div class="track-title">{{ trackTitle }}</div>
       <div class="track-artist">{{ trackArtist }}</div>
     </div>
-    <div class="track-description">{{ trackDescription }}</div>
+    <!-- <div class="track-description">{{ trackDescription }}</div> -->
+    <div class="track-description">Track description that describes the track by describing information in a descriptive way. This text will often contain a description of the track, but can also contain the transcript. The description may also contain html tags that will be parsed by our app in the future to prevent xss and to allow things like links to be used.</div>
   </div>
 </template>
 
 <style scoped>
 .track {
   display: flex;
-  flex-direction: row;
-  margin: 5px 30px;
-  padding: 0;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.5rem 1.5rem;
+  padding: 0.5rem 0.75rem;
   background-color: var(--track-background);
   border-radius: var(--border-radius-sm);
   box-shadow: var(--shadow-md);
   cursor: pointer;
   transition:
     transform 0.2s ease,
-    background-color 0.2s ease,
-    color 0.2s ease;
+    background-color 0.2s ease
 }
 
 .track:hover {
@@ -38,19 +39,14 @@
 .track-info {
   display: flex;
   flex-direction: column;
-  align-items: left;
-  align-self: center;
-  max-width: 200px;
-  margin: 5px;
+  min-width: 0;
+  flex: 0 0 200px;
+  overflow: hidden;
 }
 
 .track-title {
-  writing-mode: horizontal-tb;
-  min-inline-size: 125px;
-  max-inline-size: 300px;
-  font-size: 16px;
-  font-weight: bold;
-  text-align: left; 
+  font-size: 1rem;
+  font-weight: 600;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -58,16 +54,12 @@
 
 .track:hover .track-title{
   text-overflow: clip;
-  overflow: visible;
   white-space: normal;
 }
 
 .track-artist{
-  writing-mode: horizontal-tb;
-  max-inline-size:400px;
-  min-inline-size: 200px;
-  font-size: 12px;
-  text-align: left;
+  font-size: 0.8rem;
+  opacity: 0.75;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -75,34 +67,31 @@
 
 .track:hover .track-artist{
   text-overflow: clip;
-  overflow: visible;
   white-space: normal;
 }
 
 .track-image {
-  width: 50px;
-  height: 50px;
-  margin: 5px;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
   border-radius: var(--border-radius);
   object-fit: cover;
-  align-self: center;
 }
 
 .track-description {
-  width: 100%;
-  margin: 5px;
-  font-size: 14px;
-  overflow: hidden;
-
+  flex: 1;
+  min-width: 0;
+  font-size: 0.85rem;
+  color: #666;
   display: -webkit-box;
   -webkit-box-orient: vertical;
+  line-clamp: 3;
   -webkit-line-clamp: 3;
+  overflow: hidden;
 }
 
 .track:hover .track-description{
-  text-overflow: clip;
-  overflow: visible;
-  white-space: normal;
+  line-clamp: 3;
   -webkit-line-clamp: unset;
 }
 </style>
