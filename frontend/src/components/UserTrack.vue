@@ -40,8 +40,10 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  flex: 0 0 200px;
-  overflow: hidden;
+  width: auto;
+  max-width: 50%;
+  /* flex: 0 0 auto; */
+  /* overflow: hidden; */
 }
 
 .track-title {
