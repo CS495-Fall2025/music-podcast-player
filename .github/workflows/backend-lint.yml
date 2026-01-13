@@ -3,7 +3,7 @@ name: Backend Check Linting (Ruff)
 on:
   pull_request:
     branches:
-      - main
+      - dev
 
 jobs:
   backend-check-linting:
