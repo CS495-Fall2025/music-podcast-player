@@ -11,13 +11,13 @@ const routes = [
   {
     path: "/search",
     component: SearchFeedPage,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: false },
   },
 
   {
     path: "/view",
     component: ViewFeedPage,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: false },
   },
 
   {
@@ -29,7 +29,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(), // Uses history mode (clean URLs)
+  history: createWebHistory(),
   routes,
 });
 
