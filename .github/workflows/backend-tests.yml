@@ -3,7 +3,7 @@ name: Backend Run Tests (PyTest)
 on:
   pull_request:
     branches:
-      - main
+      - dev
 
 jobs:
   backend-run-tests:
