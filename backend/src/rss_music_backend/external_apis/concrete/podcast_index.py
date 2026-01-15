@@ -23,7 +23,10 @@ class PodcastIndexAPI:
         cls, query: str, count: int = 25, start: int = 0
     ) -> list[Feed]:
         with requests.Session() as session:
-            request, context = cls._make_search_request(query, count, start)
+            auth_headers = cls._create_current_auth_headers()
+            request, context = cls._make_search_request(
+                query, count, start, auth_headers
+            )
 
             try:
                 response = session.send(request, timeout=TIMEOUT)
@@ -38,16 +41,14 @@ class PodcastIndexAPI:
 
     @classmethod
     def _make_search_request(
-        cls, query: str, count: int, start: int
+        cls, query: str, count: int, start: int, auth_headers: dict[str, str]
     ) -> tuple[requests.PreparedRequest, dict]:
         url = urljoin(API_URL, "search/music/byterm")
         data = {
             "q": query,
             "max": start + count,
         }
-        headers = cls._create_current_auth_headers()
-
-        request = requests.Request("GET", url, headers, params=data)
+        request = requests.Request("GET", url, auth_headers, params=data)
 
         return (request.prepare(), {"count": count, "start": start})
 

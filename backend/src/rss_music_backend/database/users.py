@@ -17,8 +17,8 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(String(USERNAME_MAX_LENGTH))
-    email: Mapped[str] = mapped_column(String(EMAIL_MAX_LENGTH))
+    username: Mapped[str] = mapped_column(String(USERNAME_MAX_LENGTH), unique=True)
+    email: Mapped[str] = mapped_column(String(EMAIL_MAX_LENGTH), unique=True)
     password: Mapped[str] = mapped_column(String(PASSWORD_MAX_LENGTH))
 
 
