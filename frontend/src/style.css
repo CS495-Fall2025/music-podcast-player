@@ -51,7 +51,7 @@
 
   /* Layout */
   --max-width: 1200px;
-  --player-height: 130px;
+  --player-height: clamp(64px, 8vh, 96px);
   --modal-z: 25;
   --navbar-z: 20;
   --dropdown-z: 25;

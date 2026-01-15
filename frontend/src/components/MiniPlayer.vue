@@ -170,15 +170,15 @@ const onEnded = () => {
       @timeupdate="onTimeUpdate"
       @ended="onEnded"
     ></audio>
-    <p>{{ currentTrack?.title }}</p>
     <div class="player-info-row">
       <div class="track-info">
         <img
-          class="track-thumbnail"
-          :src="currentTrack?.image"
-          alt="Track Thumbnail"
-          v-if="currentTrack"
+        class="track-thumbnail"
+        :src="currentTrack?.image"
+        alt="Track Thumbnail"
+        v-if="currentTrack"
         />
+        <p>{{ currentTrack?.title }}</p>
       </div>
 
       <div class="progress-bar">
@@ -248,7 +248,8 @@ const onEnded = () => {
 <style scoped>
 .player-box {
   background-color: var(--player-background);
-  padding: 10px;
+  padding: clamp(8px, 1.5vh, 16px);
+  padding-bottom: calc(clamp(8px, 1.5vh, 16px) + env(safe-area-inset-bottom));
   position: fixed;
   bottom: 0;
   left: 0;
@@ -257,8 +258,8 @@ const onEnded = () => {
   flex-direction: column;
   align-items: center;
   z-index: var(--player-z);
-  max-height: var(--player-height);
-  justify-content: center;
+  min-height: var(--player-height);
+  justify-content: space-between;
 }
 
 .player-box p {
@@ -274,6 +275,7 @@ const onEnded = () => {
 .player-info-row {
   display: flex;
   align-items: center;
+  flex-direction: column;
   gap: 24px;
   width: 100%;
   max-width: 900px;
@@ -281,34 +283,45 @@ const onEnded = () => {
 
 .track-info {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
-  min-width: 125px;
-  max-width: 125px;
-  min-height: 60px;
-  max-height: 60px;
-  color: var(--light-text);
-  font-weight: bold;
+  gap: clamp(8px, 2vw, 14px);
+  max-width: 100%;
+  flex-direction: row;
+  /* color: var(--light-text);
+  font-weight: bold; */
 }
 
 .track-info p {
   margin: 0;
-  white-space: normal;
-  overflow-wrap: break-word;
-  word-break: break-word;
-  max-width: 125px;
   color: var(--light-orange);
-  font-size: large;
-  text-align: center;
+
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  line-height: 1.2;
+
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  text-align: left;
+}
+
+@media (max-width: 480px) {
+  .track-info {
+    gap: 8px;
+  }
+
+  .track-info p {
+    font-size: 0.9rem;
+  }
 }
 
 .track-thumbnail {
   border-radius: var(--border-radius);
-  vertical-align: middle;
-  width: 100%;
-  height: auto;
-  max-width: 100px;
+  width: clamp(36px, 8vw, 50px);
+  height: clamp(36px, 8vw, 50px);
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .progress-bar {
