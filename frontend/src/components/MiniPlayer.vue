@@ -198,19 +198,19 @@ const onEnded = () => {
       <button
         class="repeat-button"
         @click="repeatTrack"
-        :class="{ active: repeat }"
-        vmodel="ready"
+        :class="{ active: repeat, 'is-disabled': !repeat }"
         :disabled="!ready"
       >
-        {{ repeat ? "Repeating" : "Not Repeating" }}
+        &#10227; <!-- Repeat Icon -->
       </button>
       <button
         class="shuffle-button"
+        :class="{ 'is-disabled': !isShuffle}"
         @click="toggleShuffle"
         vmodel="ready"
         :disabled="!ready || !feed.length"
       >
-        {{ isShuffle ? "Disable Shuffle" : "Shuffle" }}
+        &#128256; <!-- Shuffle Icon (emoji) -->
       </button>
       <button
         class="skip-back-button"
@@ -218,10 +218,10 @@ const onEnded = () => {
         vmodel="ready"
         :disabled="!ready"
       >
-        Back
+        &#9198; <!-- Rewind Icon -->
       </button>
       <button class="play-button" @click="togglePlay" :disabled="!ready">
-        {{ isPlaying ? "Pause" : "Play" }}
+        {{ isPlaying ? "&#9208;" : "&#9654;"}} <!-- Play / Pause Icons -->
       </button>
       <button
         class="skip-button"
@@ -229,7 +229,7 @@ const onEnded = () => {
         vmodel="ready"
         :disabled="!ready"
       >
-        Skip
+        &#9197; <!-- Skip Icon -->
       </button>
       <BoostModal />
     </div>
@@ -349,7 +349,27 @@ const onEnded = () => {
   background-color: var(--lighter-orange);
 }
 
-.play-button:focus {
-  outline: none;
+.skip-back-button{
+  font-size: 16px;
+}
+
+.skip-button{
+  font-size: 16px;
+}
+
+.shuffle-button{
+  font-size: 16px;
+}
+.shuffle-button.is-disabled{
+  opacity: 0.4;
+  filter: grayscale(100%);
+}
+
+.repeat-button{
+  font-size: 16px;
+}
+.repeat-button.is-disabled{
+  opacity: 0.4;
+  filter: grayscale(100%);
 }
 </style>
