@@ -3,6 +3,7 @@ import os
 import time
 from urllib.parse import urljoin
 
+from flask import current_app
 from marshmallow import ValidationError
 import requests
 
@@ -101,8 +102,8 @@ class PodcastIndexAPI:
     @classmethod
     def _create_current_auth_headers(cls) -> dict[str, str]:
         user_agent = identity.get_user_agent()
-        key = os.getenv("PODCAST_INDEX_KEY")
-        secret = os.getenv("PODCAST_INDEX_SECRET")
+        key = current_app.config["PODCAST_INDEX_KEY"]
+        secret = current_app.config["PODCAST_INDEX_SECRET"]
         date = int(time.time())
 
         return cls._create_auth_headers(user_agent, key, secret, date)
