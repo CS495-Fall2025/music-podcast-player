@@ -196,40 +196,49 @@ const onEnded = () => {
     </div>
     <div class="button-row-1">
       <button
-        class="repeat-button"
+        class="media-button repeat-button"
         @click="repeatTrack"
         :class="{ active: repeat, 'is-disabled': !repeat }"
         :disabled="!ready"
       >
-        &#10227; <!-- Repeat Icon -->
+        &#10227;
+        <!-- Repeat Icon -->
       </button>
       <button
-        class="shuffle-button"
-        :class="{ 'is-disabled': !isShuffle}"
+        class="media-button shuffle-button"
+        :class="{ 'is-disabled': !isShuffle }"
         @click="toggleShuffle"
         vmodel="ready"
         :disabled="!ready || !feed.length"
       >
-        &#128256; <!-- Shuffle Icon (emoji) -->
+        &#128256;
+        <!-- Shuffle Icon (emoji) -->
       </button>
       <button
-        class="skip-back-button"
+        class="media-button skip-back-button"
         @click="skipToPreviousTrack"
         vmodel="ready"
         :disabled="!ready"
       >
-        &#9198; <!-- Rewind Icon -->
-      </button>
-      <button class="play-button" @click="togglePlay" :disabled="!ready">
-        {{ isPlaying ? "&#9208;" : "&#9654;"}} <!-- Play / Pause Icons -->
+        &#9198;
+        <!-- Rewind Icon -->
       </button>
       <button
-        class="skip-button"
+        class="media-button play-button"
+        @click="togglePlay"
+        :disabled="!ready"
+      >
+        {{ isPlaying ? "&#9208;" : "&#9654;" }}
+        <!-- Play / Pause Icons -->
+      </button>
+      <button
+        class="media-button skip-button"
         @click="skipToNextTrack"
         vmodel="ready"
         :disabled="!ready"
       >
-        &#9197; <!-- Skip Icon -->
+        &#9197;
+        <!-- Skip Icon -->
       </button>
       <BoostModal />
     </div>
@@ -329,6 +338,31 @@ const onEnded = () => {
   transform: scale(0.8);
 }
 
+.media-button {
+  padding: 0;
+
+  width: clamp(2.5em, 3.5vw, 3.25em);
+  height: clamp(2.5em, 2vw, 3.25em);
+
+  font-size: clamp(1em, 2.2vw, 1.1em);
+  line-height: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.media-button:disabled {
+  background-color: grey;
+  border-color: grey;
+  cursor: not-allowed;
+}
+
+.media-button.is-disabled {
+  opacity: 0.4;
+  filter: grayscale(100%);
+}
+
 .play-button {
   background-color: var(--cream);
   border: var(--border-thick) var(--orange);
@@ -339,6 +373,12 @@ const onEnded = () => {
   width: 100px;
 }
 
+.media-button.play-button {
+  width: clamp(3.5em, 5vw, 6em);
+  height: clamp(2.5em, 2.5vw, 3em);
+  font-size: clamp(1.15em, 3vw, 1.25em);
+}
+
 .play-button:disabled {
   background-color: grey;
   border-color: grey;
@@ -347,29 +387,5 @@ const onEnded = () => {
 .play-button:hover:enabled,
 .play-button:active:enabled {
   background-color: var(--lighter-orange);
-}
-
-.skip-back-button{
-  font-size: 16px;
-}
-
-.skip-button{
-  font-size: 16px;
-}
-
-.shuffle-button{
-  font-size: 16px;
-}
-.shuffle-button.is-disabled{
-  opacity: 0.4;
-  filter: grayscale(100%);
-}
-
-.repeat-button{
-  font-size: 16px;
-}
-.repeat-button.is-disabled{
-  opacity: 0.4;
-  filter: grayscale(100%);
 }
 </style>
