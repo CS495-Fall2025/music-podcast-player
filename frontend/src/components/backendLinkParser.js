@@ -20,7 +20,7 @@ function parseResponse(response) {
       ? Array.isArray(response.feed)
         ? response.feed
         : [response.feed]
-        : null);
+      : null);
 
   let newAlbum = [];
   let newFeed = [];
@@ -33,7 +33,7 @@ function parseResponse(response) {
       description: feedItem.description,
       link: feedItem.link,
       art_url: feedItem.art_url,
-    }
+    };
     newAlbum.push(albumObject);
     for (const item of feedItem.items) {
       let trackObject = {
@@ -42,7 +42,7 @@ function parseResponse(response) {
         description: item.description,
         audio: item.enclosure_url,
         image: item.image,
-      }
+      };
       newFeed.push(trackObject);
     }
   }
