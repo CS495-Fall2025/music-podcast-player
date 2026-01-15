@@ -35,7 +35,7 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   if (to.meta.requiresAuth && !isAuthenticated()) {
-    // redirects unauthenticated users to home
+    // redirect unauthenticated users to home
     return "/";
   }
 });

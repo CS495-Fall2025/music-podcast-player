@@ -6,7 +6,7 @@ import { completeLogin } from "../auth/authService";
 const router = useRouter();
 
 onMounted(() => {
-  // gets JWT from query, ex: /auth/callback?token=JWT_HERE
+  // gets JWT from the query - /auth/callback?token=JWT_HERE
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
 

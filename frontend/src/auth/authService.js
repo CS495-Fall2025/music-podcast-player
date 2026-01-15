@@ -9,7 +9,6 @@ export function isAuthenticated() {
 
   try {
     const payload = jwtDecode(token);
-    // Check expiry
     return payload.exp * 1000 > Date.now();
   } catch (e) {
     console.error("Invalid token", e);
@@ -37,8 +36,7 @@ export function getCurrentUser() {
 }
 
 export function startLogin() {
-  // PKCE, state, etc. handled here if needed
-  window.location.href = import.meta.env.VITE_AUTH_API + "/authorize";
+  window.location.href = import.meta.env.VITE_AUTH_API + "/auth";
 }
 
 // stores JWT in localstorage
