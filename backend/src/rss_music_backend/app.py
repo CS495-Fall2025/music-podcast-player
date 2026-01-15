@@ -16,8 +16,6 @@ def wsgi_launch(environ, start_response):
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_prefixed_env(prefix="RSS_PLAYER")
-    print(os.environ.keys())
-    print(app.config)
 
     # Tell web browsers to specifically only allow our website to interact with this
     # API.
