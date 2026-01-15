@@ -52,10 +52,10 @@
   /* Layout */
   --max-width: 1200px;
   --player-height: 130px;
+  --modal-z: 25;
   --navbar-z: 20;
   --dropdown-z: 25;
   --player-z: 15;
-  --track-hover-z: 10;
 }
 
 /* ========================================
@@ -79,6 +79,13 @@ body {
   margin: 0;
   min-height: 100vh;
   background-color: var(--body-background);
+  padding: 0;
+  overflow: hidden;
+  padding-bottom: var(--player-height, 150px);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 /* ========================================
@@ -91,28 +98,28 @@ h3,
 h4,
 h5,
 h6 {
-  border-radius: var(--border-radius);
-  border: var(--border-standard);
+  /*  border-radius: var(--border-radius);
+  border: var(--border-standard); */
   font-weight: 500;
-  background-color: var(--h-background);
+  /*  background-color: var(--h-background);
   color: var(--h-text);
-  display: inline-block;
+  display: inline-block; */
   line-height: 1.2;
-  padding: 0.5em 1em;
+  /*  padding: 0.5em 1em; */
   margin: 0 0 0.6rem 0;
 }
 
 h1 {
   font-size: 3.2em;
-  line-height: 1.1;
+  /*  line-height: 1.1;
   padding: 0.3em 0.6em;
-  color: #7c2929;
+  color: #7c2929; */
   margin: 0;
 }
 
 h2 {
   font-size: clamp(1.5rem, 4vw, 2.4rem);
-  padding: 0.4em 0.8em;
+  /*  padding: 0.4em 0.8em; */
   margin-bottom: 0.8rem;
 }
 
@@ -126,7 +133,7 @@ h5,
 h6 {
   font-size: clamp(1rem, 2.5vw, 1.4rem);
   line-height: 1.4;
-  padding: 0.6em 1.2em;
+  /*  padding: 0.6em 1.2em; */
   margin-bottom: 0.5rem;
 }
 
@@ -262,6 +269,7 @@ li {
   :root {
     color: #213547;
     background-color: var(--white);
+    --text: #213547;
     --body-background: var(--light-blue);
 
     --h-background: var(--white);
@@ -279,6 +287,7 @@ li {
   :root {
     color: var(--light-text);
     background-color: var(--dark-navy);
+    --text: var(--light-text);
     --body-background: var(--dark-navy);
 
     --h-background: var(--dark-navy);

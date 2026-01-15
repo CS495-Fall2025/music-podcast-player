@@ -3,7 +3,7 @@ name: Backend Check Formatting (Ruff)
 on:
   pull_request:
     branches:
-      - main
+      - dev
 
 jobs:
   backend-check-formatting:
@@ -15,5 +15,5 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v3
-      - run: pip install --root-user-action ignore -r dev-requirements.txt 
+      - run: pip install --root-user-action ignore -r dev-requirements.txt
       - run: python -m ruff format --check

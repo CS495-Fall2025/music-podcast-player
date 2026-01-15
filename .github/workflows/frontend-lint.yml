@@ -3,7 +3,7 @@ name: Frontend Check Linting (ESLint)
 on:
   pull_request:
     branches:
-      - main
+      - dev
 
 jobs:
   frontend-check-linting:

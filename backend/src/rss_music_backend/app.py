@@ -8,6 +8,11 @@ from flask_cors import CORS
 load_dotenv()
 
 
+def wsgi_launch(environ, start_response):
+    app = create_app()
+    return app(environ, start_response)
+
+
 def create_app() -> Flask:
     app = Flask(__name__)
 

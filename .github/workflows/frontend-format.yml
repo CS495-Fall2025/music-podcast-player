@@ -3,7 +3,7 @@ name: Frontend Check Format (Prettier)
 on:
   pull_request:
     branches:
-      - main
+      - dev
 
 jobs:
   frontend-check-format:
