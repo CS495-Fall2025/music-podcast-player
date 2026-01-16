@@ -354,7 +354,7 @@ const onEnded = () => {
   accent-color: var(--light-orange);
 }
 
-.progress-bar span{
+.progress-bar span {
   width: 6ch;
   text-align: center;
   font-variant-numeric: tabular-nums;
