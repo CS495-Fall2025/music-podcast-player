@@ -5,6 +5,13 @@ import { ref, watch } from "vue";
 import BoostModal from "./BoostModal.vue";
 import { currentTrack, feed } from "../controllers/localFeedStore.js";
 
+import playIcon from "../assets/images/play-icon.svg";
+import pauseIcon from "../assets/images/pause-icon.svg"
+import skipIcon from "../assets/images/forward-icon.svg"
+import rewindIcon from "../assets/images/backward-icon.svg"
+import shuffleIcon from "../assets/images/random-icon.svg"
+import repeatIcon from "../assets/images/undo-arrow-icon.svg"
+
 const isPlaying = ref(false); // Track if audio is playing
 const ready = ref(false); // Track if audio is ready to play
 const audioRef = ref(null); // Reference to the audio element
@@ -201,8 +208,10 @@ const onEnded = () => {
         :class="{ active: repeat, 'is-disabled': !repeat }"
         :disabled="!ready"
       >
-        &#10227;
-        <!-- Repeat Icon -->
+        <img
+        :src="repeatIcon"
+        alt="Repeat"
+        class="play-icon"/>
       </button>
       <button
         class="media-button shuffle-button"
@@ -211,25 +220,31 @@ const onEnded = () => {
         vmodel="ready"
         :disabled="!ready || !feed.length"
       >
-        &#128256;
-        <!-- Shuffle Icon (emoji) -->
+        <img
+        :src="shuffleIcon"
+        alt="Shuffle"
+        class="play-icon"/>
       </button>
       <button
         class="media-button skip-back-button"
         @click="skipToPreviousTrack"
-        vmodel="ready"
         :disabled="!ready"
       >
-        &#9198;
-        <!-- Rewind Icon -->
+        <img
+        :src="rewindIcon"
+        alt="Rewind"
+        class="play-icon"/>
       </button>
       <button
         class="media-button play-button"
         @click="togglePlay"
         :disabled="!ready"
       >
-        {{ isPlaying ? "&#9208;" : "&#9654;" }}
-        <!-- Play / Pause Icons -->
+      <img
+      :src="isPlaying ? pauseIcon : playIcon"
+      alt="Play / Pause"
+      class="play-icon"
+      />
       </button>
       <button
         class="media-button skip-button"
@@ -237,7 +252,10 @@ const onEnded = () => {
         vmodel="ready"
         :disabled="!ready"
       >
-        &#9197;
+        <img
+        :src="skipIcon"
+        alt="Skip"
+        class="play-icon"/>
         <!-- Skip Icon -->
       </button>
       <BoostModal />
@@ -384,6 +402,12 @@ const onEnded = () => {
   font-size: 18px;
   height: 50px;
   width: 100px;
+}
+
+.play-icon {
+  width: 1.2em;
+  height: 1.2em;
+  fill: currentColor;
 }
 
 .media-button.play-button {
