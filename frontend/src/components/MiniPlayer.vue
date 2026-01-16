@@ -6,11 +6,11 @@ import BoostModal from "./BoostModal.vue";
 import { currentTrack, feed } from "../controllers/localFeedStore.js";
 
 import playIcon from "../assets/images/play-icon.svg";
-import pauseIcon from "../assets/images/pause-icon.svg"
-import skipIcon from "../assets/images/forward-icon.svg"
-import rewindIcon from "../assets/images/backward-icon.svg"
-import shuffleIcon from "../assets/images/random-icon.svg"
-import repeatIcon from "../assets/images/undo-arrow-icon.svg"
+import pauseIcon from "../assets/images/pause-icon.svg";
+import skipIcon from "../assets/images/forward-icon.svg";
+import rewindIcon from "../assets/images/backward-icon.svg";
+import shuffleIcon from "../assets/images/random-icon.svg";
+import repeatIcon from "../assets/images/undo-arrow-icon.svg";
 
 const isPlaying = ref(false); // Track if audio is playing
 const ready = ref(false); // Track if audio is ready to play
@@ -180,10 +180,10 @@ const onEnded = () => {
     <div class="player-info-row">
       <div class="track-info">
         <img
-        class="track-thumbnail"
-        :src="currentTrack?.image"
-        alt="Track Thumbnail"
-        v-if="currentTrack"
+          class="track-thumbnail"
+          :src="currentTrack?.image"
+          alt="Track Thumbnail"
+          v-if="currentTrack"
         />
         <p>{{ currentTrack?.title }}</p>
       </div>
@@ -208,10 +208,7 @@ const onEnded = () => {
         :class="{ active: repeat, 'is-disabled': !repeat }"
         :disabled="!ready"
       >
-        <img
-        :src="repeatIcon"
-        alt="Repeat"
-        class="play-icon"/>
+        <img :src="repeatIcon" alt="Repeat" class="play-icon" />
       </button>
       <button
         class="media-button shuffle-button"
@@ -220,31 +217,25 @@ const onEnded = () => {
         vmodel="ready"
         :disabled="!ready || !feed.length"
       >
-        <img
-        :src="shuffleIcon"
-        alt="Shuffle"
-        class="play-icon"/>
+        <img :src="shuffleIcon" alt="Shuffle" class="play-icon" />
       </button>
       <button
         class="media-button skip-back-button"
         @click="skipToPreviousTrack"
         :disabled="!ready"
       >
-        <img
-        :src="rewindIcon"
-        alt="Rewind"
-        class="play-icon"/>
+        <img :src="rewindIcon" alt="Rewind" class="play-icon" />
       </button>
       <button
         class="media-button play-button"
         @click="togglePlay"
         :disabled="!ready"
       >
-      <img
-      :src="isPlaying ? pauseIcon : playIcon"
-      alt="Play / Pause"
-      class="play-icon"
-      />
+        <img
+          :src="isPlaying ? pauseIcon : playIcon"
+          alt="Play / Pause"
+          class="play-icon"
+        />
       </button>
       <button
         class="media-button skip-button"
@@ -252,10 +243,7 @@ const onEnded = () => {
         vmodel="ready"
         :disabled="!ready"
       >
-        <img
-        :src="skipIcon"
-        alt="Skip"
-        class="play-icon"/>
+        <img :src="skipIcon" alt="Skip" class="play-icon" />
         <!-- Skip Icon -->
       </button>
       <BoostModal />
@@ -266,22 +254,29 @@ const onEnded = () => {
 <style scoped>
 .player-box {
   background-color: var(--player-background);
+
   padding: clamp(8px, 1.5vh, 16px);
   padding-bottom: calc(clamp(8px, 1.5vh, 16px) + env(safe-area-inset-bottom));
-  position: fixed;
+  right: 0;
   bottom: 0;
   left: 0;
-  right: 0;
+
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
+
   align-items: center;
-  z-index: var(--player-z);
-  min-height: var(--player-height);
   justify-content: space-between;
+
+  z-index: var(--player-z);
+  height: auto;
+  width: 100%;
+  min-height: min-content;
+  border-top: 2px solid var(--orange);
 }
 
 .player-box p {
-  margin: 10px 0 0 0;
+  margin: 5px 0;
   white-space: nowrap;
   max-width: 100ch;
   color: var(--light-orange);
@@ -345,7 +340,7 @@ const onEnded = () => {
 .progress-bar {
   flex: 1;
   color: var(--light-text);
-  margin: 16px 20px 0 20px;
+  margin: 8px 20px 0 20px;
   display: flex;
   align-items: center;
   width: 100%;

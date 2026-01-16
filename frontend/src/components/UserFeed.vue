@@ -18,14 +18,17 @@
 .user-feed {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  align-items: stretch;
   flex: 1;
-  height: calc(86vh - var(--player-height));
-  overflow-y: auto;
+
+  min-height: 0;
+
   overflow-x: hidden;
-  padding-bottom: 5px;
+  overflow-y: auto;
+  align-items: stretch;
+
   padding-top: 5px;
+  padding-bottom: 20px;
+  gap: 0.5rem;
 }
 
 .feed-info {
