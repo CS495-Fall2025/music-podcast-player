@@ -354,6 +354,12 @@ const onEnded = () => {
   accent-color: var(--light-orange);
 }
 
+.progress-bar span{
+  width: 6ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 .button-row-1 {
   display: flex;
   flex-direction: row;
