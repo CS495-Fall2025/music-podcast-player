@@ -15,11 +15,14 @@ class SignUpRequestSchema(Schema):
         ),
     )
     email = fields.Email(required=True)
-    password = fields.Str(required=True, validate=SAnd(
-        validate.Length(min=12, max=64),
-        # Require at least one alphabetical character, digit, and special character.
-        validate.Regexp(
-            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]).*$",
-            flags=re.UNICODE
+    password = fields.Str(
+        required=True,
+        validate=SAnd(
+            validate.Length(min=12, max=64),
+            # Require at least one alphabetical character, digit, and special character.
+            validate.Regexp(
+                r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]).*$",
+                flags=re.UNICODE,
+            ),
         ),
-    ))
+    )

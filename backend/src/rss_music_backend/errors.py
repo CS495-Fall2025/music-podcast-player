@@ -28,9 +28,7 @@ _ERROR_RESPONSE_VALUES = {
     },
     RequestError.VALUE_NOT_UNIQUE: {
         "error": "ValueNotUnique",
-        "message": (
-            "The value you provided was not unique when it was required to be"
-        ),
+        "message": ("The value you provided was not unique when it was required to be"),
         "field": "unknown",
         "code": 403,
     },

@@ -22,7 +22,8 @@ def create_app() -> Flask:
         resources={
             r"/*": {
                 "origins": [
-                    origin.strip() for origin in app.config["ALLOWED_ORIGINS"].split(",")
+                    origin.strip()
+                    for origin in app.config["ALLOWED_ORIGINS"].split(",")
                 ],
             },
         },

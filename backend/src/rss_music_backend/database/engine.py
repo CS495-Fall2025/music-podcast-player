@@ -11,7 +11,7 @@ _db_engine = None
 def get_engine() -> Engine:
     if _db_engine is not None:
         return _db_engine
-    
+
     _initialize_engine()
     return _db_engine
 

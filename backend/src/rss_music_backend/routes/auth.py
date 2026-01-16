@@ -28,9 +28,7 @@ def post_signup() -> dict:
             valid_request["password"],
         )
     except errors.NotUniqueError as error:
-        return get_error_response(
-            RequestError.VALUE_NOT_UNIQUE, {"field": error.field}
-        )
+        return get_error_response(RequestError.VALUE_NOT_UNIQUE, {"field": error.field})
 
     return {
         "code": 201,

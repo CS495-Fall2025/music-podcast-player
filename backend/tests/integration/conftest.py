@@ -15,12 +15,7 @@ def app():
 
     # Allow exceptions to propegate and fail tests. Additionally, use an in-memory
     # SQLite database.
-    app.config.update(
-        {
-            "TESTING": True,
-            "DATABASE_CONNECTION": "sqlite:///:memory:"
-        }
-    )
+    app.config.update({"TESTING": True, "DATABASE_CONNECTION": "sqlite:///:memory:"})
 
     yield app
 

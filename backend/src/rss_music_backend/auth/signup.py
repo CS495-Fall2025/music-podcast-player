@@ -21,8 +21,7 @@ def _make_user(username: str, email: str, password: str) -> User:
     # scrypt is recommended over bcrypt to prevent attacks from specialized
     # hardware
     hash = hashlib.scrypt(
-        password.encode("utf-8"),
-        salt=salt, n=16384, r=8, p=1, dklen=32
+        password.encode("utf-8"), salt=salt, n=16384, r=8, p=1, dklen=32
     )
 
     salt_and_hash_password = salt + hash

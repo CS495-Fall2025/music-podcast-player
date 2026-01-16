@@ -10,7 +10,7 @@ USERNAME_MAX_LENGTH = 30
 EMAIL_MAX_LENGTH = 254
 
 # The salt (16B) + hashed password (32B) should be 48 bytes.
-PASSWORD_LENGTH = 48 
+PASSWORD_LENGTH = 48
 
 
 class User(Base):
@@ -20,5 +20,3 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(USERNAME_MAX_LENGTH), unique=True)
     email: Mapped[str] = mapped_column(String(EMAIL_MAX_LENGTH), unique=True)
     password: Mapped[bytes] = mapped_column(LargeBinary(PASSWORD_LENGTH))
-
-

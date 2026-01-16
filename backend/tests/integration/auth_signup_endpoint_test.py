@@ -34,7 +34,8 @@ def test_malformed_post_returns_invalid_format(client) -> None:
 
 def test_missing_arg_returns_invalid_argument(client) -> None:
     response = client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "t3st_user57",
             "email": "user@domain.com",
         },
@@ -51,10 +52,11 @@ def test_missing_arg_returns_invalid_argument(client) -> None:
 
 def test_short_username_returns_invalid_argument(client) -> None:
     response = client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "a" * 3,
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd"
+            "password": "T3stP@ssw0rd",
         },
     )
 
@@ -68,10 +70,11 @@ def test_short_username_returns_invalid_argument(client) -> None:
 
 def test_long_username_returns_invalid_argument(client) -> None:
     response = client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "a" * 31,
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd"
+            "password": "T3stP@ssw0rd",
         },
     )
 
@@ -86,10 +89,11 @@ def test_long_username_returns_invalid_argument(client) -> None:
 
 def test_outer_underscore_username_returns_invalid_argument(client) -> None:
     response = client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "_admin",
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd"
+            "password": "T3stP@ssw0rd",
         },
     )
 
@@ -104,10 +108,11 @@ def test_outer_underscore_username_returns_invalid_argument(client) -> None:
 
 def test_illegal_characters_username_returns_invalid_argument(client) -> None:
     response = client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "<user>",
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd"
+            "password": "T3stP@ssw0rd",
         },
     )
 
@@ -122,10 +127,11 @@ def test_illegal_characters_username_returns_invalid_argument(client) -> None:
 
 def test_invalid_email_returns_invalid_argument(client) -> None:
     response = client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "t3st_user57",
             "email": "domain.com",
-            "password": "T3stP@ssw0rd"
+            "password": "T3stP@ssw0rd",
         },
     )
 
@@ -140,10 +146,11 @@ def test_invalid_email_returns_invalid_argument(client) -> None:
 
 def test_short_password_returns_invalid_argument(client) -> None:
     response = client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "t3st_user57",
             "email": "user@domain.com",
-            "password": "@2abcdef"
+            "password": "@2abcdef",
         },
     )
 
@@ -158,7 +165,8 @@ def test_short_password_returns_invalid_argument(client) -> None:
 
 def test_long_password_returns_invalid_argument(client) -> None:
     response = client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "t3st_user57",
             "email": "user@domain.com",
             "password": "@2" + "a" * 80,
@@ -177,14 +185,15 @@ def test_long_password_returns_invalid_argument(client) -> None:
 @pytest.mark.parametrize(
     "password",
     [
-        "123456789@%$#!", # No letter
-        "abcdefghijk@%$#!", # No digit
-        "a0b1c2d3e4f5g6h7", # No special character
+        "123456789@%$#!",  # No letter
+        "abcdefghijk@%$#!",  # No digit
+        "a0b1c2d3e4f5g6h7",  # No special character
     ],
 )
 def test_weak_password_returns_invalid_argument(client, password) -> None:
     response = client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "t3st_user57",
             "email": "user@domain.com",
             "password": password,
@@ -202,10 +211,11 @@ def test_weak_password_returns_invalid_argument(client, password) -> None:
 
 def test_successful_signup(client, db_session) -> None:
     response = client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "t3st_user57",
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd"
+            "password": "T3stP@ssw0rd",
         },
     )
 
@@ -223,17 +233,19 @@ def test_successful_signup(client, db_session) -> None:
 
 def test_duplicate_username_returns_error(client, db_session) -> None:
     client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "t3st_user57",
             "email": "otheruser@domain.com",
-            "password": "P@ssw0rdT3st"
+            "password": "P@ssw0rdT3st",
         },
     )
     response = client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "t3st_user57",
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd"
+            "password": "T3stP@ssw0rd",
         },
     )
 
@@ -251,17 +263,19 @@ def test_duplicate_username_returns_error(client, db_session) -> None:
 
 def test_duplicate_email_returns_error(client, db_session) -> None:
     client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "0ther_t3st_user57",
             "email": "user@domain.com",
-            "password": "P@ssw0rdT3st"
+            "password": "P@ssw0rdT3st",
         },
     )
     response = client.post(
-        ENDPOINT_URL, json={
+        ENDPOINT_URL,
+        json={
             "username": "t3st_user57",
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd"
+            "password": "T3stP@ssw0rd",
         },
     )
 
