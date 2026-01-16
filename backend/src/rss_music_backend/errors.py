@@ -5,6 +5,7 @@ class RequestError(Enum):
     INVALID_FORMAT = auto()
     INVALID_ARGUMENT = auto()
     EXTERNAL_API_UNAVALIABLE = auto()
+    VALUE_NOT_UNIQUE = auto()
 
 
 _ERROR_RESPONSE_VALUES = {
@@ -25,9 +26,24 @@ _ERROR_RESPONSE_VALUES = {
         ),
         "code": 503,
     },
+    RequestError.VALUE_NOT_UNIQUE: {
+        "error": "ValueNotUnique",
+        "message": (
+            "The value you provided was not unique when it was required to be"
+        ),
+        "field": "unknown",
+        "code": 403,
+    },
 }
 
 
-def get_error_response(error: RequestError) -> dict[str, str]:
+def get_error_response(
+    error: RequestError, modified_args: dict | None = None
+) -> tuple[dict[str, str], int]:
     json_response = _ERROR_RESPONSE_VALUES[error]
+
+    if modified_args is not None:
+        for key, value in modified_args.items():
+            json_response[key] = value
+
     return json_response, json_response["code"]

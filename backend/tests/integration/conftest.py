@@ -1,18 +1,16 @@
 from pathlib import Path
 
-from alembic.config import Config
-import alembic.command
 import pytest
 from unittest import mock
 
 from rss_music_backend import create_app
-from rss_music_backend.database import get_engine
+from rss_music_backend.database import Base, get_engine, make_session
 
 ALEMBIC_CONFIG_PATH = Path(__file__).parent.parent.parent / "alembic.ini"
 
 
 @pytest.fixture
-def client():
+def app():
     app = create_app()
 
     # Allow exceptions to propegate and fail tests. Additionally, use an in-memory
@@ -24,15 +22,11 @@ def client():
         }
     )
 
-    # Bring the in-memory database to the latest migration.
-    alembic_config = Config(ALEMBIC_CONFIG_PATH)
-    alembic_config.set_main_option("sqlalchemy.url", "sqlite:///:memory:")
+    yield app
 
-    with app.app_context():
-        with get_engine().begin() as connection:
-            alembic_config.attributes["connection"] = connection
-            alembic.command.upgrade(alembic_config, "head")
 
+@pytest.fixture
+def client(app):
     # Block network requests and fail the test. If network requests are intended, mock
     # them explicitly in the test.
     def fail_request(*args, **kwargs):
@@ -42,3 +36,16 @@ def client():
 
     with mock.patch("requests.Session.send", side_effect=fail_request) as _:
         yield app.test_client()
+
+
+@pytest.fixture
+def db_session(app):
+    with app.app_context():
+        engine = get_engine()
+        Base.metadata.create_all(engine)
+
+        try:
+            with make_session() as session:
+                yield session
+        finally:
+            Base.metadata.drop_all(engine)
