@@ -14,7 +14,7 @@ def post_signup() -> dict:
     try:
         data = request.get_json(silent=True)
 
-        if data == None:
+        if data is None:
             return get_error_response(RequestError.INVALID_FORMAT)
 
         valid_request = SignUpRequestSchema().load(data)

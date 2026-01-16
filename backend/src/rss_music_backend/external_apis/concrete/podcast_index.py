@@ -1,5 +1,4 @@
 import hashlib
-import os
 import time
 from urllib.parse import urljoin
 

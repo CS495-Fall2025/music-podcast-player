@@ -4,6 +4,7 @@ from rss_music_backend.database.users import User
 
 
 __all__ = [
+    "Base",
     "User",
     "get_engine",
     "make_session",

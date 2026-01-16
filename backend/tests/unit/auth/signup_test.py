@@ -3,7 +3,6 @@ import hashlib
 import pytest
 
 from rss_music_backend.auth import signup
-from rss_music_backend.database.users import User
 
 
 def test_makes_user_with_username() -> None:

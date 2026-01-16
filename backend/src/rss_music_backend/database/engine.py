@@ -1,5 +1,3 @@
-from contextlib import contextmanager
-
 from flask import current_app
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import Session
