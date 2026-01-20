@@ -15,6 +15,10 @@ services:
     ports:
       - "5000:5000"
     env_file: ./secrets/backend.env
-
-volumes:
-  music_db_data:
+  database:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: dev-db-password
+    # Necessary for updating DB schema with Alembic outside Docker.
+    ports:
+      - "5432:5432"
