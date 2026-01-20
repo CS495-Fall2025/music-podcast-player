@@ -4,6 +4,12 @@
 
 <template>
   <div class="user-feed">
+    <div class="feed-info">
+      <img class="feed-image" :src="feedImage" />
+      <div class="feed-title">{{ feedTitle }}</div>
+      <div class="feed-artist">{{ feedArtist }}</div>
+    </div>
+
     <Track v-for="(item, index) in feed" :key="index" :track="item" />
   </div>
 </template>
@@ -12,13 +18,58 @@
 .user-feed {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  align-items: stretch;
   flex: 1;
-  height: calc(86vh - var(--player-height));
-  overflow-y: auto;
+
+  min-height: 0;
+
   overflow-x: hidden;
-  padding-bottom: 10px;
-  padding-top: 10px;
+  overflow-y: auto;
+  align-items: stretch;
+
+  padding-top: 5px;
+  padding-bottom: 20px;
+  gap: 0.5rem;
+}
+
+.feed-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.feed-image {
+  width: 100%;
+  max-width: 200px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border: 2px solid black;
+  border-radius: var(--border-radius-sm);
+  transition: transform 0.2s ease;
+}
+
+.feed-image:hover {
+  transform: scale(1.0125);
+}
+
+.feed-title {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 2rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.feed-artist {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1.25rem;
+  opacity: 0.85;
+  white-space: nowrap;
 }
 </style>
