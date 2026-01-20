@@ -12,7 +12,7 @@ describe("useNavbar", () => {
     clickHandler = null;
 
     // Mock window.location for href and reload
-    Object.defineProperty(global.window, "location", {
+    Object.defineProperty(window, "location", {
       value: { href: "", reload: vi.fn() },
       writable: true,
     });
