@@ -1,6 +1,5 @@
 import { jwtDecode } from "jwt-decode";
 
-// JWT will be stored in localStorage
 const TOKEN_KEY = "access_token";
 
 export function isAuthenticated() {
@@ -16,9 +15,7 @@ export function isAuthenticated() {
   }
 }
 
-/**
- * gets current user info from JWT
- */
+// gets current user info from JWT
 export function getCurrentUser() {
   const token = localStorage.getItem(TOKEN_KEY);
   if (!token) return null;
@@ -26,7 +23,7 @@ export function getCurrentUser() {
   try {
     const payload = jwtDecode(token);
     return {
-      username: payload.name || payload.preferred_username || "Unknown",
+      username: payload.name || "Unknown",
       email: payload.email || null,
     };
   } catch (e) {
