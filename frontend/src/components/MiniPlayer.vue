@@ -144,22 +144,22 @@ const skipToPreviousTrack = () => {
     return;
   }
 
-  prevClickTimeout.value = setTimeout(()=> {
+  prevClickTimeout.value = setTimeout(() => {
     // restart current song
     restartSong();
     prevClickTimeout.value = null;
   }, DOUBLE_CLICK_DELAY);
 };
 
-const restartSong = () =>{
-    const audio = audioRef.value;
-    if(audio){
-      audio.currentTime = 0;
-      audio.play();
-      isPlaying.value = true;
-      ready.value = true;
-    }
-}
+const restartSong = () => {
+  const audio = audioRef.value;
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play();
+    isPlaying.value = true;
+    ready.value = true;
+  }
+};
 
 const onTimeUpdate = () => {
   if (audioRef.value) {
