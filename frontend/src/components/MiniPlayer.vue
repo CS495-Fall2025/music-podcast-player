@@ -21,6 +21,8 @@ const repeat = ref(false); // Track if audio is set to repeat
 const isShuffle = ref(false); // Shows whether shuffle is enabled
 const shuffleOrder = ref([]); // Array of indices into feed
 const shuffleIndex = ref(-1); // Position in shuffleOrder
+const prevClickTimeout = ref(null);
+const DOUBLE_CLICK_DELAY = 300; // ms
 
 const getCurrentIndex = () => {
   if (!currentTrack.value || !currentTrack.value.audio) return -1;
@@ -120,14 +122,44 @@ const skipToNextTrack = () => {
 };
 
 const skipToPreviousTrack = () => {
-  const currentIndex = feed.findIndex(
-    (track) => track.audio === currentTrack.value.audio,
-  );
-  currentTrack.value = feed[currentIndex - 1];
-  isPlaying.value = false; // Reset playing state
-  ready.value = false; // Reset ready state until new track is loaded
-  repeat.value = false; // Turn off repeat when skipping to last track
+  if (prevClickTimeout.value) {
+    // second click, skip back a song
+    clearTimeout(prevClickTimeout.value);
+    prevClickTimeout.value = null;
+
+    const currentIndex = feed.findIndex(
+      (track) => track.audio === currentTrack.value.audio,
+    );
+
+    if (currentIndex > 0) {
+      // skip back a song
+      currentTrack.value = feed[currentIndex - 1];
+      isPlaying.value = false;
+      ready.value = false;
+      repeat.value = false;
+    } else if (currentIndex === 0) {
+      // restart current song
+      restartSong();
+    }
+    return;
+  }
+
+  prevClickTimeout.value = setTimeout(()=> {
+    // restart current song
+    restartSong();
+    prevClickTimeout.value = null;
+  }, DOUBLE_CLICK_DELAY);
 };
+
+const restartSong = () =>{
+    const audio = audioRef.value;
+    if(audio){
+      audio.currentTime = 0;
+      audio.play();
+      isPlaying.value = true;
+      ready.value = true;
+    }
+}
 
 const onTimeUpdate = () => {
   if (audioRef.value) {
