@@ -126,24 +126,40 @@ const skipToPreviousTrack = () => {
     // second click, skip back a song
     clearTimeout(prevClickTimeout.value);
     prevClickTimeout.value = null;
+    // NOT shuffling
+    if (!isShuffle.value) {
+      const currentIndex = feed.findIndex(
+        (track) => track.audio === currentTrack.value.audio,
+      );
 
-    const currentIndex = feed.findIndex(
-      (track) => track.audio === currentTrack.value.audio,
-    );
+      if (currentIndex > 0) {
+        // skip back a song
+        currentTrack.value = feed[currentIndex - 1];
+      } else {
+        // restart current song
+        restartSong();
+        return;
+      }
+    } else {
+      // IS shuffling
+      if (shuffleIndex.value > 0) {
+        // skip back a song
+        shuffleIndex.value--;
+        const feedIndex = shuffleOrder.value[shuffleIndex.value];
 
-    if (currentIndex > 0) {
-      // skip back a song
-      currentTrack.value = feed[currentIndex - 1];
-      isPlaying.value = false;
-      ready.value = false;
-      repeat.value = false;
-    } else if (currentIndex === 0) {
-      // restart current song
-      restartSong();
+        currentTrack.value = feed[feedIndex];
+      } else {
+        // restart current song
+        restartSong();
+        return;
+      }
     }
+
+    isPlaying.value = false;
+    ready.value = false;
+    repeat.value = false;
     return;
   }
-
   prevClickTimeout.value = setTimeout(() => {
     // restart current song
     restartSong();
