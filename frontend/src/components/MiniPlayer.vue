@@ -21,7 +21,7 @@ const repeat = ref(false); // Track if audio is set to repeat
 const isShuffle = ref(false); // Shows whether shuffle is enabled
 const shuffleOrder = ref([]); // Array of indices into feed
 const shuffleIndex = ref(-1); // Position in shuffleOrder
-const prevClickTimeout = ref(null); 
+const prevClickTimeout = ref(null);
 const DOUBLE_CLICK_DELAY = 300; // ms
 
 const getCurrentIndex = () => {
