@@ -2,7 +2,8 @@ import { searchedFeeds } from "./localFeedStore.js";
 
 export function requestFeeds(query) {
   fetch(
-    `http://localhost:5000/search/feeds?query=${encodeURIComponent(query)}&count=50`,
+    `${import.meta.env.VITE_BACKEND_URL}/search/feeds?`
+		+ `query=${encodeURIComponent(query)}&count=50`,
   )
     .then((response) => {
       if (!response.ok) {
