@@ -31,9 +31,17 @@
         >
           Account ▾
         </button>
+
         <div v-if="dropdownOpen" class="dropdown-menu">
-          <button class="dropdown-item" @click="handleLogin">Login</button>
-          <button class="dropdown-item" @click="handleLogout">Logout</button>
+          <template v-if="loggedIn">
+            <span class="dropdown-item"
+              >Hello, {{ currentUser?.username }}</span
+            >
+            <button class="dropdown-item" @click="handleLogout">Logout</button>
+          </template>
+          <template v-else>
+            <button class="dropdown-item" @click="handleLogin">Login</button>
+          </template>
         </div>
       </div>
     </div>
