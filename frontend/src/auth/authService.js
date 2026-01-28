@@ -1,46 +1,31 @@
-import { jwtDecode } from "jwt-decode";
+import { useAuth } from "./authStore";
 
-const TOKEN_KEY = "access_token";
+// For backwards compatibility, export functions that use the store
+const auth = useAuth();
 
 export function isAuthenticated() {
-  const token = localStorage.getItem(TOKEN_KEY);
-  if (!token) return false;
-
-  try {
-    const payload = jwtDecode(token);
-    return payload.exp * 1000 > Date.now();
-  } catch (e) {
-    console.error("Invalid token", e);
-    return false;
-  }
+  return auth.isAuthenticated.value;
 }
 
-// gets current user info from JWT
 export function getCurrentUser() {
-  const token = localStorage.getItem(TOKEN_KEY);
-  if (!token) return null;
+  return auth.currentUser.value;
+}
 
-  try {
-    const payload = jwtDecode(token);
-    return {
-      username: payload.name || "Unknown",
-      email: payload.email || null,
-    };
-  } catch (e) {
-    console.error("Failed to parse JWT", e);
-    return null;
-  }
+export async function verifyToken() {
+  return auth.verifyToken();
 }
 
 export function startLogin() {
-  window.location.href = import.meta.env.VITE_AUTH_API + "/auth";
+  auth.startLogin();
 }
 
-// stores JWT in localstorage
 export function completeLogin(token) {
-  localStorage.setItem(TOKEN_KEY, token);
+  auth.completeLogin(token);
 }
 
 export function logout() {
-  localStorage.removeItem(TOKEN_KEY);
+  auth.logout();
 }
+
+// Also export the store itself for components that need reactivity
+export { useAuth };
