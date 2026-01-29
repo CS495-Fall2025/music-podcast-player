@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
+import os
 
 
 load_dotenv()
@@ -15,6 +16,13 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_prefixed_env(prefix="RSS_PLAYER")
 
+    # Configure session for PKCE flow
+    # In production, use secure cookies and proper session backend
+    app.config["SESSION_COOKIE_SECURE"] = os.getenv("RSS_PLAYER_ENVIRONMENT", "dev") == "production"
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SECRET_KEY"] = os.getenv("RSS_PLAYER_SECRET_KEY", "dev-secret-key")
+
     # Tell web browsers to specifically only allow our website to interact with this
     # API.
     CORS(
@@ -27,6 +35,7 @@ def create_app() -> Flask:
                 ],
             },
         },
+        supports_credentials=True,
     )
 
     apply_blueprints(app)
