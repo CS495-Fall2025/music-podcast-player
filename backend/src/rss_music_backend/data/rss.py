@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 
-
 @dataclass
 class Rss:
     url: str
@@ -13,3 +12,4 @@ class Rss:
     pub_date: str
     last_build_date: str
     items: list[dict] = field(default_factory=list)
+    value_items: list[dict] = field(default_factory=list)
