@@ -24,9 +24,6 @@
     </div>
 
     <div class="nav-right">
-      <div v-if="isAuthenticated" class="user-greeting">
-        Hello, {{ currentUser?.username }}!
-      </div>
       <div class="nav-dropdown" ref="dropdownRef">
         <button
           class="dropdown-toggle"
@@ -36,12 +33,14 @@
         </button>
 
         <div v-if="dropdownOpen" class="dropdown-menu">
-          <template v-if="isAuthenticated">
+          <template v-if="loggedIn">
+            <span class="dropdown-item"
+              >Hello, {{ currentUser?.username }}</span
+            >
             <button class="dropdown-item" @click="handleLogout">Logout</button>
           </template>
           <template v-else>
             <button class="dropdown-item" @click="handleLogin">Login</button>
-            <button class="dropdown-item" @click="handleSignup">Sign Up</button>
           </template>
         </div>
       </div>
@@ -52,15 +51,9 @@
 <script setup>
 import useNavbar from "../controllers/navBar.js";
 
-const {
-  isOpen,
-  dropdownOpen,
-  handleLogin,
-  handleSignup,
-  handleLogout,
-  isAuthenticated,
-  currentUser,
-} = useNavbar();
+const { isOpen, dropdownOpen, dropdownRef, handleLogin, handleLogout } =
+  useNavbar();
+
 const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
 </script>
 
@@ -177,17 +170,6 @@ const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
   padding-bottom: 0.25rem;
 }
 
-/* ========================================
-   USER GREETING
-   ======================================== */
-
-.user-greeting {
-  color: var(--light-orange);
-  font-weight: 500;
-  margin-right: 1.5rem;
-  font-size: 0.95rem;
-  letter-spacing: 0.3px;
-}
 
 /* ========================================
    ACCOUNT DROPDOWN
