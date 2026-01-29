@@ -18,6 +18,10 @@ COPY pyproject.toml ./
 # Install the backend as a package
 RUN pip3 install .
 
+# Copy migrations and alembic config after package install
+COPY migrations ./migrations
+COPY alembic.ini ./
+
 # Expose the port for the backend
 EXPOSE 5000
 
