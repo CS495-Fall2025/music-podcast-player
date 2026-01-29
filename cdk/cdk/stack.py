@@ -36,8 +36,19 @@ class RSSMusicPlayerStack(Stack):
         return bucket
 
     def _make_frontend_distribution(self, bucket: s3.Bucket) -> cloudfront.Distribution:
+        access_control = cloudfront.S3OriginAccessControl(
+            self,
+            "RSSMusicPlayerFrontendBucketOAC",
+            signing=cloudfront.Signing.SIGV4_ALWAYS,
+        )
+
+        origin = origins.S3BucketOrigin.with_origin_access_control(
+            bucket,
+            origin_access_control=access_control
+        )
+
         behavior = cloudfront.BehaviorOptions(
-            origin=origins.S3BucketOrigin(bucket),
+            origin=origin,
             viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         )
 
