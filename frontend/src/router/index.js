@@ -3,8 +3,6 @@ import InputFeedPage from "../pages/InputFeedPage.vue";
 import SearchFeedPage from "../pages/SearchFeedPage.vue";
 import ViewFeedPage from "../pages/ViewFeedPage.vue";
 import AuthCallback from "../pages/AuthCallback.vue";
-import LoginPage from "../pages/LoginPage.vue";
-import SignupPage from "../pages/SignupPage.vue";
 import { isAuthenticated } from "../auth/authService";
 
 const routes = [
@@ -19,18 +17,6 @@ const routes = [
   {
     path: "/view",
     component: ViewFeedPage,
-    meta: { requiresAuth: false },
-  },
-
-  {
-    path: "/login",
-    component: LoginPage,
-    meta: { requiresAuth: false },
-  },
-
-  {
-    path: "/signup",
-    component: SignupPage,
     meta: { requiresAuth: false },
   },
 
