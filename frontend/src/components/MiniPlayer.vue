@@ -28,10 +28,9 @@ const {
   onTimeUpdate,
   onCanPlay,
   onEnded,
-  formatTime
+  formatTime,
 } = useMiniPlayer();
 </script>
-
 
 <template>
   <div class="player-box" v-if="currentTrack">

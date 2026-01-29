@@ -67,7 +67,7 @@ const {
   openModal,
   closeModal,
   onConnectWallet,
-  onSendBoost
+  onSendBoost,
 } = useBoostModal();
 </script>
 
