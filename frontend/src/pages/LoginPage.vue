@@ -83,16 +83,13 @@ const handleLogin = async (e) => {
 
     const data = await response.json();
 
-    // was JWT was received?
-    if (!data.token) {
-      throw new Error("No token received from server");
-    }
-
+    // Authentication successful - cookies are set by backend
     sessionStorage.removeItem("pkce_verifier");
 
-    // store token
-    completeLogin(data.token);
+    // Verify authentication and load user data
+    await completeLogin();
 
+    // Short delay to ensure state is updated
     await new Promise((resolve) => setTimeout(resolve, 100));
     router.push("/");
   } catch (err) {

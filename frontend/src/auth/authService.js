@@ -15,16 +15,20 @@ export async function verifyToken() {
   return auth.verifyToken();
 }
 
+export async function refreshToken() {
+  return auth.refreshToken();
+}
+
 export function startLogin() {
   auth.startLogin();
 }
 
-export function completeLogin(token) {
-  auth.completeLogin(token);
+export async function completeLogin() {
+  return auth.completeLogin();
 }
 
-export function logout() {
-  auth.logout();
+export async function logout() {
+  return auth.logout();
 }
 
 // Also export the store itself for components that need reactivity

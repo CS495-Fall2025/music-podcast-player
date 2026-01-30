@@ -87,48 +87,58 @@ def post_login() -> tuple:
     if not pkce.verify_code_challenge(code_verifier, stored_challenge):
         return {"error": "Invalid PKCE verifier"}, 401
     
-    # Authenticate user
     try:
         user = login.authenticate_user(username, password)
     except login.InvalidCredentialsError:
         return {"error": "Invalid credentials"}, 401
     
-    # Generate JWT
     secret_key = os.getenv("RSS_PLAYER_SECRET_KEY", "dev-secret-key")
-    token = login.generate_jwt(user, secret_key)
+    tokens = login.generate_tokens(user, secret_key)
     
-    # Clear session state
     session.pop("code_challenge", None)
     session.pop("code_verifier_expected", None)
     
-    return {
-        "token": token,
-    }, 200
+    from flask import make_response
+    is_production = os.getenv("RSS_PLAYER_ENVIRONMENT", "dev") == "production"
+    
+    response = make_response({"success": True}, 200)
+    
+    response.set_cookie(
+        "access_token",
+        tokens["access_token"],
+        httponly=True,
+        secure=is_production,
+        samesite="Lax",
+        max_age=3600,
+    )
+    
+    response.set_cookie(
+        "refresh_token",
+        tokens["refresh_token"],
+        httponly=True,
+        secure=is_production,
+        samesite="Lax",
+        max_age=604800,
+    )
+    
+    return response
 
 
 @AUTH_BP.post("/verify")
 def post_verify() -> tuple:
     """
-    Verify a JWT token and check if the user still exists.
-    Frontend calls this to validate stored tokens on app startup.
+    Verify a JWT token from httpOnly cookie and check if the user still exists.
+    Frontend calls this to validate tokens on app startup.
     """
-    try:
-        data = request.get_json(silent=True)
-        
-        if data is None:
-            return {"error": "Invalid request"}, 400
-        
-        token = data.get("token")
-        if not token:
-            return {"error": "Missing token"}, 400
-        
-    except Exception:
-        return {"error": "Invalid request"}, 400
+    token = request.cookies.get("access_token")
+    
+    if not token:
+        return {"valid": False, "error": "No token found"}, 401
     
     secret_key = os.getenv("RSS_PLAYER_SECRET_KEY", "dev-secret-key")
     
     try:
-        payload = login.verify_jwt(token, secret_key)
+        payload = login.verify_jwt(token, secret_key, expected_type="access")
         return {
             "valid": True,
             "user": {
@@ -139,3 +149,61 @@ def post_verify() -> tuple:
         }, 200
     except login.InvalidTokenError as e:
         return {"valid": False, "error": str(e)}, 401
+
+
+@AUTH_BP.post("/refresh")
+def post_refresh() -> tuple:
+    """
+    Use a refresh token to get a new access token.
+    This allows users to stay logged in without re-entering credentials.
+    """
+    refresh_token = request.cookies.get("refresh_token")
+    
+    if not refresh_token:
+        return {"error": "No refresh token found"}, 401
+    
+    secret_key = os.getenv("RSS_PLAYER_SECRET_KEY", "dev-secret-key")
+    
+    try:
+        payload = login.verify_jwt(refresh_token, secret_key, expected_type="refresh")
+        user_id = payload.get("sub")
+        
+        from rss_music_backend.database import make_session
+        with make_session() as db_session:
+            user = db_session.query(login.User).filter(login.User.id == user_id).first()
+            if not user:
+                return {"error": "User not found"}, 401
+            
+            new_access_token = login.generate_jwt(user, secret_key, expires_in_hours=1, token_type="access")
+            
+            from flask import make_response
+            is_production = os.getenv("RSS_PLAYER_ENVIRONMENT", "dev") == "production"
+            
+            response = make_response({"success": True}, 200)
+            response.set_cookie(
+                "access_token",
+                new_access_token,
+                httponly=True,
+                secure=is_production,
+                samesite="Lax",
+                max_age=3600,
+            )
+            
+            return response
+            
+    except login.InvalidTokenError as e:
+        return {"error": str(e)}, 401
+
+
+@AUTH_BP.post("/logout")
+def post_logout() -> tuple:
+    """
+    Log out by clearing authentication cookies.
+    """
+    from flask import make_response
+    
+    response = make_response({"success": True}, 200)
+    response.set_cookie("access_token", "", httponly=True, max_age=0)
+    response.set_cookie("refresh_token", "", httponly=True, max_age=0)
+    
+    return response

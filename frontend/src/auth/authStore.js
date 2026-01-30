@@ -1,79 +1,118 @@
 import { ref, computed } from "vue";
 import { jwtDecode } from "jwt-decode";
 
-const TOKEN_KEY = "access_token";
+// Track authentication state without storing the token
+// The token is in an httpOnly cookie, inaccessible to JavaScript
+const isLoggedIn = ref(false);
+const currentUserData = ref(null);
 
-// Reactive auth state
-const token = ref(localStorage.getItem(TOKEN_KEY));
-
-function updateAuthState() {
-  token.value = localStorage.getItem(TOKEN_KEY);
-}
+// Refresh token check interval (every 30 minutes)
+let refreshInterval = null;
 
 export function useAuth() {
-  const isAuthenticated = computed(() => {
-    if (!token.value) return false;
-    try {
-      const payload = jwtDecode(token.value);
-      return payload.exp * 1000 > Date.now();
-    } catch (e) {
-      console.error("Invalid token", e);
-      return false;
-    }
-  });
+  const isAuthenticated = computed(() => isLoggedIn.value);
+  
+  const currentUser = computed(() => currentUserData.value);
 
-  const currentUser = computed(() => {
-    if (!token.value) return null;
-    try {
-      const payload = jwtDecode(token.value);
-      return {
-        username: payload.name || "Unknown",
-        email: payload.email || null,
-      };
-    } catch (e) {
-      console.error("Failed to parse JWT", e);
-      return null;
+  const completeLogin = async () => {
+    // Verify the authentication succeeded by checking the cookie
+    const verified = await verifyToken();
+    if (verified) {
+      isLoggedIn.value = true;
+      startAutoRefresh();
     }
-  });
-
-  const completeLogin = (newToken) => {
-    localStorage.setItem(TOKEN_KEY, newToken);
-    token.value = newToken;
   };
 
-  const logout = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    token.value = null;
+  const logout = async () => {
+    try {
+      // Call backend to clear cookies
+      await fetch(`${import.meta.env.VITE_AUTH_API}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (e) {
+      console.error("Logout request failed:", e);
+    }
+    
+    isLoggedIn.value = false;
+    currentUserData.value = null;
+    stopAutoRefresh();
   };
 
   const verifyToken = async () => {
-    const currentToken = token.value;
-    if (!currentToken) return false;
-
     try {
       const response = await fetch(
         `${import.meta.env.VITE_AUTH_API}/auth/verify`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ token: currentToken }),
+          credentials: "include",  // Send cookies
         },
       );
 
       if (!response.ok) {
-        // Token is invalid, remove it
-        logout();
+        isLoggedIn.value = false;
+        currentUserData.value = null;
         return false;
       }
 
       const data = await response.json();
-      return data.valid === true;
+      if (data.valid === true) {
+        isLoggedIn.value = true;
+        currentUserData.value = {
+          username: data.user.username,
+          email: data.user.email,
+        };
+        return true;
+      }
+      
+      return false;
     } catch (e) {
       console.error("Failed to verify token:", e);
-      // On network error, keep the token but log the error
+      // On network error, keep the current state
+      return isLoggedIn.value;
+    }
+  };
+  
+  const refreshToken = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_AUTH_API}/auth/refresh`,
+        {
+          method: "POST",
+          credentials: "include",  // Send refresh token cookie
+        },
+      );
+
+      if (!response.ok) {
+        // Refresh failed - user needs to log in again
+        await logout();
+        return false;
+      }
+
+      // Access token cookie has been updated
       return true;
+    } catch (e) {
+      console.error("Failed to refresh token:", e);
+      return false;
+    }
+  };
+  
+  const startAutoRefresh = () => {
+    stopAutoRefresh();
+    // Refresh every 30 minutes (access token expires in 1 hour)
+    refreshInterval = setInterval(async () => {
+      const success = await refreshToken();
+      if (!success) {
+        console.log("Auto-refresh failed, stopping interval");
+        stopAutoRefresh();
+      }
+    }, 30 * 60 * 1000);
+  };
+  
+  const stopAutoRefresh = () => {
+    if (refreshInterval) {
+      clearInterval(refreshInterval);
+      refreshInterval = null;
     }
   };
 
@@ -84,11 +123,10 @@ export function useAuth() {
   return {
     isAuthenticated,
     currentUser,
-    token: token,
     completeLogin,
     logout,
     verifyToken,
+    refreshToken,
     startLogin,
-    updateAuthState,
   };
 }
