@@ -1,8 +1,11 @@
+import loadConfig from "./config.js";
 import { searchedFeeds } from "./localFeedStore.js";
 
-export function requestFeeds(query) {
+export async function requestFeeds(query) {
+	const config = await loadConfig();
+
   fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/search/feeds?`
+    `${config.backendUrl}/search/feeds?`
 		+ `query=${encodeURIComponent(query)}&count=50`,
   )
     .then((response) => {

@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 from aws_cdk import (
     CfnOutput,
@@ -8,16 +9,17 @@ from aws_cdk import (
     aws_apigateway as apigw,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
-    aws_kms as kms,
     aws_lambda as _lambda,
-    aws_logs as logs,
     aws_ssm as ssm,
-    aws_s3 as s3
+    aws_s3 as s3,
+    aws_s3_deployment as s3_deploy
 )
 from constructs import Construct
 
 BACKEND_PATH = Path(__file__).parent.parent.parent / "backend"
+FRONTEND_PATH = Path(__file__).parent.parent.parent / "frontend"
 BACKEND_BUILD = BACKEND_PATH / "lambda_build/backend_build.zip"
+FRONTEND_BUILD = FRONTEND_PATH / "dist"
 
 
 class RSSMusicPlayerStack(Stack):
@@ -32,6 +34,8 @@ class RSSMusicPlayerStack(Stack):
         )
 
         backend_rest_api = self._make_rest_api(backend_function)
+
+        self._deploy_frontend(frontend_bucket, backend_rest_api.url)
 
     def _make_frontend_bucket(self) -> s3.Bucket:
         bucket = s3.Bucket(
@@ -141,7 +145,6 @@ class RSSMusicPlayerStack(Stack):
                 "SSM_ROUTE_DATABASE_CONNECTION":
                     "/rss-music-player/database/connection-url",
             },
-            log_retention=logs.RetentionDays.ONE_WEEK,
         )
 
         for secret in backend_secrets:
@@ -150,10 +153,6 @@ class RSSMusicPlayerStack(Stack):
         return function
 
     def _make_rest_api(self, function: _lambda.Function) -> apigw.LambdaRestApi:
-        options = apigw.StageOptions(
-            logging_level=apigw.MethodLoggingLevel.INFO,
-        )
-
         api = apigw.LambdaRestApi(
             self,
             "RSSMusicPlayerBackendRestApi",
@@ -168,3 +167,25 @@ class RSSMusicPlayerStack(Stack):
         )
 
         return api
+
+    def _deploy_frontend(
+        self, bucket: s3.Bucket, api_url: str
+    ) -> s3_deploy.BucketDeployment:
+        config = {
+            "backendUrl": api_url,
+        }
+
+        deployment = s3_deploy.BucketDeployment(
+            self,
+            "RSSMusicPlayerFrontendDeployment",
+            sources=[
+                s3_deploy.Source.asset(str(FRONTEND_BUILD)),
+                s3_deploy.Source.data(
+                    "config.json",
+                    json.dumps(config),
+                ),
+            ],
+            destination_bucket=bucket,
+        )
+
+        return deployment
