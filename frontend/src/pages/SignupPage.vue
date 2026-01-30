@@ -71,7 +71,7 @@ const handleSignup = async (e) => {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",  // Include cookies in request
+        credentials: "include", // Include cookies in request
         body: JSON.stringify({
           username: username.value,
           email: email.value,

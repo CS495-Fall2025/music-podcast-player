@@ -42,6 +42,10 @@ describe("useNavbar", () => {
     vi.doMock("../src/auth/authService.js", () => ({
       startLogin: vi.fn(),
       logout: vi.fn(),
+      useAuth: vi.fn(() => ({
+        isAuthenticated: { value: false },
+        currentUser: { value: null },
+      })),
     }));
 
     const { default: useNavbar } = await import("../src/controllers/navBar.js");

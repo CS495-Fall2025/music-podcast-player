@@ -11,7 +11,7 @@ let refreshInterval = null;
 
 export function useAuth() {
   const isAuthenticated = computed(() => isLoggedIn.value);
-  
+
   const currentUser = computed(() => currentUserData.value);
 
   const completeLogin = async () => {
@@ -33,7 +33,7 @@ export function useAuth() {
     } catch (e) {
       console.error("Logout request failed:", e);
     }
-    
+
     isLoggedIn.value = false;
     currentUserData.value = null;
     stopAutoRefresh();
@@ -45,7 +45,7 @@ export function useAuth() {
         `${import.meta.env.VITE_AUTH_API}/auth/verify`,
         {
           method: "POST",
-          credentials: "include",  // Send cookies
+          credentials: "include", // Send cookies
         },
       );
 
@@ -64,7 +64,7 @@ export function useAuth() {
         };
         return true;
       }
-      
+
       return false;
     } catch (e) {
       console.error("Failed to verify token:", e);
@@ -72,14 +72,14 @@ export function useAuth() {
       return isLoggedIn.value;
     }
   };
-  
+
   const refreshToken = async () => {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_AUTH_API}/auth/refresh`,
         {
           method: "POST",
-          credentials: "include",  // Send refresh token cookie
+          credentials: "include", // Send refresh token cookie
         },
       );
 
@@ -96,19 +96,22 @@ export function useAuth() {
       return false;
     }
   };
-  
+
   const startAutoRefresh = () => {
     stopAutoRefresh();
     // Refresh every 30 minutes (access token expires in 1 hour)
-    refreshInterval = setInterval(async () => {
-      const success = await refreshToken();
-      if (!success) {
-        console.log("Auto-refresh failed, stopping interval");
-        stopAutoRefresh();
-      }
-    }, 30 * 60 * 1000);
+    refreshInterval = setInterval(
+      async () => {
+        const success = await refreshToken();
+        if (!success) {
+          console.log("Auto-refresh failed, stopping interval");
+          stopAutoRefresh();
+        }
+      },
+      30 * 60 * 1000,
+    );
   };
-  
+
   const stopAutoRefresh = () => {
     if (refreshInterval) {
       clearInterval(refreshInterval);
