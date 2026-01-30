@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from aws_cdk import (
     CfnOutput,
     Duration,
@@ -5,9 +7,16 @@ from aws_cdk import (
     RemovalPolicy,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
+    aws_kms as kms,
+    aws_lambda as _lambda,
+    aws_ssm as ssm,
     aws_s3 as s3
 )
 from constructs import Construct
+
+BACKEND_PATH = Path(__file__).parent.parent.parent / "backend"
+BACKEND_BUILD = BACKEND_PATH / "lambda_build/backend_build.zip"
+
 
 class RSSMusicPlayerStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
@@ -15,6 +24,10 @@ class RSSMusicPlayerStack(Stack):
         
         frontend_bucket = self._make_frontend_bucket()
         frontend_distribution = self._make_frontend_distribution(frontend_bucket)
+
+        backend_function = self._make_backend_function(
+            frontend_distribution.domain_name
+        )
 
     def _make_frontend_bucket(self) -> s3.Bucket:
         bucket = s3.Bucket(
@@ -84,3 +97,47 @@ class RSSMusicPlayerStack(Stack):
         )
 
         return distribution
+
+    def _make_backend_function(self, frontend_domain) -> _lambda.Function:
+        # These are REFERENCES to keys that MUST be created manually. AWS doesn't
+        # support creating SecureString parameters through the CDK, and we'd need to set
+        # the values manually anyways.
+        backend_secrets = [
+            ssm.StringParameter.from_secure_string_parameter_attributes(
+                self,
+                "RSSMusicPlayerPodcastIndexAPIKey",
+                parameter_name="/rss-music-player/podcast-index-api/key",
+            ),
+            ssm.StringParameter.from_secure_string_parameter_attributes(
+                self,
+                "RSSMusicPlayerPodcastIndexAPISecret",
+                parameter_name="/rss-music-player/podcast-index-api/secret",
+            ),
+            ssm.StringParameter.from_secure_string_parameter_attributes(
+                self,
+                "RSSMusicPlayerDatabaseConnectionURL",
+                parameter_name="/rss-music-player/database/connection-url",
+            ),
+        ]
+
+        function = _lambda.Function(
+            self,
+            "RSSMusicPlayerBackendFunction",
+            code=_lambda.Code.from_asset(str(BACKEND_BUILD)),
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="lambda_handler.handler",
+            memory_size=512,
+            architecture=_lambda.Architecture.ARM_64,
+            environment={
+                "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{frontend_domain}",
+                "SSM_ROUTE_PODCAST_INDEX_KEY":
+                    "/rss-music-player/podcast-index-api/key",
+                "SSM_ROUTE_PODCAST_INDEX_SECRET":
+                    "/rss-music-player/podcast-index-api/secret",
+                "SSM_ROUTE_DATABASE_CONNECTION":
+                    "/rss-music-player/database/connection-url",
+            },
+        )
+
+        for secret in backend_secrets:
+            secret.grant_read(function)
