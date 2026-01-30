@@ -32,11 +32,10 @@ function parseResponse(response) {
     let album = {
       type: "album",
       artist: feedItem.artist,
-      title: feedItem.title,
+      feedTitle: feedItem.title,
       description: feedItem.description,
       link: feedItem.link,
       image: feedItem.art_url,
-      value: valueObject
     };
     newAlbum.push(album);
     for (const item of feedItem.items) {
@@ -47,6 +46,7 @@ function parseResponse(response) {
         description: item.description,
         audio: item.enclosure_url,
         image: item.image || feedItem.art_url,
+        value: valueObject,
       };
       newFeed.push(track);
       console.log(track);
@@ -70,12 +70,12 @@ function parseValue(response) {
     for (const valueItem of feedItem.value_items) {
       let valueObject = {
         type: "value",
-        recipient: valueItem.recipientName || "None",
-        valueType: valueItem.type || "None",
-        address: valueItem.recipientAddress || "None",
-        customKey: valueItem.recipientCustomKey || "None",
-        customValue: valueItem.recipientCustomValue || "None",
-        split: valueItem.recipientSplit || "None",
+        recipient: valueItem.Name || "None",
+        valueType: valueItem.Type || "None",
+        address: valueItem.Address || "None",
+        customKey: valueItem.CustomKey || "None",
+        customValue: valueItem.CustomValue || "None",
+        split: valueItem.Split || "None",
       };
       valueObject.customRecord =
         valueObject.customKey && valueObject.customValue

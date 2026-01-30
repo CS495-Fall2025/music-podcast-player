@@ -1,4 +1,3 @@
-from marshmallow import ValidationError
 import requests
 
 from rss_music_backend.data import Rss
@@ -151,38 +150,27 @@ class LinkFunctions:
 
             valueType = ""
             valueMethod = ""
-            valueRecipientName = ""
-            valueRecipientType = ""
-            valueRecipientAddress = ""
-            valueRecipientCustomKey = ""
-            valueRecipientCustomValue = ""
-            valueRecipientSplit = ""
+            value_items = []
 
             if value_element is not None:
                 valueType = value_element.get("type", "").strip()
                 valueMethod = value_element.get("method", "").strip()
-                val_recipient = value_element.find(pc("valueRecipient"))
-                if val_recipient is not None:
-                    valueRecipientName = val_recipient.get("name", "").strip()
-                    valueRecipientType = val_recipient.get("type", "").strip()
-                    valueRecipientAddress = val_recipient.get("address", "").strip()
-                    valueRecipientCustomKey = val_recipient.get("customKey", "").strip()
-                    valueRecipientCustomValue = val_recipient.get("customValue", "").strip()
-                    valueRecipientSplit = val_recipient.get("split", "").strip()
+                val_recipient_tag = value_element.findall(pc("valueRecipient"))
+                if val_recipient_tag is not None:
+                    for val_recipient in val_recipient_tag:
+                        value_items.append({
+                            "type": valueType,
+                            "method": valueMethod,
+                            "Name": val_recipient.get("name", "").strip(),
+                            "Type": val_recipient.get("type", "").strip(),
+                            "Address": val_recipient.get("address", "").strip(),
+                            "CustomKey": val_recipient.get("customKey", "").strip(),
+                            "CustomValue": val_recipient.get("customValue", "").strip(),
+                            "Split": val_recipient.get("split", "").strip()
+                        })
             else:
                 valueType = ""
                 valueMethod = ""
-
-            value_items = [{
-                "type": valueType,
-                "method": valueMethod,
-                "recipientName": valueRecipientName,
-                "recipientType": valueRecipientType,
-                "recipientAddress": valueRecipientAddress,
-                "recipientCustomKey": valueRecipientCustomKey,
-                "recipientCustomValue": valueRecipientCustomValue,
-                "recipientSplit": valueRecipientSplit
-            }]
 
             if valueType != "lightning" or valueMethod != "keysend":
                 value_items=[{}]
