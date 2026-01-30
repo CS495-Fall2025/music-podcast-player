@@ -1,5 +1,6 @@
 import os
 
+import awsgi
 import boto3
 
 from rss_music_backend import create_app
@@ -19,7 +20,8 @@ def populate_secrets() -> None:
 
     for route_var, env_var in var_to_routes.items():
         route = os.environ[route_var]
-        value = ssm_client.get_parameter(Name=route, WithDecryption=True)
+        response = ssm_client.get_parameter(Name=route, WithDecryption=True)
+        value = response["Parameter"]["Value"]
         os.environ[env_var] = value
 
 
