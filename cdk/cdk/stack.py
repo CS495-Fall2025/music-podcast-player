@@ -5,10 +5,12 @@ from aws_cdk import (
     Duration,
     Stack,
     RemovalPolicy,
+    aws_apigateway as apigw,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
     aws_kms as kms,
     aws_lambda as _lambda,
+    aws_logs as logs,
     aws_ssm as ssm,
     aws_s3 as s3
 )
@@ -28,6 +30,8 @@ class RSSMusicPlayerStack(Stack):
         backend_function = self._make_backend_function(
             frontend_distribution.domain_name
         )
+
+        backend_rest_api = self._make_rest_api(backend_function)
 
     def _make_frontend_bucket(self) -> s3.Bucket:
         bucket = s3.Bucket(
@@ -137,7 +141,30 @@ class RSSMusicPlayerStack(Stack):
                 "SSM_ROUTE_DATABASE_CONNECTION":
                     "/rss-music-player/database/connection-url",
             },
+            log_retention=logs.RetentionDays.ONE_WEEK,
         )
 
         for secret in backend_secrets:
             secret.grant_read(function)
+
+        return function
+
+    def _make_rest_api(self, function: _lambda.Function) -> apigw.LambdaRestApi:
+        options = apigw.StageOptions(
+            logging_level=apigw.MethodLoggingLevel.INFO,
+        )
+
+        api = apigw.LambdaRestApi(
+            self,
+            "RSSMusicPlayerBackendRestApi",
+            handler=function,
+            proxy=True,
+        )
+
+        CfnOutput(
+            self,
+            "RSSMusicPlayerBackendURL",
+            value=api.url,
+        )
+
+        return api
