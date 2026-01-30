@@ -1,5 +1,4 @@
 import { ref, computed } from "vue";
-import { jwtDecode } from "jwt-decode";
 
 // Track authentication state without storing the token
 // The token is in an httpOnly cookie, inaccessible to JavaScript

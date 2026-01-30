@@ -39,7 +39,9 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = os.getenv("RSS_PLAYER_DATABASE_CONNECTION", config.get_main_option("sqlalchemy.url"))
+    url = os.getenv(
+        "RSS_PLAYER_DATABASE_CONNECTION", config.get_main_option("sqlalchemy.url")
+    )
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -59,7 +61,7 @@ def run_migrations_online() -> None:
 
     """
     database_url = os.getenv("RSS_PLAYER_DATABASE_CONNECTION")
-    
+
     if database_url:
         connectable = engine_from_config(
             {"sqlalchemy.url": database_url},

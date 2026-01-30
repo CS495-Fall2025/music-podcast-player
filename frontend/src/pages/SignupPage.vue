@@ -16,7 +16,7 @@ const passwordRequirements = {
   hasLetter: (password) => /[a-zA-Z]/.test(password),
   hasDigit: (password) => /\d/.test(password),
   hasSpecial: (password) =>
-    /[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]/.test(password),
+    /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password),
 };
 
 const isPasswordValid = () => {

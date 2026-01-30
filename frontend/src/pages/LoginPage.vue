@@ -81,8 +81,6 @@ const handleLogin = async (e) => {
       throw new Error(data.error || "Login failed");
     }
 
-    const data = await response.json();
-
     // Authentication successful - cookies are set by backend
     sessionStorage.removeItem("pkce_verifier");
 

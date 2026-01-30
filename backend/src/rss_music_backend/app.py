@@ -18,7 +18,7 @@ def create_app() -> Flask:
 
     secret_key = os.getenv("RSS_PLAYER_SECRET_KEY", "dev-secret-key")
     is_production = os.getenv("RSS_PLAYER_ENVIRONMENT", "dev") == "production"
-    
+
     app.config["SECRET_KEY"] = secret_key
     app.config["SESSION_COOKIE_SECURE"] = is_production
     app.config["SESSION_COOKIE_HTTPONLY"] = True
