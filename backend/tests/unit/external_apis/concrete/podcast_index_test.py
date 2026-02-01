@@ -53,7 +53,10 @@ def test_secret_not_in_headers() -> None:
 def test_search_feed_request_http_method() -> None:
     expected = "GET"
 
-    request, context = PodcastIndexAPI._make_search_request("query", 10, 5)
+    auth_headers = {key: "XXX-TEST-XXX" for key in AUTHENTICATION_HEADERS}
+    request, context = PodcastIndexAPI._make_search_request(
+        "query", 10, 5, auth_headers
+    )
 
     assert expected == request.method
 
@@ -63,13 +66,19 @@ def test_search_feed_request_url_correct() -> None:
         "https://api.podcastindex.org/api/1.0/search/music/byterm?q=query&max=15"
     )
 
-    request, context = PodcastIndexAPI._make_search_request("query", 10, 5)
+    auth_headers = {key: "XXX-TEST-XXX" for key in AUTHENTICATION_HEADERS}
+    request, context = PodcastIndexAPI._make_search_request(
+        "query", 10, 5, auth_headers
+    )
 
     assert expected_url == request.url
 
 
 def test_search_feed_request_includes_auth_headers() -> None:
-    request, context = PodcastIndexAPI._make_search_request("query", 10, 5)
+    auth_headers = {key: "XXX-TEST-XXX" for key in AUTHENTICATION_HEADERS}
+    request, context = PodcastIndexAPI._make_search_request(
+        "query", 10, 5, auth_headers
+    )
 
     for header in AUTHENTICATION_HEADERS:
         assert header in request.headers, (
@@ -78,7 +87,10 @@ def test_search_feed_request_includes_auth_headers() -> None:
 
 
 def test_search_feed_context_matches_paging_args() -> None:
-    request, context = PodcastIndexAPI._make_search_request("query", 8, 12)
+    auth_headers = {key: "XXX-TEST-XXX" for key in AUTHENTICATION_HEADERS}
+    request, context = PodcastIndexAPI._make_search_request(
+        "query", 8, 12, auth_headers
+    )
 
     assert "start" in context
     assert "count" in context
