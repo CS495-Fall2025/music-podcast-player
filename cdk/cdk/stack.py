@@ -28,13 +28,18 @@ class RSSMusicPlayerStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        database = self._make_database()
+        # Things in this VPC can reach the database, but not the outside internet.
+        database_vpc = ec2.Vpc(self, "RSSMusicPlayerDatabaseVpc", max_azs=3)
+        database = self._make_database(database_vpc)
         
         frontend_bucket = self._make_frontend_bucket()
         frontend_distribution = self._make_frontend_distribution(frontend_bucket)
 
+        # For when we split the backend.
+        #database_function = self._make_database_function(
+        #    database, database_vpc
+        #)
         backend_function = self._make_backend_function(
-            database,
             frontend_distribution.domain_name
         )
 
@@ -110,8 +115,33 @@ class RSSMusicPlayerStack(Stack):
         )
 
         return distribution
+    
+    def _make_database_function(self, database, database_vpc) -> _lambda.Function:
+        function = _lambda.Function(
+            self,
+            "RSSMusicPlayerBackendDatabaseFunction",
+            #code=_lambda.Code.from_asset(),
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            #handler="lambda_handler.handler",
+            memory_size=256,
+            architecture=_lambda.Architecture.ARM_64,
+            environment={
+                "DATABASE_CONNECTION_PARTIAL":
+                    "postgresql://{user}:{password}@"
+                    f"{database.db_instance_endpoint_address}:"
+                    f"{database.db_instance_endpoint_port}",
+                "DATABASE_SECRET_ARN":
+                    database.secret.secret_arn,
+            },
+            vpc=database_vpc,
+            timeout=Duration.seconds(3)
+        )
 
-    def _make_backend_function(self, database, frontend_domain) -> _lambda.Function:
+        database.secret.grant_read(function)
+
+        return function
+
+    def _make_backend_function(self, frontend_domain) -> _lambda.Function:
         # These are REFERENCES to keys that MUST be created manually. AWS doesn't
         # support creating SecureString parameters through the CDK, and we'd need to set
         # the values manually anyways.
@@ -130,7 +160,7 @@ class RSSMusicPlayerStack(Stack):
 
         function = _lambda.Function(
             self,
-            "RSSMusicPlayerBackendFunction",
+            "RSSMusicPlayerBackendInternetFunction",
             code=_lambda.Code.from_asset(str(BACKEND_BUILD)),
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="lambda_handler.handler",
@@ -138,23 +168,16 @@ class RSSMusicPlayerStack(Stack):
             architecture=_lambda.Architecture.ARM_64,
             environment={
                 "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{frontend_domain}",
-                "PODCAST_INDEX_KEY_ARN":
+                "PODCAST_INDEX_KEY_ROUTE":
                     "/rss-music-player/podcast-index-api/key",
-                "PODCAST_INDEX_SECRET_ARN":
+                "PODCAST_INDEX_SECRET_ROUTE":
                     "/rss-music-player/podcast-index-api/secret",
-                "DATABASE_CONNECTION_PARTIAL":
-                    "postgresql://{user}:{password}@"
-                    f"{database.db_instance_endpoint_address}:"
-                    f"{database.db_instance_endpoint_port}",
-                "DATABASE_SECRET_ARN":
-                    database.secret.secret_arn,
             },
+            timeout=Duration.seconds(3)
         )
 
         for secret in backend_secrets:
             secret.grant_read(function)
-
-        database.secret.grant_read(function)
 
         return function
 
@@ -196,13 +219,10 @@ class RSSMusicPlayerStack(Stack):
 
         return deployment
 
-    def _make_database(self) -> rds.DatabaseInstance:
-        #vpc = ec2.Vpc.from_lookup(self, "DefaultVPC", is_default=True)
-        vpc = ec2.Vpc(self, "RSSMusicPlayerDatabaseVpc", max_azs=3)
+    def _make_database(self, database_vpc: ec2.Vpc) -> rds.DatabaseInstance:
         security_group = ec2.SecurityGroup.from_security_group_id(
-            self, "DefaultSG", vpc.vpc_default_security_group
+            self, "DefaultSG", database_vpc.vpc_default_security_group
         )
-
 
         database = rds.DatabaseInstance(
             self,
@@ -213,7 +233,7 @@ class RSSMusicPlayerStack(Stack):
             instance_type=ec2.InstanceType.of(
                 ec2.InstanceClass.BURSTABLE4_GRAVITON, ec2.InstanceSize.MICRO,
             ),
-            vpc=vpc,
+            vpc=database_vpc,
             vpc_subnets=ec2.SubnetSelection(
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
@@ -230,6 +250,10 @@ class RSSMusicPlayerStack(Stack):
         database.connections.allow_default_port_from_any_ipv4(
             description="Necessary to allow backend to connect"
         )
+        
+        database.add_rotation_single_user(
+            automatically_after=Duration.days(30)
+        )
 
         CfnOutput(
             self,
@@ -239,5 +263,6 @@ class RSSMusicPlayerStack(Stack):
                 f"{database.db_instance_endpoint_port}"
             )
         )
+        
 
         return database

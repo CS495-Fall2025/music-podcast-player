@@ -21,9 +21,15 @@ RUN pip3 install ./src -t ./
 
 COPY ./lambda_handler.py ./
 
+# Package dynamic libraries used by some packages.
+COPY copy_lib_requirements.py ./
+RUN mkdir lib
+RUN python3 copy_lib_requirements.py
+
 # Remove unneeded files
 RUN rm -rf ./src
 RUN rm -rf ./bin
 RUN find . -name "__pycache__" -type d -exec rm -rf {} +
+RUN rm copy_lib_requirements.py
 
 CMD ["zip", "/mnt/result/backend_build.zip", "-r", "."]
