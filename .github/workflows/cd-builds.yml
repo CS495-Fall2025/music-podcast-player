@@ -1,8 +1,13 @@
 name: Continuous Deployment Builds
 
-on:
-  workflow_dispatch:
+#on:
 #  workflow_call:
+
+# Temporary until I've finished testing the actions.
+on:
+  pull_request:
+    branches:
+      - dev
 
 jobs:
   build-frontend:
@@ -26,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/build-backend
+      - run: ls -la /github/workspace #./.github/actions/build-backend
       - uses: actions/upload-artifact@3
         with:
           name: backend-build
