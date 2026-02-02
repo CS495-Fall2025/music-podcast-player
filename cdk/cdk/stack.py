@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import json
 
@@ -20,8 +21,8 @@ from constructs import Construct
 
 BACKEND_PATH = Path(__file__).parent.parent.parent / "backend"
 FRONTEND_PATH = Path(__file__).parent.parent.parent / "frontend"
-BACKEND_BUILD = BACKEND_PATH / "lambda_build/backend_build.zip"
-FRONTEND_BUILD = FRONTEND_PATH / "dist"
+BACKEND_BUILD = os.environ.get("BACKEND_BUILD_PATH", str(BACKEND_PATH / "lambda_build/backend_build.zip"))
+FRONTEND_BUILD = os.environ.get("FRONTEND_BUILD_PATH", str(FRONTEND_PATH / "dist"))
 
 
 class RSSMusicPlayerStack(Stack):
