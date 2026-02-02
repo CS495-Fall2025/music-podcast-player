@@ -1,0 +1,33 @@
+name: Continuous Deployment Builds
+
+on:
+  workflow_call:
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    container:
+      image: node:24-alpine
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          node-version: 24
+      - run: npm install
+      - run: npm run build
+      - uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/dist
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/build-backend
+      - uses: actions/upload-artifact@3
+        with:
+          name: backend-build
+          path: build/backend-build.zip
+
