@@ -23,7 +23,7 @@ jobs:
           node-version: 24
       - run: npm install
       - run: npm run build
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: frontend-build
           path: frontend/dist
@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: ls -la /github/workspace #./.github/actions/build-backend
-      - uses: actions/upload-artifact@3
+      - uses: actions/upload-artifact@v4
         with:
           name: backend-build
           path: build/backend-build.zip
