@@ -1,4 +1,3 @@
-import json
 import os
 from pathlib import Path
 
@@ -35,9 +34,9 @@ def populate_secrets() -> None:
 
 # Move this to the database backend when we have it. This function (the internet
 # backend function) will not have access to this.
-#def get_rotated_secrets() -> None:
+# def get_rotated_secrets() -> None:
 #    secrets_client = boto3.client("secretsmanager")
-#    
+#
 #    connection_url = os.environ["DATABASE_CONNECTION_PARTIAL"]
 #
 #    db_credentials = json.loads(
@@ -62,11 +61,11 @@ app = create_app()
 
 
 # This is a short term solution! Most REST APIs for Lambda run on either AWS Lambda
-# Powertools, and awsgi hasn't been maintained in years. However, to avoid a merge 
+# Powertools, and awsgi hasn't been maintained in years. However, to avoid a merge
 # conflict and refactor, I'm using this for now.
 def handler(event, context):
     # For the database backend when it exists.
-    #secrets = get_rotated_secrets()
-    #app.config.update(secrets)
+    # secrets = get_rotated_secrets()
+    # app.config.update(secrets)
 
     return awsgi.response(app, event, context)

@@ -37,7 +37,7 @@ def get_dependencies() -> list[str]:
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
         )
 
         for dependency in result.stdout.strip().splitlines():
