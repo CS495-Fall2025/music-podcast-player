@@ -14,11 +14,13 @@ jobs:
       run:
         working-directory: backend
     env:
-      ALLOWED_ORIGINS: http://localhost:5173
-      PODCAST_INDEX_KEY: fake_key
-      PODCAST_INDEX_SECRET: fake_secret
+      RSS_PLAYER_ALLOWED_ORIGINS: http://localhost:5173
+      RSS_PLAYER_PODCAST_INDEX_KEY: fake_key
+      RSS_PLAYER_PODCAST_INDEX_SECRET: fake_secret
+      RSS_PLAYER_DATABASE_CONNECTION: 'sqlite:///:memory:'
     steps:
       - uses: actions/checkout@v3
+      - run: apk add postgresql-dev gcc python3-dev musl-dev
       - run: pip install --root-user-action ignore -r dev-requirements.txt
       - run: pip install --root-user-action ignore -e .
       - run: python -m pytest

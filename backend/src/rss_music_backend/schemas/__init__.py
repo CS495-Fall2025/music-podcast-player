@@ -5,6 +5,7 @@ from rss_music_backend.schemas.requests.search_feeds_request import (
 from rss_music_backend.schemas.responses.search_feeds_response import (
     SearchFeedsResponseSchema,
 )
+from rss_music_backend.schemas.requests.signup_request import SignUpRequestSchema
 
 from rss_music_backend.schemas.requests.link_feed_request import (
     LinkFeedRequestSchema,
@@ -15,4 +16,5 @@ __all__ = [
     "SearchFeedsResponseSchema",
     "SearchFeedsRequestSchema",
     "LinkFeedRequestSchema",
+    "SignUpRequestSchema",
 ]
