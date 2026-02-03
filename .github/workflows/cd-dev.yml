@@ -1,6 +1,6 @@
-name: Development Continuous Deployment Checks
-description: Shows how the changes in a PR would affect the current deployment.
+name: Continuous Deployment - Development
 
+# Temporary, just to confirm this action works.
 on:
   pull_request:
     branches:
@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/cd-builds.yml
-  check-dev-stack-diff:
+  deploy-dev-stack:
     runs-on: ubuntu-latest
     environment: development
     permissions:
@@ -40,6 +40,6 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - uses: aws-actions/configure-aws-credentials@v5
         with:
-          role-to-assume: ${{ vars.AWS_FETCH_ROLE }}
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE }}
           aws-region: ${{ vars.AWS_REGION }}
-      - run: cdk diff
+      - run: cdk deploy
