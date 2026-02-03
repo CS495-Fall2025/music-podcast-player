@@ -1,6 +1,4 @@
 from unittest import mock
-
-import pytest
 from requests import exceptions, PreparedRequest, Response
 
 from tests.integration.api_mocks import podcastindex_mock
