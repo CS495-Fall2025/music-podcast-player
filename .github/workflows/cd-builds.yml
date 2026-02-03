@@ -1,13 +1,7 @@
 name: Continuous Deployment Builds
 
-#on:
-#  workflow_call:
-
-# Temporary until I've finished testing the actions.
 on:
-  pull_request:
-    branches:
-      - dev
+  workflow_call:
 
 jobs:
   build-frontend:
