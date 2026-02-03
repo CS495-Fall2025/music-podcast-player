@@ -395,4 +395,3 @@ def test_auth_get_stores_challenge_in_session(client) -> None:
     # Store challenge
     response = client.get(f"/auth/?code_challenge={challenge}")
     assert response.status_code == 200
-

@@ -12,7 +12,7 @@ COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
 # Copy in the src directory and pyproject.toml
-COPY src ./
+COPY src ./src
 COPY pyproject.toml ./
 
 # Install the backend as a package

@@ -14,7 +14,7 @@ COPY migrations ./migrations
 COPY alembic.ini ./
 
 # Copy the backend package for database models
-COPY src ./
+COPY src ./src
 COPY pyproject.toml ./
 RUN pip3 install .
 
