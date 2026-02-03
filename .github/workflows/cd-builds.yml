@@ -33,7 +33,7 @@ jobs:
           file: backend/Dockerfile.lambda
           cache-from: type=gha
           cache-to: type=gha
-          platforms: linux/amd64
+          platforms: linux/arm64
           tags: backend-build:latest
           load: true
       - run: docker run --rm -v build/ --platform linux/arm64 backend-build:latest
