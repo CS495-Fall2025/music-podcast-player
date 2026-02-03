@@ -2,11 +2,11 @@ import loadConfig from "./config.js";
 import { searchedFeeds } from "./localFeedStore.js";
 
 export async function requestFeeds(query) {
-	const config = await loadConfig();
+  const config = await loadConfig();
 
   fetch(
-    `${config.backendUrl}/search/feeds?`
-		+ `query=${encodeURIComponent(query)}&count=50`,
+    `${config.backendUrl}/search/feeds?` +
+      `query=${encodeURIComponent(query)}&count=50`,
   )
     .then((response) => {
       if (!response.ok) {
