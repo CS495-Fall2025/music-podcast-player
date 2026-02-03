@@ -36,9 +36,9 @@ jobs:
           platforms: linux/arm64
           tags: backend-build:latest
           load: true
-      - run: docker run --rm -v build:/mnt/result --platform linux/arm64 backend-build:latest
+      - run: docker run --rm -v ${{ github.workspace }}/build:/mnt/result --platform linux/arm64 backend-build:latest
       - uses: actions/upload-artifact@v4
         with:
           name: backend-build
-          path: build/backend_build.zip
+          path: ${{ github.workspace }}/build/backend_build.zip
 

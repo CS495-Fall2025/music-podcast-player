@@ -19,8 +19,8 @@ jobs:
       run:
         working-directory: cdk
     env:
-      FRONTEND_BUILD_PATH: "$GITHUB_WORKSPACE/builds/dist"
-      BACKEND_BUILD_PATH: "$GITHUB_WORKSPACE/builds/backend_build.zip"
+      FRONTEND_BUILD_PATH: "${{ github.workspace }}/builds/dist"
+      BACKEND_BUILD_PATH: "${{ github.workspace }}/builds/backend_build.zip"
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v5
