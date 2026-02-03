@@ -1,7 +1,3 @@
-from unittest import mock
-from requests import exceptions, PreparedRequest, Response
-
-from tests.integration.api_mocks import podcastindex_mock
 import urllib
 
 ENDPOINT_URL = "/link/feed"
