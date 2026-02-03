@@ -6,14 +6,15 @@ on:
     branches:
       - dev
 
-permissions:
-  id-token: write
 jobs:
   build:
     uses: ./.github/workflows/cd-builds.yml
   check-dev-stack-diff:
     runs-on: ubuntu-latest
     environment: development
+    permissions:
+      contents: read
+      id-token: write
     needs: build
     container:
       image: python:3.13-alpine
