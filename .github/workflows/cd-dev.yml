@@ -1,8 +1,7 @@
 name: Continuous Deployment - Development
 
-# Temporary, just to confirm this action works.
 on:
-  pull_request:
+  push:
     branches:
       - dev
 
