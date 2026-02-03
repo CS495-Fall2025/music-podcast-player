@@ -28,7 +28,7 @@ _ERROR_RESPONSE_VALUES = {
     },
     RequestError.VALUE_NOT_UNIQUE: {
         "error": "ValueNotUnique",
-        "message": ("The value you provided was not unique when it was required to be"),
+        "message": "This {field} is already in use",
         "field": "unknown",
         "code": 403,
     },
@@ -38,10 +38,16 @@ _ERROR_RESPONSE_VALUES = {
 def get_error_response(
     error: RequestError, modified_args: dict | None = None
 ) -> tuple[dict[str, str], int]:
-    json_response = _ERROR_RESPONSE_VALUES[error]
+    json_response = _ERROR_RESPONSE_VALUES[error].copy()
 
     if modified_args is not None:
         for key, value in modified_args.items():
             json_response[key] = value
 
-    return json_response, json_response["code"]
+        if "field" in json_response and "{field}" in json_response["message"]:
+            json_response["message"] = json_response["message"].replace(
+                "{field}", json_response["field"]
+            )
+
+    status_code = json_response["code"]
+    return json_response, status_code

@@ -33,9 +33,9 @@ export default function useNavbar() {
     window.location.href = "/signup";
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     dropdownOpen.value = false;
-    logout();
+    await logout();
     window.location.reload();
   };
 

@@ -14,6 +14,10 @@ class InvalidTokenError(Exception):
     pass
 
 
+class UserNotFoundError(Exception):
+    pass
+
+
 def verify_password(stored_salt_and_hash: bytes, provided_password: str) -> bool:
     """
     Verify a password against stored salt + hash.
@@ -125,6 +129,6 @@ def verify_jwt(token: str, secret_key: str, expected_type: str = "access") -> di
     with make_session() as session:
         user = session.query(User).filter(User.id == user_id).first()
         if not user:
-            raise InvalidTokenError("User no longer exists")
+            raise UserNotFoundError("User no longer exists")
 
     return payload

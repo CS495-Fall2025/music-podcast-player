@@ -56,7 +56,7 @@ def test_short_username_returns_invalid_argument(client) -> None:
         json={
             "username": "a" * 3,
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd",
+            "password": "Password123!",
         },
     )
 
@@ -74,7 +74,7 @@ def test_long_username_returns_invalid_argument(client) -> None:
         json={
             "username": "a" * 31,
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd",
+            "password": "Password123!",
         },
     )
 
@@ -93,7 +93,7 @@ def test_outer_underscore_username_returns_invalid_argument(client) -> None:
         json={
             "username": "_admin",
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd",
+            "password": "Password123!",
         },
     )
 
@@ -112,7 +112,7 @@ def test_illegal_characters_username_returns_invalid_argument(client) -> None:
         json={
             "username": "<user>",
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd",
+            "password": "Password123!",
         },
     )
 
@@ -131,7 +131,7 @@ def test_invalid_email_returns_invalid_argument(client) -> None:
         json={
             "username": "t3st_user57",
             "email": "domain.com",
-            "password": "T3stP@ssw0rd",
+            "password": "Password123!",
         },
     )
 
@@ -215,7 +215,7 @@ def test_successful_signup(client, db_session) -> None:
         json={
             "username": "t3st_user57",
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd",
+            "password": "Password123!",
         },
     )
 
@@ -237,7 +237,7 @@ def test_duplicate_username_returns_error(client, db_session) -> None:
         json={
             "username": "t3st_user57",
             "email": "otheruser@domain.com",
-            "password": "P@ssw0rdT3st",
+            "password": "OtherPassword123!",
         },
     )
     response = client.post(
@@ -245,7 +245,7 @@ def test_duplicate_username_returns_error(client, db_session) -> None:
         json={
             "username": "t3st_user57",
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd",
+            "password": "Password123!",
         },
     )
 
@@ -259,6 +259,7 @@ def test_duplicate_username_returns_error(client, db_session) -> None:
 
     assert 403 == data["code"]
     assert "username" == data["field"]
+    assert "This username is already in use" == data["message"]
 
 
 def test_duplicate_email_returns_error(client, db_session) -> None:
@@ -267,7 +268,7 @@ def test_duplicate_email_returns_error(client, db_session) -> None:
         json={
             "username": "0ther_t3st_user57",
             "email": "user@domain.com",
-            "password": "P@ssw0rdT3st",
+            "password": "OtherPassword123!",
         },
     )
     response = client.post(
@@ -275,7 +276,7 @@ def test_duplicate_email_returns_error(client, db_session) -> None:
         json={
             "username": "t3st_user57",
             "email": "user@domain.com",
-            "password": "T3stP@ssw0rd",
+            "password": "Password123!",
         },
     )
 
@@ -289,3 +290,4 @@ def test_duplicate_email_returns_error(client, db_session) -> None:
 
     assert 403 == data["code"]
     assert "email" == data["field"]
+    assert "This email is already in use" == data["message"]

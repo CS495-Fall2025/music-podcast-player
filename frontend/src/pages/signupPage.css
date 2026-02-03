@@ -5,6 +5,7 @@
   min-height: 100vh;
   background: linear-gradient(135deg, var(--dark-navy) 0%, #131d28 100%);
   padding: var(--spacing-md);
+  overflow-y: auto;
 }
 
 .signup-card {
@@ -14,6 +15,7 @@
   box-shadow: var(--shadow-md);
   width: 100%;
   max-width: 450px;
+  margin: auto;
 }
 
 .signup-card h1 {

@@ -82,17 +82,24 @@ const handleSignup = async (e) => {
 
     if (!response.ok) {
       const data = await response.json();
-      if (data.error) {
-        if (data.error.field === "username") {
+
+      // Set error message based on error type
+      if (data.error === "ValueNotUnique") {
+        if (data.field === "username") {
           error.value = "Username already taken";
-        } else if (data.error.field === "email") {
+        } else if (data.field === "email") {
           error.value = "Email already registered";
         } else {
-          error.value = data.error.message || "Signup failed";
+          error.value = "Value already exists";
         }
+      } else if (data.error === "InvalidArgument") {
+        error.value = "Invalid input. Please check your entries.";
+      } else if (data.message) {
+        error.value = data.message;
       } else {
         error.value = "Signup failed. Please try again.";
       }
+
       return;
     }
 

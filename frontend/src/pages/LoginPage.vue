@@ -78,7 +78,8 @@ const handleLogin = async (e) => {
 
     if (!response.ok) {
       const data = await response.json();
-      throw new Error(data.error || "Login failed");
+      const errorMessage = data.message || "Login failed";
+      throw new Error(errorMessage);
     }
 
     // Authentication successful - cookies are set by backend
@@ -87,8 +88,7 @@ const handleLogin = async (e) => {
     // Verify authentication and load user data
     await completeLogin();
 
-    // Short delay to ensure state is updated
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // Redirect to home page
     router.push("/");
   } catch (err) {
     console.error("Login error:", err);

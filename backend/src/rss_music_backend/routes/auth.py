@@ -1,8 +1,9 @@
-from flask import Blueprint, request, session
+import flask
+from flask import Blueprint, request, session, current_app
 from marshmallow import ValidationError
-import os
 
 from rss_music_backend.auth import errors, signup, login, pkce
+from rss_music_backend.database import make_session
 from rss_music_backend.errors import RequestError, get_error_response
 from rss_music_backend.schemas import SignUpRequestSchema
 
@@ -47,7 +48,11 @@ def get_auth() -> dict:
     code_challenge = request.args.get("code_challenge")
 
     if not code_challenge:
-        return {"error": "Missing code_challenge parameter"}, 400
+        return {
+            "code": 400,
+            "error": "MissingParameter",
+            "message": "Missing code_challenge parameter",
+        }, 400
 
     # Store challenge in session for later verification
     session["code_challenge"] = code_challenge
@@ -67,42 +72,52 @@ def post_login() -> tuple:
         data = request.get_json(silent=True)
 
         if data is None:
-            return get_error_response(RequestError.INVALID_FORMAT), 400
+            return get_error_response(RequestError.INVALID_FORMAT)
 
         username = data.get("username")
         password = data.get("password")
         code_verifier = data.get("code_verifier")
 
         if not username or not password or not code_verifier:
-            return get_error_response(RequestError.INVALID_ARGUMENT), 400
+            return get_error_response(RequestError.INVALID_ARGUMENT)
 
     except Exception:
-        return get_error_response(RequestError.INVALID_FORMAT), 400
+        return get_error_response(RequestError.INVALID_FORMAT)
 
     # Verify PKCE challenge
     stored_challenge = session.get("code_challenge")
     if not stored_challenge:
-        return {"error": "Invalid session: no PKCE challenge found"}, 400
+        return {
+            "code": 400,
+            "error": "InvalidSession",
+            "message": "Invalid session: no PKCE challenge found",
+        }, 400
 
     if not pkce.verify_code_challenge(code_verifier, stored_challenge):
-        return {"error": "Invalid PKCE verifier"}, 401
+        return {
+            "code": 401,
+            "error": "InvalidPKCE",
+            "message": "Invalid PKCE verifier",
+        }, 401
 
     try:
         user = login.authenticate_user(username, password)
     except login.InvalidCredentialsError:
-        return {"error": "Invalid credentials"}, 401
+        return {
+            "code": 401,
+            "error": "InvalidCredentials",
+            "message": "Invalid credentials",
+        }, 401
 
-    secret_key = os.getenv("RSS_PLAYER_SECRET_KEY", "dev-secret-key")
+    secret_key = current_app.config.get("SECRET_KEY", "dev-secret-key")
     tokens = login.generate_tokens(user, secret_key)
 
     session.pop("code_challenge", None)
     session.pop("code_verifier_expected", None)
 
-    from flask import make_response
+    is_production = current_app.config.get("SESSION_COOKIE_SECURE", False)
 
-    is_production = os.getenv("RSS_PLAYER_ENVIRONMENT", "dev") == "production"
-
-    response = make_response({"success": True}, 200)
+    response = flask.make_response({"success": True}, 200)
 
     response.set_cookie(
         "access_token",
@@ -134,22 +149,51 @@ def post_verify() -> tuple:
     token = request.cookies.get("access_token")
 
     if not token:
-        return {"valid": False, "error": "No token found"}, 401
+        return {
+            "valid": False,
+            "code": 401,
+            "error": "MissingToken",
+            "message": "No token found",
+        }, 401
 
-    secret_key = os.getenv("RSS_PLAYER_SECRET_KEY", "dev-secret-key")
+    secret_key = current_app.config.get("SECRET_KEY", "dev-secret-key")
 
     try:
         payload = login.verify_jwt(token, secret_key, expected_type="access")
+        user_id = payload.get("sub")
+
+        # Verify user still exists in database
+        with make_session() as db_session:
+            user = db_session.query(login.User).filter(login.User.id == user_id).first()
+            if not user:
+                return {
+                    "valid": False,
+                    "code": 401,
+                    "error": "UserNotFound",
+                    "message": "User not found",
+                }, 401
+
+        user_info = {
+            "id": payload.get("sub"),
+            "username": payload.get("name"),
+            "email": payload.get("email"),
+        }
+
+        return {"valid": True, "user": user_info}, 200
+    except login.UserNotFoundError as e:
         return {
-            "valid": True,
-            "user": {
-                "id": payload.get("sub"),
-                "username": payload.get("name"),
-                "email": payload.get("email"),
-            },
-        }, 200
+            "valid": False,
+            "code": 401,
+            "error": "UserNotFound",
+            "message": str(e),
+        }, 401
     except login.InvalidTokenError as e:
-        return {"valid": False, "error": str(e)}, 401
+        return {
+            "valid": False,
+            "code": 401,
+            "error": "InvalidToken",
+            "message": str(e),
+        }, 401
 
 
 @AUTH_BP.post("/refresh")
@@ -161,43 +205,49 @@ def post_refresh() -> tuple:
     refresh_token = request.cookies.get("refresh_token")
 
     if not refresh_token:
-        return {"error": "No refresh token found"}, 401
+        return {
+            "code": 401,
+            "error": "MissingToken",
+            "message": "No refresh token found",
+        }, 401
 
-    secret_key = os.getenv("RSS_PLAYER_SECRET_KEY", "dev-secret-key")
+    secret_key = current_app.config.get("SECRET_KEY", "dev-secret-key")
 
     try:
         payload = login.verify_jwt(refresh_token, secret_key, expected_type="refresh")
-        user_id = payload.get("sub")
-
-        from rss_music_backend.database import make_session
-
-        with make_session() as db_session:
-            user = db_session.query(login.User).filter(login.User.id == user_id).first()
-            if not user:
-                return {"error": "User not found"}, 401
-
-            new_access_token = login.generate_jwt(
-                user, secret_key, expires_in_hours=1, token_type="access"
-            )
-
-            from flask import make_response
-
-            is_production = os.getenv("RSS_PLAYER_ENVIRONMENT", "dev") == "production"
-
-            response = make_response({"success": True}, 200)
-            response.set_cookie(
-                "access_token",
-                new_access_token,
-                httponly=True,
-                secure=is_production,
-                samesite="Lax",
-                max_age=3600,
-            )
-
-            return response
-
+    except login.UserNotFoundError:
+        return {"code": 401, "error": "UserNotFound", "message": "User not found"}, 401
     except login.InvalidTokenError as e:
-        return {"error": str(e)}, 401
+        return {"code": 401, "error": "InvalidToken", "message": str(e)}, 401
+
+    user_id = payload.get("sub")
+
+    with make_session() as db_session:
+        user = db_session.query(login.User).filter(login.User.id == user_id).first()
+        if not user:
+            return {
+                "code": 401,
+                "error": "UserNotFound",
+                "message": "User not found",
+            }, 401
+
+        new_access_token = login.generate_jwt(
+            user, secret_key, expires_in_hours=1, token_type="access"
+        )
+
+        is_production = current_app.config.get("SESSION_COOKIE_SECURE", False)
+
+        response = flask.make_response({"success": True}, 200)
+        response.set_cookie(
+            "access_token",
+            new_access_token,
+            httponly=True,
+            secure=is_production,
+            samesite="Lax",
+            max_age=3600,
+        )
+
+        return response
 
 
 @AUTH_BP.post("/logout")
@@ -205,9 +255,7 @@ def post_logout() -> tuple:
     """
     Log out by clearing authentication cookies.
     """
-    from flask import make_response
-
-    response = make_response({"success": True}, 200)
+    response = flask.make_response({"success": True}, 200)
     response.set_cookie("access_token", "", httponly=True, max_age=0)
     response.set_cookie("refresh_token", "", httponly=True, max_age=0)
 
