@@ -10,11 +10,11 @@ jobs:
   build:
     uses: ./.github/workflows/cd-builds.yml
   check-dev-stack-diff:
-    runs-on: python:3.13-alpine
+    runs-on: ubuntu-latest
     environment: development
     needs: build
     container:
-      image: node:24-alpine
+      image: python:3.13-alpine
     defaults:
       run:
         working-directory: cdk
