@@ -19,10 +19,11 @@ class LinkFunctions:
 
     @classmethod
     def parse_link_feed_response(cls, response: requests.Response) -> Rss:
+        if len(response.content) > MAX_FEED_SIZE:
+            raise errors.ExternalAPIBadRequestError(
+                "The RSS Feed was too large in size to parse"
+            )
 
-        if(len(response.content) > MAX_FEED_SIZE):
-            raise errors.ExternalAPIBadRequestError("The RSS Feed was too large in size to parse")
-        
         if not response.status_code == 200:
             match response.status_code:
                 case 400:
@@ -33,7 +34,7 @@ class LinkFunctions:
                     raise errors.ExternalAPIBadAuthenticationError(
                         "Recieved 401: Bad Authentication from the Link Endpoint"
                     )
-                case 405: 
+                case 405:
                     raise errors.ExternalAPIBadRequestError(
                         "Recieved 405: Method Not Allowed"
                     )
@@ -47,18 +48,17 @@ class LinkFunctions:
 
         def it(tag: str) -> str:
             return f"{{{ITUNES_NS}}}{tag}"
-        
-        def pc(tag:str) -> str:
+
+        def pc(tag: str) -> str:
             return f"{{{PODCAST_NS}}}{tag}"
 
         try:
             root = ET.fromstring(response.content)
             if root is None:
-                raise errors.ExternalAPIInvalidResponseDataError(
-                    "Invalid XML"
-                )
+                raise errors.ExternalAPIInvalidResponseDataError("Invalid XML")
             podcast_check = any(
-                child.tag.startswith(f"{{{PODCAST_NS}}}") for child in root.iter())
+                child.tag.startswith(f"{{{PODCAST_NS}}}") for child in root.iter()
+            )
             if not podcast_check:
                 raise errors.ExternalAPIBadRequestError(
                     "Requested link is not of podcast type"
@@ -69,79 +69,79 @@ class LinkFunctions:
                     "RSS Feed response did not contain data"
                 )
 
-            if( channel.findtext(it("title"))):
+            if channel.findtext(it("title")):
                 title = channel.findtext(it("title")).strip()
-            elif( channel.findtext("title")):
+            elif channel.findtext("title"):
                 title = channel.findtext("title").strip()
-            elif( channel.findtext("itunes:title")):
+            elif channel.findtext("itunes:title"):
                 title = channel.findtext("itunes:title").strip()
-            elif( channel.findtext(pc("title"))):
+            elif channel.findtext(pc("title")):
                 title = channel.findtext(pc("title")).strip()
             else:
                 title = "Unknown"
-            
-            if( channel.findtext(it("description"))):
+
+            if channel.findtext(it("description")):
                 description = channel.findtext(it("description")).strip()
-            elif( channel.findtext("description")):
+            elif channel.findtext("description"):
                 description = channel.findtext("description").strip()
-            elif( channel.findtext("itunes:description")):
+            elif channel.findtext("itunes:description"):
                 description = channel.findtext("itunes:description").strip()
-            elif( channel.findtext(pc("description"))):
+            elif channel.findtext(pc("description")):
                 description = channel.findtext(pc("description")).strip()
             else:
                 description = "Unknown"
-            
-            if( channel.findtext(it("author"))):
+
+            if channel.findtext(it("author")):
                 author = channel.findtext(it("author")).strip()
-            elif( channel.findtext("author")):
+            elif channel.findtext("author"):
                 author = channel.findtext("author").strip()
-            elif( channel.findtext("itunes:author")):
+            elif channel.findtext("itunes:author"):
                 author = channel.findtext("itunes:author").strip()
-            elif( channel.findtext(pc("author"))):
+            elif channel.findtext(pc("author")):
                 author = channel.findtext(pc("author")).strip()
             else:
                 author = "Unknown"
-            
-            if( channel.findtext(it("link"))):
+
+            if channel.findtext(it("link")):
                 link = channel.findtext(it("link")).strip()
-            elif( channel.findtext("link")):
+            elif channel.findtext("link"):
                 link = channel.findtext("link").strip()
-            elif( channel.findtext("itunes:link")):
+            elif channel.findtext("itunes:link"):
                 link = channel.findtext("itunes:link").strip()
-            elif( channel.findtext(pc("link"))):
+            elif channel.findtext(pc("link")):
                 link = channel.findtext(pc("link")).strip()
             else:
                 link = response.url
-            
-            if( channel.findtext(it("language"))):
+
+            if channel.findtext(it("language")):
                 language = channel.findtext(it("language")).strip()
-            elif( channel.findtext("language")):
+            elif channel.findtext("language"):
                 language = channel.findtext("language").strip()
-            elif( channel.findtext("itunes:language")):
+            elif channel.findtext("itunes:language"):
                 language = channel.findtext("itunes:language").strip()
-            elif( channel.findtext(pc("language"))):
+            elif channel.findtext(pc("language")):
                 language = channel.findtext(pc("language")).strip()
             else:
                 language = "Unknown"
-            
-            if( channel.findtext(it("pubDate"))):
+
+            if channel.findtext(it("pubDate")):
                 pubDate = channel.findtext(it("pubDate")).strip()
-            elif( channel.findtext("pubDate")):
+            elif channel.findtext("pubDate"):
                 pubDate = channel.findtext("pubDate").strip()
-            elif( channel.findtext("itunes:pubDate")):
+            elif channel.findtext("itunes:pubDate"):
                 pubDate = channel.findtext("itunes:pubDate").strip()
-            elif(channel.findtext(pc("pubDate"))):
+            elif channel.findtext(pc("pubDate")):
                 pubDate = channel.findtext(pc("pubDate")).strip()
             else:
                 pubDate = "Unknown"
 
-            if( channel.findtext(it("lastBuildDate"))):
+            if channel.findtext(it("lastBuildDate")):
                 lastBuildDate = channel.findtext(it("lastBuildDate")).strip()
-            elif( channel.findtext("lastBuildDate")):
+            elif channel.findtext("lastBuildDate"):
                 lastBuildDate = channel.findtext("lastBuildDate").strip()
-            elif( channel.findtext("itunes:lastBuildDate")):
+            elif channel.findtext("itunes:lastBuildDate"):
                 lastBuildDate = channel.findtext("itunes:lastBuildDate").strip()
-            elif(channel.findtext(pc("lastBuildDate"))):
+            elif channel.findtext(pc("lastBuildDate")):
                 lastBuildDate = channel.findtext(pc("lastBuildDate")).strip()
             else:
                 lastBuildDate = "Unknown"
@@ -158,30 +158,33 @@ class LinkFunctions:
                 val_recipient_tag = value_element.findall(pc("valueRecipient"))
                 if val_recipient_tag is not None:
                     for val_recipient in val_recipient_tag:
-                        value_items.append({
-                            "type": valueType,
-                            "method": valueMethod,
-                            "Name": val_recipient.get("name", "").strip(),
-                            "Type": val_recipient.get("type", "").strip(),
-                            "Address": val_recipient.get("address", "").strip(),
-                            "CustomKey": val_recipient.get("customKey", "").strip(),
-                            "CustomValue": val_recipient.get("customValue", "").strip(),
-                            "Split": val_recipient.get("split", "").strip()
-                        })
+                        value_items.append(
+                            {
+                                "type": valueType,
+                                "method": valueMethod,
+                                "Name": val_recipient.get("name", "").strip(),
+                                "Type": val_recipient.get("type", "").strip(),
+                                "Address": val_recipient.get("address", "").strip(),
+                                "CustomKey": val_recipient.get("customKey", "").strip(),
+                                "CustomValue": val_recipient.get(
+                                    "customValue", ""
+                                ).strip(),
+                                "Split": val_recipient.get("split", "").strip(),
+                            }
+                        )
             else:
                 valueType = ""
                 valueMethod = ""
 
             if valueType != "lightning" or valueMethod != "keysend":
-                value_items=[{}]
-            
+                value_items = [{}]
 
             image = channel.find(it("image"))
             if image is not None:
                 art_url = image.get("href", "").strip()
             else:
                 art_url = ""
-                    
+
             feed_data = {
                 "url": link,
                 "title": title,
@@ -201,63 +204,67 @@ class LinkFunctions:
                 )
             parsed_items = []
             for item in items:
-                if(item.findtext("title")):
+                if item.findtext("title"):
                     title = item.findtext("title").strip()
-                elif(item.findtext(it("title"))):
+                elif item.findtext(it("title")):
                     title = item.findtext(it("title")).strip()
-                elif(item.findtext(pc("title"))):
+                elif item.findtext(pc("title")):
                     title = item.findtext(pc("title")).strip()
                 else:
                     title = "Unknown"
 
-                if(item.findtext("link")):
+                if item.findtext("link"):
                     link = item.findtext("link").strip()
-                elif(item.findtext(it("link"))):
+                elif item.findtext(it("link")):
                     link = item.findtext(it("link")).strip()
-                elif(item.findtext(pc("link"))):
+                elif item.findtext(pc("link")):
                     link = item.findtext(pc("link")).strip()
                 else:
                     link = ""
 
-                if(item.findtext("guid")):
+                if item.findtext("guid"):
                     guid = item.findtext("guid").strip()
-                elif(item.findtext(it("guid"))):
+                elif item.findtext(it("guid")):
                     guid = item.findtext(it("guid")).strip()
-                elif(item.findtext(pc("guid"))):
+                elif item.findtext(pc("guid")):
                     guid = item.findtext(pc("guid")).strip()
                 else:
                     guid = ""
 
-                if(item.findtext("description")):
+                if item.findtext("description"):
                     description = item.findtext("description").strip()
-                elif(item.findtext(it("description"))):
+                elif item.findtext(it("description")):
                     description = item.findtext(it("description")).strip()
-                elif(item.findtext(pc("description"))):
+                elif item.findtext(pc("description")):
                     description = item.findtext(pc("description")).strip()
                 else:
                     description = "Unknown"
 
-                if(item.findtext("pubDate")):
+                if item.findtext("pubDate"):
                     pubDate = item.findtext("pubDate").strip()
-                elif(item.findtext(it("pubDate"))):
+                elif item.findtext(it("pubDate")):
                     pubDate = item.findtext(it("pubDate")).strip()
-                elif(item.findtext(pc("pubDate"))):
+                elif item.findtext(pc("pubDate")):
                     pubDate = item.findtext(pc("pubDate")).strip()
                 else:
                     pubDate = "Unknown"
-                    
+
                 if item.find("enclosure") is not None:
                     enclosure_url = item.find("enclosure").attrib.get("url", "").strip()
                 else:
                     enclosure_url = ""
 
                 if item.find("enclosure") is not None:
-                    enclosure_length = item.find("enclosure").attrib.get("length", "").strip()
+                    enclosure_length = (
+                        item.find("enclosure").attrib.get("length", "").strip()
+                    )
                 else:
                     enclosure_length = ""
 
                 if item.find("enclosure") is not None:
-                    enclosure_type = item.find("enclosure").attrib.get("type", "").strip()
+                    enclosure_type = (
+                        item.find("enclosure").attrib.get("type", "").strip()
+                    )
                 else:
                     enclosure_type = ""
 
@@ -296,11 +303,11 @@ class LinkFunctions:
             pub_date=feed_data["pubDate"],
             last_build_date=feed_data["lastBuildDate"],
             items=parsed_items,
-            value_items=value_items
+            value_items=value_items,
         )
 
         return feed
-    
+
     @classmethod
     def get_feed_by_url(cls, url: str) -> Rss:
         headers = {

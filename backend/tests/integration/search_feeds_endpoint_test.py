@@ -8,6 +8,7 @@ from tests.integration.api_mocks import podcastindex_mock
 ENDPOINT_URL = "/search/feeds"
 SEND_METHOD = "requests.Session.send"
 
+
 def test_missing_query_returns_invalid_argument(client) -> None:
     response = client.get(ENDPOINT_URL)
 

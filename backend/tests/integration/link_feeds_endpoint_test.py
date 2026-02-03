@@ -9,6 +9,7 @@ import urllib
 ENDPOINT_URL = "/link/feed"
 SEND_METHOD = "requests.Session.send"
 
+
 def test_missing_url_returns_invalid_argument(client) -> None:
     response = client.get(ENDPOINT_URL)
 
@@ -68,8 +69,12 @@ def test_too_long_query_returns_invalid_argument(client) -> None:
 
     assert "InvalidArgument" == data["error"]
 
+
 def test_invalid_url(client) -> None:
-    response = client.get(ENDPOINT_URL, query_string={"query": urllib.parse.quote('https%3A%2F%2Fwww.google.com%2F')})
+    response = client.get(
+        ENDPOINT_URL,
+        query_string={"query": urllib.parse.quote("https%3A%2F%2Fwww.google.com%2F")},
+    )
 
     assert response.status_code == 400
 
