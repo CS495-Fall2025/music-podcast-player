@@ -36,10 +36,12 @@ def create_app() -> Flask:
 
 def apply_blueprints(app: Flask) -> None:
     from rss_music_backend.routes.search import SEARCH_BP
+    from rss_music_backend.routes.link import LINK_BP
     from rss_music_backend.routes.auth import AUTH_BP
 
     blueprints = [
         SEARCH_BP,
+        LINK_BP,
         AUTH_BP,
     ]
 
