@@ -6,6 +6,8 @@ on:
     branches:
       - dev
 
+permissions:
+  id-token: write
 jobs:
   build:
     uses: ./.github/workflows/cd-builds.yml
