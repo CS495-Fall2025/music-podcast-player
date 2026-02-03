@@ -15,13 +15,15 @@ from aws_cdk import (
     aws_rds as rds,
     aws_ssm as ssm,
     aws_s3 as s3,
-    aws_s3_deployment as s3_deploy
+    aws_s3_deployment as s3_deploy,
 )
 from constructs import Construct
 
 BACKEND_PATH = Path(__file__).parent.parent.parent / "backend"
 FRONTEND_PATH = Path(__file__).parent.parent.parent / "frontend"
-BACKEND_BUILD = os.environ.get("BACKEND_BUILD_PATH", str(BACKEND_PATH / "lambda_build/backend_build.zip"))
+BACKEND_BUILD = os.environ.get(
+    "BACKEND_BUILD_PATH", str(BACKEND_PATH / "lambda_build/backend_build.zip")
+)
 FRONTEND_BUILD = os.environ.get("FRONTEND_BUILD_PATH", str(FRONTEND_PATH / "dist"))
 
 
@@ -30,16 +32,16 @@ class RSSMusicPlayerStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # Things in this VPC can reach the database, but not the outside internet.
-        database_vpc = ec2.Vpc(self, "RSSMusicPlayerDatabaseVpc", max_azs=3)
-        database = self._make_database(database_vpc)
-        
+        # database_vpc = ec2.Vpc(self, "RSSMusicPlayerDatabaseVpc", max_azs=3)
+        # database = self._make_database(database_vpc)
+
         frontend_bucket = self._make_frontend_bucket()
         frontend_distribution = self._make_frontend_distribution(frontend_bucket)
 
         # For when we split the backend.
-        #database_function = self._make_database_function(
+        # database_function = self._make_database_function(
         #    database, database_vpc
-        #)
+        # )
         backend_function = self._make_backend_function(
             frontend_distribution.domain_name
         )
@@ -75,8 +77,7 @@ class RSSMusicPlayerStack(Stack):
         )
 
         origin = origins.S3BucketOrigin.with_origin_access_control(
-            bucket,
-            origin_access_control=access_control
+            bucket, origin_access_control=access_control
         )
 
         behavior = cloudfront.BehaviorOptions(
@@ -112,30 +113,28 @@ class RSSMusicPlayerStack(Stack):
             self,
             "RSSMusicPlayerFrontendURL",
             value=f"https://{distribution.domain_name}",
-            description="The URL of the frontend"
+            description="The URL of the frontend",
         )
 
         return distribution
-    
+
     def _make_database_function(self, database, database_vpc) -> _lambda.Function:
         function = _lambda.Function(
             self,
             "RSSMusicPlayerBackendDatabaseFunction",
-            #code=_lambda.Code.from_asset(),
+            # code=_lambda.Code.from_asset(),
             runtime=_lambda.Runtime.PYTHON_3_12,
-            #handler="lambda_handler.handler",
+            # handler="lambda_handler.handler",
             memory_size=256,
             architecture=_lambda.Architecture.ARM_64,
             environment={
-                "DATABASE_CONNECTION_PARTIAL":
-                    "postgresql://{user}:{password}@"
-                    f"{database.db_instance_endpoint_address}:"
-                    f"{database.db_instance_endpoint_port}",
-                "DATABASE_SECRET_ARN":
-                    database.secret.secret_arn,
+                "DATABASE_CONNECTION_PARTIAL": "postgresql://{user}:{password}@"
+                f"{database.db_instance_endpoint_address}:"
+                f"{database.db_instance_endpoint_port}",
+                "DATABASE_SECRET_ARN": database.secret.secret_arn,
             },
             vpc=database_vpc,
-            timeout=Duration.seconds(3)
+            timeout=Duration.seconds(3),
         )
 
         database.secret.grant_read(function)
@@ -169,12 +168,10 @@ class RSSMusicPlayerStack(Stack):
             architecture=_lambda.Architecture.ARM_64,
             environment={
                 "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{frontend_domain}",
-                "PODCAST_INDEX_KEY_ROUTE":
-                    "/rss-music-player/podcast-index-api/key",
-                "PODCAST_INDEX_SECRET_ROUTE":
-                    "/rss-music-player/podcast-index-api/secret",
+                "PODCAST_INDEX_KEY_ROUTE": "/rss-music-player/podcast-index-api/key",
+                "PODCAST_INDEX_SECRET_ROUTE": "/rss-music-player/podcast-index-api/secret",
             },
-            timeout=Duration.seconds(3)
+            timeout=Duration.seconds(3),
         )
 
         for secret in backend_secrets:
@@ -232,7 +229,8 @@ class RSSMusicPlayerStack(Stack):
                 version=rds.PostgresEngineVersion.VER_17
             ),
             instance_type=ec2.InstanceType.of(
-                ec2.InstanceClass.BURSTABLE4_GRAVITON, ec2.InstanceSize.MICRO,
+                ec2.InstanceClass.BURSTABLE4_GRAVITON,
+                ec2.InstanceSize.MICRO,
             ),
             vpc=database_vpc,
             vpc_subnets=ec2.SubnetSelection(
@@ -243,7 +241,9 @@ class RSSMusicPlayerStack(Stack):
             allocated_storage=20,
             publicly_accessible=False,
             storage_encrypted=True,
-            credentials=rds.Credentials.from_generated_secret(username="rssmusicplayer"),
+            credentials=rds.Credentials.from_generated_secret(
+                username="rssmusicplayer"
+            ),
             backup_retention=Duration.days(1),
             removal_policy=RemovalPolicy.DESTROY,
         )
@@ -251,10 +251,8 @@ class RSSMusicPlayerStack(Stack):
         database.connections.allow_default_port_from_any_ipv4(
             description="Necessary to allow backend to connect"
         )
-        
-        database.add_rotation_single_user(
-            automatically_after=Duration.days(30)
-        )
+
+        database.add_rotation_single_user(automatically_after=Duration.days(30))
 
         CfnOutput(
             self,
@@ -262,8 +260,7 @@ class RSSMusicPlayerStack(Stack):
             value=(
                 f"{database.db_instance_endpoint_address}:"
                 f"{database.db_instance_endpoint_port}"
-            )
+            ),
         )
-        
 
         return database
