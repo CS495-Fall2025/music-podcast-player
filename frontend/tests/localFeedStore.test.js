@@ -13,7 +13,7 @@ describe("localFeedStore", () => {
   });
 
   // Test currentTrack ref initialization
-  it("currentTrack is initialized as an empty ref string", () => {
+  it("currentTrack is initialized as an empty string", () => {
     expect(currentTrack.value).toBe("");
   });
 

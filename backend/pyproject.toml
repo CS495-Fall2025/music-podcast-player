@@ -8,6 +8,8 @@ dependencies = [
 	"requests>=2.32,<3.0",
 	"marshmallow>=4.0,<5.0",
 	"marshmallow-dataclass>=8.7,<9.0",
+	"PyJWT>=2.8.0,<3.0",
+	"alembic>=1.13,<2.0",
 ]
 
 
@@ -21,3 +23,8 @@ dev = [
 [build-system]
 requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests*", "migrations*"]
