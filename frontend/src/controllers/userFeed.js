@@ -8,11 +8,13 @@ export default {
   computed: {
     // Returns feed if a feed is loaded. If a feed is not loaded, returns mock empty feed (until a feed is loaded) to prevent crashing.
     feed() {
-      return feed.length ? feed[0] : {
-        image: "",
-        title: "",
-        artist: ""
-      };
+      return feed.length
+        ? feed[0]
+        : {
+            image: "",
+            title: "",
+            artist: "",
+          };
     },
     // Returns the list of track objects within the feed. Each object holds its own data.
     feedTracks() {
