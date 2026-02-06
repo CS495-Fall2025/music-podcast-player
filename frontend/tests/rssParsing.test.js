@@ -18,7 +18,7 @@ describe("rssParsing controller", () => {
 
   // Setup mocks and reset state before each test
   beforeEach(() => {
-    vi.spyOn(console, "log").mockImplementation(() => { });
+    vi.spyOn(console, "log").mockImplementation(() => {});
     feedTracks.splice(0, feedTracks.length);
     vi.stubGlobal("fetch", vi.fn());
 

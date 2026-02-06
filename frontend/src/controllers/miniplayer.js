@@ -23,7 +23,9 @@ export function useMiniPlayer() {
 
   const getCurrentIndex = () => {
     if (!currentTrack.value || !currentTrack.value.audio) return -1;
-    return feedTracks.findIndex((track) => track.audio === currentTrack.value.audio);
+    return feedTracks.findIndex(
+      (track) => track.audio === currentTrack.value.audio,
+    );
   };
 
   const buildShuffleOrder = () => {
@@ -122,7 +124,8 @@ export function useMiniPlayer() {
       } else {
         if (shuffleIndex.value > 0) {
           shuffleIndex.value--;
-          currentTrack.value = feedTracks[shuffleOrder.value[shuffleIndex.value]];
+          currentTrack.value =
+            feedTracks[shuffleOrder.value[shuffleIndex.value]];
         } else restartSong();
       }
 
