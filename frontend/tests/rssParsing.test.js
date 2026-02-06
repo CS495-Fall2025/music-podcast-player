@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { requestFeedFromURL } from "../src/controllers/rssParsing.js";
-import { feed } from "../src/controllers/localFeedStore.js";
+import { feedTracks } from "../src/controllers/localFeedStore.js";
 
 describe("rssParsing controller", () => {
   const mockRssXml = `
@@ -18,8 +18,8 @@ describe("rssParsing controller", () => {
 
   // Setup mocks and reset state before each test
   beforeEach(() => {
-    vi.spyOn(console, "log").mockImplementation(() => {});
-    feed.splice(0, feed.length);
+    vi.spyOn(console, "log").mockImplementation(() => { });
+    feedTracks.splice(0, feedTracks.length);
     vi.stubGlobal("fetch", vi.fn());
 
     vi.stubGlobal(
@@ -97,8 +97,8 @@ describe("rssParsing controller", () => {
 
     await vi.runAllTimersAsync();
     await vi.waitFor(() => {
-      expect(feed).toHaveLength(1);
-      expect(feed[0]).toEqual({
+      expect(feedTracks).toHaveLength(1);
+      expect(feedTracks[0]).toEqual({
         type: "track",
         title: "Test Track",
         image: "test.jpg",
@@ -121,8 +121,8 @@ describe("rssParsing controller", () => {
     await vi.waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith("Request returned status 404");
     });
-    feed.splice(0, feed.length);
-    expect(feed).toHaveLength(0);
+    feedTracks.splice(0, feedTracks.length);
+    expect(feedTracks).toHaveLength(0);
   });
 
   // Test parsing error handling
@@ -139,7 +139,7 @@ describe("rssParsing controller", () => {
         "Error encountered while parsing RSS feed.",
       );
       expect(consoleSpy).toHaveBeenCalledWith(mockError);
-      expect(feed).toHaveLength(0);
+      expect(feedTracks).toHaveLength(0);
     });
   });
 });
