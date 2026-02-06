@@ -1,5 +1,5 @@
 import Track from "../components/UserTrack.vue";
-import { feed } from "./localFeedStore.js";
+import { feed, feedTracks } from "./localFeedStore.js";
 
 export default {
   name: "UserFeed",
@@ -7,19 +7,23 @@ export default {
 
   computed: {
     feed() {
-      return feed;
+      return feed.length ? feed[0] : {
+        image: "",
+        title: "",
+        artist: ""
+      };
+    },
+    feedTracks() {
+      return feedTracks;
     },
     feedImage() {
-      // not yet working, i think it's a parsing thing, will likely need to change some calls
-      return this.feed.image?.trim() || "/src/assets/images/default-image.jpg";
+      return this.feed.image || "/src/assets/images/default-image.jpg";
     },
     feedTitle() {
-      // not yet working, i think it's a parsing thing, will likely need to change some calls
-      return this.feed.title?.trim() || "Untitled Feed";
+      return this.feed.title || "Untitled Feed";
     },
     feedArtist() {
-      // not yet working, i think it's a parsing thing, will likely need to change some calls
-      return this.feed.artist?.trim() || "Feed artist not found";
+      return this.feed.artist || "Feed artist not found";
     },
   },
 };
