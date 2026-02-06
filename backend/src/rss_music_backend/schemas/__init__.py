@@ -7,9 +7,14 @@ from rss_music_backend.schemas.responses.search_feeds_response import (
 )
 from rss_music_backend.schemas.requests.signup_request import SignUpRequestSchema
 
+from rss_music_backend.schemas.requests.link_feed_request import (
+    LinkFeedRequestSchema,
+)
+
 __all__ = [
     "SAnd",
     "SearchFeedsResponseSchema",
     "SearchFeedsRequestSchema",
+    "LinkFeedRequestSchema",
     "SignUpRequestSchema",
 ]

@@ -1,6 +1,12 @@
 <script setup>
-// Import components here.
+import { onMounted } from "vue";
+import { verifyToken } from "./auth/authService";
 import NavBar from "./components/NavBar.vue";
+
+// Verify stored token on app startup
+onMounted(async () => {
+  await verifyToken();
+});
 </script>
 
 <template>

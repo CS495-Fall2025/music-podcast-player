@@ -1,9 +1,13 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
+import { startLogin, logout, useAuth } from "../auth/authService";
 
 export default function useNavbar() {
   const isOpen = ref(false);
   const dropdownOpen = ref(false);
   const dropdownRef = ref(null);
+
+  // Use the reactive auth store
+  const { isAuthenticated, currentUser } = useAuth();
 
   const handleClickOutside = (event) => {
     if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
@@ -20,20 +24,29 @@ export default function useNavbar() {
   });
 
   const handleLogin = () => {
-    alert("Login clicked");
     dropdownOpen.value = false;
+    startLogin();
   };
 
-  const handleLogout = () => {
-    alert("Logout clicked");
+  const handleSignup = () => {
     dropdownOpen.value = false;
+    window.location.href = "/signup";
+  };
+
+  const handleLogout = async () => {
+    dropdownOpen.value = false;
+    await logout();
+    window.location.reload();
   };
 
   return {
     isOpen,
     dropdownOpen,
     dropdownRef,
+    isAuthenticated,
+    currentUser,
     handleLogin,
+    handleSignup,
     handleLogout,
   };
 }

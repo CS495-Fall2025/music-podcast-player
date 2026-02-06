@@ -14,6 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: npm install
+      - run: mv build.env .env
       - run: npm run build
       - uses: actions/upload-artifact@v4
         with:

@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
+import os
 
 
 load_dotenv()
@@ -15,8 +16,15 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_prefixed_env(prefix="RSS_PLAYER")
 
-    # Tell web browsers to specifically only allow our website to interact with this
-    # API.
+    secret_key = os.getenv("RSS_PLAYER_SECRET_KEY", "dev-secret-key")
+    is_production = os.getenv("RSS_PLAYER_ENVIRONMENT", "dev") == "production"
+
+    app.config["SECRET_KEY"] = secret_key
+    app.config["SESSION_COOKIE_SECURE"] = is_production
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["PERMANENT_SESSION_LIFETIME"] = 3600
+
     CORS(
         app,
         resources={
@@ -27,6 +35,7 @@ def create_app() -> Flask:
                 ],
             },
         },
+        supports_credentials=True,
     )
 
     apply_blueprints(app)
@@ -36,10 +45,12 @@ def create_app() -> Flask:
 
 def apply_blueprints(app: Flask) -> None:
     from rss_music_backend.routes.search import SEARCH_BP
+    from rss_music_backend.routes.link import LINK_BP
     from rss_music_backend.routes.auth import AUTH_BP
 
     blueprints = [
         SEARCH_BP,
+        LINK_BP,
         AUTH_BP,
     ]
 

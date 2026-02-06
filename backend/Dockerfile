@@ -12,11 +12,15 @@ COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
 # Copy in the src directory and pyproject.toml
-COPY src ./
+COPY src ./src
 COPY pyproject.toml ./
 
 # Install the backend as a package
 RUN pip3 install .
+
+# Copy migrations and alembic config after package install
+COPY migrations ./migrations
+COPY alembic.ini ./
 
 # Expose the port for the backend
 EXPOSE 5000

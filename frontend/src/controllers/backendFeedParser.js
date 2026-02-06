@@ -1,4 +1,4 @@
-import loadConfig from "./config.js";
+import loadConfig from "../config";
 import { searchedFeeds } from "./localFeedStore.js";
 
 export async function requestFeeds(query) {
