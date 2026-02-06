@@ -24,7 +24,9 @@ describe("rssFeedForm controller", () => {
     vi.resetModules();
 
     const formModule = await import("../src/controllers/rssFeedForm.js");
-    const parsingModule = await import("../src/controllers/backendLinkParser.js");
+    const parsingModule = await import(
+      "../src/controllers/backendLinkParser.js"
+    );
 
     canSubmit = formModule.canSubmit;
     onUserFeedInputBlur = formModule.onUserFeedInputBlur;
