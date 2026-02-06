@@ -10,14 +10,14 @@ RUN dnf install -y python3.12-devel postgresql-devel gcc make
 WORKDIR /app
 
 COPY ./requirements.txt ./
-COPY ./pyproject.toml ./src/
+COPY ./pyproject.toml ./
 
 # Install backend dependencies
 RUN pip3 install -r ./requirements.txt -t ./
 
 # Install backend package
 COPY ./src/rss_music_backend ./src/rss_music_backend
-RUN pip3 install ./src -t ./
+RUN pip3 install ./ -t ./
 
 COPY ./lambda_handler.py ./
 
