@@ -9,14 +9,7 @@
       <div class="track-title">{{ trackTitle }}</div>
       <div class="track-artist">{{ trackArtist }}</div>
     </div>
-    <!-- <div class="track-description">{{ trackDescription }}</div> -->
-    <div class="track-description">
-      Track description that describes the track by describing information in a
-      descriptive way. This text will often contain a description of the track,
-      but can also contain the transcript. The description may also contain html
-      tags that will be parsed by our app in the future to prevent xss and to
-      allow things like links to be used.
-    </div>
+    <div class="track-description">{{ trackDescription }}</div>
   </div>
 </template>
 
