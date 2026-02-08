@@ -1,8 +1,8 @@
 import requests
 
-from rss_music_backend.data import Rss
-from rss_music_backend.external_apis.auth import identity
-from rss_music_backend.external_apis import errors
+from rss_music_api_service.data import Rss
+from rss_music_api_service.external_apis.auth import identity
+from rss_music_api_service.external_apis import errors
 
 import xml.etree.ElementTree as ET
 

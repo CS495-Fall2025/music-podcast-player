@@ -6,10 +6,10 @@ from flask import current_app
 from marshmallow import ValidationError
 import requests
 
-from rss_music_backend.data import Feed
-from rss_music_backend.external_apis.auth import identity
-from rss_music_backend.external_apis import errors
-from rss_music_backend.schemas import SearchFeedsResponseSchema
+from rss_music_api_service.data import Feed
+from rss_music_api_service.external_apis.auth import identity
+from rss_music_api_service.external_apis import errors
+from rss_music_api_service.schemas import SearchFeedsResponseSchema
 
 API_URL = "https://api.podcastindex.org/api/1.0/"
 TIMEOUT = (3, 10)  # 3 Seconds to connect, 10 seconds to recieve response.

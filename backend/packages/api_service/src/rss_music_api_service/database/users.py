@@ -1,7 +1,7 @@
 from sqlalchemy import LargeBinary, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from rss_music_backend.database.base import Base
+from rss_music_api_service.database.base import Base
 
 
 USERNAME_MAX_LENGTH = 30

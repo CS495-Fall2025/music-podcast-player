@@ -1,6 +1,6 @@
 from importlib.metadata import version
 
-PACKAGE_NAME = "rss_music_backend"
+PACKAGE_NAME = "rss_music_api_service"
 USER_AGENT_NAME = "RSSMusicPlayer"
 
 

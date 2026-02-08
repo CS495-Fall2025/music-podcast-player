@@ -3,8 +3,8 @@ import os
 
 from sqlalchemy.exc import IntegrityError
 
-from rss_music_backend.auth.errors import NotUniqueError
-from rss_music_backend.database import User, make_session
+from rss_music_api_service.auth.errors import NotUniqueError
+from rss_music_api_service.database import User, make_session
 
 
 def create_and_add_user(username: str, email: str, password: str) -> None:

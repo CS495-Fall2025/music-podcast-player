@@ -1,10 +1,6 @@
-from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 import os
-
-
-load_dotenv()
 
 
 def wsgi_launch(environ, start_response):
@@ -44,9 +40,9 @@ def create_app() -> Flask:
 
 
 def apply_blueprints(app: Flask) -> None:
-    from rss_music_backend.routes.search import SEARCH_BP
-    from rss_music_backend.routes.link import LINK_BP
-    from rss_music_backend.routes.auth import AUTH_BP
+    from rss_music_api_service.routes.search import SEARCH_BP
+    from rss_music_api_service.routes.link import LINK_BP
+    from rss_music_api_service.routes.auth import AUTH_BP
 
     blueprints = [
         SEARCH_BP,

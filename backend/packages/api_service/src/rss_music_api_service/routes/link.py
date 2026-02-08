@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, request
 from marshmallow import ValidationError
 
-from rss_music_backend.errors import RequestError, get_error_response
-from rss_music_backend.external_apis.concrete import LinkFunctions
-from rss_music_backend.external_apis.errors import ExternalAPIError
-from rss_music_backend.schemas import LinkFeedRequestSchema
+from rss_music_api_service.errors import RequestError, get_error_response
+from rss_music_api_service.external_apis.concrete import LinkFunctions
+from rss_music_api_service.external_apis.errors import ExternalAPIError
+from rss_music_api_service.schemas import LinkFeedRequestSchema
 
 LINK_BP = Blueprint("link", __name__, url_prefix="/link")
 

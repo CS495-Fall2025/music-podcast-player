@@ -2,8 +2,8 @@ import re
 
 from marshmallow import Schema, fields, validate
 
-from rss_music_backend.database.users import USERNAME_MAX_LENGTH
-from rss_music_backend.schemas import SAnd
+from rss_music_api_service.database.users import USERNAME_MAX_LENGTH
+from rss_music_api_service.schemas import SAnd
 
 
 class SignUpRequestSchema(Schema):

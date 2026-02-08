@@ -2,7 +2,7 @@ import re
 
 from marshmallow import Schema, fields, validate
 
-from rss_music_backend.schemas import SAnd
+from rss_music_api_service.schemas import SAnd
 
 
 class SearchFeedsRequestSchema(Schema):

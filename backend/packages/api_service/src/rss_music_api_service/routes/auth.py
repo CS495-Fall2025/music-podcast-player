@@ -2,10 +2,10 @@ import flask
 from flask import Blueprint, request, session, current_app
 from marshmallow import ValidationError
 
-from rss_music_backend.auth import errors, signup, login, pkce
-from rss_music_backend.database import make_session
-from rss_music_backend.errors import RequestError, get_error_response
-from rss_music_backend.schemas import SignUpRequestSchema
+from rss_music_api_service.auth import errors, signup, login, pkce
+from rss_music_api_service.database import make_session
+from rss_music_api_service.errors import RequestError, get_error_response
+from rss_music_api_service.schemas import SignUpRequestSchema
 
 # All routes added to this BP are under "/auth"
 AUTH_BP = Blueprint("auth", __name__, url_prefix="/auth")

@@ -1,10 +1,10 @@
 from flask import Blueprint, request
 from marshmallow import ValidationError
 
-from rss_music_backend.errors import RequestError, get_error_response
-from rss_music_backend.external_apis.concrete import PodcastIndexAPI
-from rss_music_backend.external_apis.errors import ExternalAPIError
-from rss_music_backend.schemas import SearchFeedsRequestSchema
+from rss_music_api_service.errors import RequestError, get_error_response
+from rss_music_api_service.external_apis.concrete import PodcastIndexAPI
+from rss_music_api_service.external_apis.errors import ExternalAPIError
+from rss_music_api_service.schemas import SearchFeedsRequestSchema
 
 # All routes added to this BP are under "/math", so "" would just be "/math".
 SEARCH_BP = Blueprint("search", __name__, url_prefix="/search")

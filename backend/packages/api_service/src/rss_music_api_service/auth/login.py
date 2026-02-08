@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 
-from rss_music_backend.database import User, make_session
+from rss_music_api_service.database import User, make_session
 
 
 class InvalidCredentialsError(Exception):
