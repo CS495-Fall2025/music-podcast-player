@@ -1,4 +1,3 @@
-from flask import current_app
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
@@ -12,8 +11,7 @@ def get_engine() -> Engine:
     if _db_engine is not None:
         return _db_engine
 
-    _initialize_engine()
-    return _db_engine
+    raise RuntimeError("Database connection not initialized")
 
 
 def make_session() -> Session:
@@ -22,16 +20,16 @@ def make_session() -> Session:
     return Session(engine)
 
 
-def _initialize_engine() -> None:
+def initialize_engine(connection: str) -> None:
     global _db_engine
 
     # This is the setup for automated testing to avoid needing an actual DB. (Uses
     # SQLite in-memory DB.)
-    if current_app.config["DATABASE_CONNECTION"] == "sqlite:///:memory:":
+    if connection == "sqlite:///:memory:":
         _db_engine = create_engine(
-            current_app.config["DATABASE_CONNECTION"],
+            "sqlite:///:memory:",
             poolclass=StaticPool,
             connect_args={"check_same_thread": False},
         )
     else:
-        _db_engine = create_engine(current_app.config["DATABASE_CONNECTION"])
+        _db_engine = create_engine(connection)
