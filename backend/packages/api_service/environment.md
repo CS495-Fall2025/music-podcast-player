@@ -28,6 +28,11 @@ Docker, use `postgres://postgres:dev-db-password@database/postgres`. See SQLAlch
 [documentation](https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls) for
 more details.
 
+### Database Service URL
+`RSS_PLAYER_DATABASE_SERVICE_URL`
+
+The URL to the database service.
+
 ## AWS Deployment Secret Route Variables
 
 In order to protect our secrets, we store them as encrypted strings in AWS' parameter

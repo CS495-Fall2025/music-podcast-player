@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from rss_music_backend.database.base import Base
+from rss_music_data_model import Base
 import os
 
 # this is the Alembic Config object, which provides

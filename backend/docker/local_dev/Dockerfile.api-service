@@ -5,18 +5,10 @@ WORKDIR /app
 # For psycopg2
 RUN apk add postgresql-dev gcc python3-dev musl-dev
 
-# Install dependencies first for better caching
-RUN pip3 install pip-tools
-COPY pyproject.toml ./
-RUN pip-compile pyproject.toml
-RUN pip3 uninstall -y pip-tools
-RUN pip3 install -r requirements.txt
-
-# Copy in the src directory
-COPY src ./src
-
-# Install the backend as a package
-RUN pip3 install .
+# Install rss_music_api_service
+COPY api_service api_service
+RUN pip3 install ./api_service
+RUN rm -rf api_service
 
 # Copy migrations and alembic config after package install
 #COPY migrations ./migrations
