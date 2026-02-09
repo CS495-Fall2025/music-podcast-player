@@ -3,8 +3,6 @@ name = "rss-music-migration-handler"
 version = "0.1.0"
 dependencies = [
 	"alembic>=1.13,<2.0",
-
-	# From manual install
 	"rss-music-data-model==0.1.0",
 ]
 
@@ -26,3 +24,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+
+[tool.uv.sources]
+rss-music-data-model = { path = "../data_model" }

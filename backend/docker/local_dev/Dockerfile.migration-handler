@@ -5,20 +5,21 @@ WORKDIR /app
 # Install dependencies for PostgreSQL
 RUN apk add postgresql-dev gcc python3-dev musl-dev
 
+# Install uv for better dependency management
+RUN pip3 install uv
+
 # Install rss_music_data_model package
 COPY data_model data_model
-RUN pip3 install data_model/
-RUN rm -rf data_model
+
+# Install rss_music_migration_handler dependencies
+WORKDIR /app/migration_handler
+
+COPY migration_handler/pyproject.toml pyproject.toml
+RUN uv sync --no-install-project
 
 # Install rss_music_migration_handler
-COPY migration_handler migration_handler
-RUN pip3 install migration_handler/
-
-# Keep only files needs to run the handler
-RUN mv migration_handler/migrations ./
-RUN mv migration_handler/alembic.ini ./
-RUN mv migration_handler/local_handler.py ./
-RUN rm -rf migration_handler/
+COPY migration_handler .
+RUN uv sync
 
 # Run local handler when container starts
-CMD ["python3", "local_handler.py"]
+CMD ["uv", "run", "local_handler.py"]

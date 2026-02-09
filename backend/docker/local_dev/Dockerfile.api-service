@@ -5,14 +5,18 @@ WORKDIR /app
 # For psycopg2
 RUN apk add postgresql-dev gcc python3-dev musl-dev
 
-# Install rss_music_api_service
-COPY api_service api_service
-RUN pip3 install ./api_service
-RUN rm -rf api_service
+# Install uv for better package management.
+RUN pip install uv
 
-# Copy migrations and alembic config after package install
-#COPY migrations ./migrations
-#COPY alembic.ini ./
+# Install rss_music_api_service dependencies
+WORKDIR /app/api_service
+
+COPY api_service/pyproject.toml pyproject.toml
+RUN uv sync --no-install-project
+
+# Install rss_music_api_service
+COPY api_service .
+RUN uv sync
 
 # Expose the port for the backend
 EXPOSE 5000
@@ -20,7 +24,6 @@ EXPOSE 5000
 # Configure the environment
 ENV FLASK_APP=rss_music_api_service:create_app
 ENV FLASK_RUN_HOST=0.0.0.0
-#ENV ALLOWED_ORIGINS=http://localhost:5173
 
 # Run the backend
-CMD ["python3", "-m", "flask", "run"]
+CMD ["uv", "run", "flask", "run"]
