@@ -4,7 +4,8 @@ from fastapi.responses import JSONResponse
 from rss_music_db_service_schemas import ErrorResponse, ErrorType
 import rss_music_db_service_schemas.users.requests as db_user_requests
 
-from rss_music_db_service.auth import errors, signup
+from rss_music_db_service import errors
+from rss_music_db_service.users import create, exists
 from rss_music_db_service.basic_validation import validate_json
 
 
@@ -19,7 +20,7 @@ async def create_user(request: Request):
         return result
 
     try:
-        signup.create_and_add_user(
+        create.create_and_add_user(
             result["username"],
             result["email"],
             result["password"],
@@ -42,5 +43,31 @@ async def create_user(request: Request):
         "code": 201
     }
 
-#@users.post("/create")
-#async def user_exists(request: Request):
+@users.post("/exists")
+async def user_exists(request: Request):
+    result = await validate_json(request, db_user_requests.UserExistsRequest())
+
+    if isinstance(result, JSONResponse):
+        return result
+
+    found_flag = False
+    for field in result.keys():
+        match field:
+            case "username":
+                if exists.user_exists_by_username(result["username"]):
+                    found_flag = True
+                    # breaks refer to the for loop, not the match.
+                    break
+            case "email":
+                if exists.user_exists_by_email(result["email"]):
+                    found_flag = True
+                    break
+            case "id":
+                if exists.user_exists_by_id(result["id"]):
+                    found_flag = True
+                    break
+
+    return {
+        "code": 200,
+        "exists": found_flag,
+    }

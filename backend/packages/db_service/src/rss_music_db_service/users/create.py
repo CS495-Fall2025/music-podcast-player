@@ -4,7 +4,7 @@ import os
 from sqlalchemy.exc import IntegrityError
 
 from rss_music_data_model import User, make_session
-from rss_music_db_service.auth.errors import NotUniqueError
+from rss_music_db_service.errors import NotUniqueError
 
 
 def create_and_add_user(username: str, email: str, password: str) -> None:
