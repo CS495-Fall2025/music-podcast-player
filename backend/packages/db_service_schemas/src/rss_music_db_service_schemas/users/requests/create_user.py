@@ -12,5 +12,4 @@ class CreateUserRequest(Schema):
     password = fields.Str(
         required=True,
         validate=common_validate.password,
-        ),
     )

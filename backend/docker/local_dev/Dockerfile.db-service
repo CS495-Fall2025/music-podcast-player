@@ -1,0 +1,30 @@
+FROM python:3.13-alpine
+
+WORKDIR /app
+
+# For psycopg2
+RUN apk add postgresql-dev gcc python3-dev musl-dev
+
+# Install uv for better package management.
+RUN pip install uv
+
+# Bring in needed local packages.
+COPY common_validators common_validators
+COPY data_model data_model
+COPY db_service_schemas db_service_schemas
+
+# Install rss_music_db_service dependencies
+WORKDIR /app/db_service
+
+COPY db_service/pyproject.toml pyproject.toml
+RUN uv sync --no-install-project --group local
+
+# Install rss_music_db_service
+COPY db_service .
+RUN uv sync --group local
+
+# Expose the port for the backend
+EXPOSE 5001
+
+# Run the backend
+CMD ["uv", "run", "uvicorn", "rss_music_db_service.app:app", "--host", "0.0.0.0", "--port", "5001"]

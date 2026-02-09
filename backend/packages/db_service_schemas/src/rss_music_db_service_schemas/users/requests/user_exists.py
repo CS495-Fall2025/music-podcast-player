@@ -4,9 +4,9 @@ from marshmallow import Schema, fields, validate, validates_schema, ValidationEr
 import rss_music_common_validators as common_validate
 
 
-class CreateUserRequest(Schema):
+class UserExistsRequest(Schema):
     id = fields.Int(
-        validate.Range(min=0)
+        validate=validate.Range(min=0)
     )
     username = fields.Str(
         validate=common_validate.username,

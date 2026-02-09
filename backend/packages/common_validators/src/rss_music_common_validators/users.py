@@ -1,8 +1,10 @@
+import re
+
 from marshmallow import Schema, fields, validate
 
 
 username = validate.And(
-    validate.Length(min=6, max=USERNAME_MAX_LENGTH),
+    validate.Length(min=6, max=30),
     validate.Regexp(r"^[a-zA-Z0-9]\w*[a-zA-Z0-9]$", flags=re.UNICODE),
 )
 

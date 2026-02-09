@@ -2,9 +2,6 @@ FROM python:3.13-alpine
 
 WORKDIR /app
 
-# For psycopg2
-RUN apk add postgresql-dev gcc python3-dev musl-dev
-
 # Install uv for better package management.
 RUN pip install uv
 

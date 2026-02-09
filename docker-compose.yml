@@ -22,7 +22,17 @@ services:
 #        condition: service_healthy
 #      migrations:
 #        condition: service_completed_successfully
-#    command: python3 -m flask run
+  backend-db-service:
+    build:
+      context: ./backend/packages/
+      dockerfile: ../docker/local_dev/Dockerfile.db-service
+    ports:
+      - "5001:5001"
+    depends_on:
+      database:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
   migrations:
     build:
       context: ./backend/packages/
