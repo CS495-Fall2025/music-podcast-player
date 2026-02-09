@@ -1,31 +1,34 @@
 services:
-  frontend:
-    build: ./frontend
-    ports:
-      - "5173:5173"
-    # Keeping node_modules in the container seperate.
-    # Using ./frontend as a volume lets us update files on the fly and have the page
-    # still autoupdate.
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    stdin_open: true
-  backend:
-    build: ./backend
-    ports:
-      - "5000:5000"
-    env_file: ./secrets/backend.env
-    depends_on:
-      database:
-        condition: service_healthy
-      migrations:
-        condition: service_completed_successfully
-    command: python3 -m flask run
+#  frontend:
+#    build: ./frontend
+#    ports:
+#      - "5173:5173"
+#    # Keeping node_modules in the container seperate.
+#    # Using ./frontend as a volume lets us update files on the fly and have the page
+#    # still autoupdate.
+#    volumes:
+#      - ./frontend:/app
+#      - /app/node_modules
+#    stdin_open: true
+#  backend-api-service:
+#    build:
+#      context: ./backend/packages/
+#      dockerfile: ../docker/local_dev/Dockerfile.api-service
+#    ports:
+#      - "5000:5000"
+#    env_file: ./secrets/backend.env
+#    depends_on:
+#      database:
+#        condition: service_healthy
+#      migrations:
+#        condition: service_completed_successfully
+#    command: python3 -m flask run
   migrations:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.migrations
-    env_file: ./secrets/backend.env
+      context: ./backend/packages/
+      dockerfile: ../docker/local_dev/Dockerfile.migration-handler
+    environment:
+      DATABASE_URL: postgresql://postgres:dev-db-password@database:5432
     depends_on:
       database:
         condition: service_healthy
@@ -38,6 +41,6 @@ services:
       - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      interval: 1s
       timeout: 5s
       retries: 5
