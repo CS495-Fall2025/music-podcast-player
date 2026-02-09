@@ -28,6 +28,8 @@ services:
       dockerfile: ../docker/local_dev/Dockerfile.db-service
     ports:
       - "5001:5001"
+    environment:
+      DATABASE_URL: postgresql://postgres:dev-db-password@database:5432
     depends_on:
       database:
         condition: service_healthy
