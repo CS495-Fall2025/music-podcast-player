@@ -6,10 +6,8 @@ export function sanitizeText(
   allowedTags = ["p", "br", "a", "strong", "b", "em", "i", "ul", "ol", "li"],
   allowedAttr = ["href", "target"],
 ) {
-
   // If NO rawText OR if rawText is not a string, returns null.
-  if (!rawText) return null;
-  if (typeof rawText !== "string") return null;
+  if (!rawText || typeof rawText !== "string") return null;
 
   // Otherwise, sanitize and return.
   return DOMPurify.sanitize(rawText, {
