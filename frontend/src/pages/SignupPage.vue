@@ -2,6 +2,8 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
+import loadConfig from "../config";
+
 const router = useRouter();
 const username = ref("");
 const email = ref("");
@@ -64,8 +66,10 @@ const handleSignup = async (e) => {
   loading.value = true;
 
   try {
+		const config = await loadConfig();
+
     const response = await fetch(
-      `${import.meta.env.VITE_AUTH_API}/auth/signup`,
+      `${config.backendUrl}/auth/signup`,
       {
         method: "POST",
         headers: {
