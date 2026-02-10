@@ -6,7 +6,7 @@ dependencies = [
 ]
 
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
 	"pytest>=8.4,<9.0",
 	"ruff>=0.13,<1.0",
