@@ -5,7 +5,7 @@ import {
   saveSearchHistory,
   loadSearchHistory,
   clearSearchHistory,
-  setSaveHistory
+  setSaveHistory,
 } from "../controllers/searchHistory.js";
 import { requestFeeds } from "../controllers/backendFeedParser.js";
 
@@ -41,9 +41,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="history-container">
-    <button ref="buttonRef" @click="showHistory = !showHistory">
-      History
-    </button>
+    <button ref="buttonRef" @click="showHistory = !showHistory">History</button>
 
     <div v-if="showHistory" ref="boxRef" class="history-box">
       <div v-if="!saveSearchHistory">
@@ -61,9 +59,7 @@ onBeforeUnmount(() => {
       </ul>
 
       <div class="controls">
-        <button @click="clearSearchHistory">
-          Clear Search History
-        </button>
+        <button @click="clearSearchHistory">Clear Search History</button>
 
         <label>
           <input

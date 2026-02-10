@@ -40,16 +40,13 @@ function handleHistorySelect(value) {
         @input="onUserInputInput"
       />
       <button
-      type="button"
-      class="history-button"
-      @click="showHistory = !showHistory"
+        type="button"
+        class="history-button"
+        @click="showHistory = !showHistory"
       >
-      🕘
+        🕘
       </button>
-      <SearchHistory
-        v-if="showHistory"
-        @select="handleHistorySelect"
-      />
+      <SearchHistory v-if="showHistory" @select="handleHistorySelect" />
       <span class="error-message" v-if="!canSubmit"
         >Search query has incorrect length or is using disallowed
         characters.</span
@@ -73,9 +70,8 @@ function handleHistorySelect(value) {
   margin-bottom: 2px;
 }
 .history-button {
-  background: transparent;;
+  background: transparent;
   border: none;
   cursor: pointer;
 }
-
 </style>

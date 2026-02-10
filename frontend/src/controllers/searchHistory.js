@@ -41,13 +41,13 @@ export function loadSearchHistory() {
 export function addSearch(query) {
   if (!saveSearchHistory.value || !query) return;
 
-  searchHistory.value = searchHistory.value.filter(q => q !== query);
+  searchHistory.value = searchHistory.value.filter((q) => q !== query);
   searchHistory.value.unshift(query);
 
   if (searchHistory.value.length > MAX_HISTORY) {
     searchHistory.value.pop();
   }
-    while (JSON.stringify(searchHistory.value).length > 25000) {
+  while (JSON.stringify(searchHistory.value).length > 25000) {
     searchHistory.value.pop();
   }
 
