@@ -1,0 +1,6 @@
+- Set environment variables for frontend
+- Build frontend
+- Deploy S3 Bucket
+- Upload frontend build to S3 Bucket
+- Deploy Cloudfront for HTTPS access to S3
+

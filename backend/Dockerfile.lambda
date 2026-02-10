@@ -1,0 +1,35 @@
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023
+
+# Install general dependencies
+RUN dnf install -y python312
+RUN python3.12 -m ensurepip --upgrade
+
+# Install dependencies for psycogp2
+RUN dnf install -y python3.12-devel postgresql-devel gcc make
+
+WORKDIR /app
+
+COPY ./requirements.txt ./
+COPY ./pyproject.toml ./
+
+# Install backend dependencies
+RUN pip3 install -r ./requirements.txt -t ./
+
+# Install backend package
+COPY ./src/rss_music_backend ./src/rss_music_backend
+RUN pip3 install ./ -t ./
+
+COPY ./lambda_handler.py ./
+
+# Package dynamic libraries used by some packages.
+COPY copy_lib_requirements.py ./
+RUN mkdir lib
+RUN python3 copy_lib_requirements.py
+
+# Remove unneeded files
+RUN rm -rf ./src
+RUN rm -rf ./bin
+RUN find . -name "__pycache__" -type d -exec rm -rf {} +
+RUN rm copy_lib_requirements.py
+
+CMD ["zip", "/mnt/result/backend_build.zip", "-r", "."]

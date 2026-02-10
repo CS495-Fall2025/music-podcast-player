@@ -1,0 +1,9 @@
+Need to bootstrap with every account.
+
+Deploy infra first, then deploy files. Allows better caching and avoid needing to
+redeploy for every change.
+
+`aws s3 sync frontenddist/ s3://FRONTEND_BUCKET/ --delete --profile cdk-profile`
+
+
+Personal profile: personal-deployment

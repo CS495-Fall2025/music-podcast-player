@@ -1,5 +1,7 @@
 import { ref, computed } from "vue";
 
+import loadConfig from "../config";
+
 // Track authentication state without storing the token
 // The token is in an httpOnly cookie, inaccessible to JavaScript
 const isLoggedIn = ref(false);
@@ -24,8 +26,10 @@ export function useAuth() {
 
   const logout = async () => {
     try {
+      const config = await loadConfig();
+
       // Call backend to clear cookies
-      await fetch(`${import.meta.env.VITE_AUTH_API}/auth/logout`, {
+      await fetch(`${config.backendUrl}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -40,13 +44,11 @@ export function useAuth() {
 
   const verifyToken = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_AUTH_API}/auth/verify`,
-        {
-          method: "POST",
-          credentials: "include", // Send cookies
-        },
-      );
+      const config = await loadConfig();
+      const response = await fetch(`${config.backendUrl}/auth/verify`, {
+        method: "POST",
+        credentials: "include", // Send cookies
+      });
 
       if (!response.ok) {
         isLoggedIn.value = false;
@@ -74,13 +76,11 @@ export function useAuth() {
 
   const refreshToken = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_AUTH_API}/auth/refresh`,
-        {
-          method: "POST",
-          credentials: "include", // Send refresh token cookie
-        },
-      );
+      const config = await loadConfig();
+      const response = await fetch(`${config.backendUrl}/auth/refresh`, {
+        method: "POST",
+        credentials: "include", // Send refresh token cookie
+      });
 
       if (!response.ok) {
         // Refresh failed - user needs to log in again

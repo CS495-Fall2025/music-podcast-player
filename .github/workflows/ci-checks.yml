@@ -1,0 +1,72 @@
+name: Continuous Integration Checks
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  frontend-check-linting:
+    runs-on: ubuntu-latest
+    container:
+      image: node:24-alpine
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install
+      - run: npm run lint
+  frontend-check-format:
+    runs-on: ubuntu-latest
+    container:
+      image: node:24-alpine
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install
+      - run: npm run format-check
+  backend-check-linting:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.13-alpine
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v3
+      - run: apk add postgresql-dev gcc python3-dev musl-dev
+      - run: pip install --root-user-action ignore -r dev-requirements.txt
+      - run: python -m ruff check
+  backend-check-formatting:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.13-alpine
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v3
+      - run: apk add postgresql-dev gcc python3-dev musl-dev
+      - run: pip install --root-user-action ignore -r dev-requirements.txt
+      - run: python -m ruff format --check
+  backend-run-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.13-alpine
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      RSS_PLAYER_ALLOWED_ORIGINS: http://localhost:5173
+      RSS_PLAYER_PODCAST_INDEX_KEY: fake_key
+      RSS_PLAYER_PODCAST_INDEX_SECRET: fake_secret
+      RSS_PLAYER_DATABASE_CONNECTION: 'sqlite:///:memory:'
+    steps:
+      - uses: actions/checkout@v3
+      - run: apk add postgresql-dev gcc python3-dev musl-dev
+      - run: pip install --root-user-action ignore -r dev-requirements.txt
+      - run: pip install --root-user-action ignore -e .
+      - run: python -m pytest
