@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 from rss_music_db_service_schemas import ErrorResponse, ErrorType
 import rss_music_db_service_schemas.users.requests as db_user_requests
+import rss_music_db_service_schemas.users.responses as db_user_responses
 
 from rss_music_db_service import errors
 from rss_music_db_service.users import create, exists, login
@@ -27,7 +28,6 @@ async def create_user(request: Request):
         )
     except errors.NotUniqueError as error:
         response_data = {
-            "code": 409,
             "error": ErrorType.NOT_UNIQUE,
             "message": "The username or email has been used already",
             "details": {
@@ -39,9 +39,10 @@ async def create_user(request: Request):
             content=ErrorResponse().dump(response_data),
         )
 
-    return {
-        "code": 201
+    response_data = {
+        "username": result["username"],
     }
+    return db_user_responses.CreateUserResponse().dump(response_data)
 
 
 @users.post("/exists")
@@ -68,10 +69,10 @@ async def user_exists(request: Request):
                     found_flag = True
                     break
 
-    return {
-        "code": 200,
+    response_data = {
         "exists": found_flag,
     }
+    return db_user_responses.UserExistsResponse().dump(response_data)
 
 
 @users.post("/login")
@@ -85,7 +86,6 @@ async def user_login(request: Request):
 
     if user is None:
         response_data = {
-            "code": 409,
             "error": ErrorType.INVALID_CREDENTIALS,
             "message": "The provided credentials are invalid",
         }
@@ -95,8 +95,8 @@ async def user_login(request: Request):
             content=ErrorResponse().dump(response_data)
         )
 
-    return {
-        "code": 200,
+    response_data = {
         "username": user.username,
         "id": user.id,
     }
+    return db_user_responses.UserLoginResponse().dump(response_data)
