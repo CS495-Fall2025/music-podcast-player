@@ -5,6 +5,10 @@ WORKDIR /app
 # Install uv for better package management.
 RUN pip install uv
 
+# Bring in needed local packages.
+COPY common_validators common_validators
+COPY db_service_schemas db_service_schemas
+
 # Install rss_music_api_service dependencies
 WORKDIR /app/api_service
 

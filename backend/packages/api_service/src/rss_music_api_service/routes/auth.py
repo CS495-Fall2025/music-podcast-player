@@ -2,9 +2,10 @@ import flask
 from flask import Blueprint, request, session, current_app
 from marshmallow import ValidationError
 
-from rss_music_api_service.auth import errors, signup, login, pkce
-from rss_music_api_service.database import make_session
+from rss_music_api_service.auth import signup, login, pkce
 from rss_music_api_service.errors import RequestError, get_error_response
+from rss_music_api_service.internal_apis import db_service 
+from rss_music_api_service.internal_apis import errors as db_errors
 from rss_music_api_service.schemas import SignUpRequestSchema
 
 # All routes added to this BP are under "/auth"
@@ -29,7 +30,7 @@ def post_signup() -> dict:
             valid_request["email"],
             valid_request["password"],
         )
-    except errors.NotUniqueError as error:
+    except db_errors.InternalAPIUniquenessError as error:
         return get_error_response(RequestError.VALUE_NOT_UNIQUE, {"field": error.field})
 
     return {
@@ -101,7 +102,7 @@ def post_login() -> tuple:
         }, 401
 
     try:
-        user = login.authenticate_user(username, password)
+        user_id, username = login.authenticate_user(username, password)
     except login.InvalidCredentialsError:
         return {
             "code": 401,
@@ -110,12 +111,12 @@ def post_login() -> tuple:
         }, 401
 
     secret_key = current_app.config.get("SECRET_KEY", "dev-secret-key")
-    tokens = login.generate_tokens(user, secret_key)
+    tokens = login.generate_tokens(user_id, username, secret_key)
 
     session.pop("code_challenge", None)
     session.pop("code_verifier_expected", None)
 
-    is_production = current_app.config.get("SESSION_COOKIE_SECURE", False)
+    is_production = current_app.config.get("SESSION_COOKIE_SECURE", True)
 
     response = flask.make_response({"success": True}, 200)
 
@@ -156,22 +157,21 @@ def post_verify() -> tuple:
             "message": "No token found",
         }, 401
 
-    secret_key = current_app.config.get("SECRET_KEY", "dev-secret-key")
+    secret_key = current_app.config.get("SECRET_KEY")
 
     try:
-        payload = login.verify_jwt(token, secret_key, expected_type="access")
+        payload = login.verify_jwt(token, secret_key, expected_type=login.TokenType.ACCESS)
         user_id = payload.get("sub")
 
         # Verify user still exists in database
-        with make_session() as db_session:
-            user = db_session.query(login.User).filter(login.User.id == user_id).first()
-            if not user:
-                return {
-                    "valid": False,
-                    "code": 401,
-                    "error": "UserNotFound",
-                    "message": "User not found",
-                }, 401
+        if not db_service.check_user_exists(user_id):
+            return {
+                "valid": False,
+                "code": 401,
+                "error": "UserNotFound",
+                "message": "User not found",
+            }, 401
+
 
         user_info = {
             "id": payload.get("sub"),
@@ -211,43 +211,43 @@ def post_refresh() -> tuple:
             "message": "No refresh token found",
         }, 401
 
-    secret_key = current_app.config.get("SECRET_KEY", "dev-secret-key")
+    secret_key = current_app.config.get("SECRET_KEY")
 
     try:
-        payload = login.verify_jwt(refresh_token, secret_key, expected_type="refresh")
+        payload = login.verify_jwt(refresh_token, secret_key, expected_type=login.TokenType.REFRESH)
     except login.UserNotFoundError:
         return {"code": 401, "error": "UserNotFound", "message": "User not found"}, 401
     except login.InvalidTokenError as e:
         return {"code": 401, "error": "InvalidToken", "message": str(e)}, 401
 
     user_id = payload.get("sub")
+    username = payload.get("name")
 
-    with make_session() as db_session:
-        user = db_session.query(login.User).filter(login.User.id == user_id).first()
-        if not user:
-            return {
-                "code": 401,
-                "error": "UserNotFound",
-                "message": "User not found",
-            }, 401
+    if not db_service.check_user_exists(user_id):
+        return {
+            "code": 401,
+            "error": "UserNotFound",
+            "message": "User not found",
+        }, 401
 
-        new_access_token = login.generate_jwt(
-            user, secret_key, expires_in_hours=1, token_type="access"
-        )
 
-        is_production = current_app.config.get("SESSION_COOKIE_SECURE", False)
+    new_access_token = login.generate_jwt(
+        user_id, username, secret_key, expires_in_hours=1, token_type=login.TokenType.ACCESS
+    )
 
-        response = flask.make_response({"success": True}, 200)
-        response.set_cookie(
-            "access_token",
-            new_access_token,
-            httponly=True,
-            secure=is_production,
-            samesite="Lax",
-            max_age=3600,
-        )
+    is_production = current_app.config.get("SESSION_COOKIE_SECURE", True)
 
-        return response
+    response = flask.make_response({"success": True}, 200)
+    response.set_cookie(
+        "access_token",
+        new_access_token,
+        httponly=True,
+        secure=is_production,
+        samesite="Lax",
+        max_age=3600,
+    )
+
+    return response
 
 
 @AUTH_BP.post("/logout")

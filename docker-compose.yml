@@ -1,27 +1,32 @@
 services:
-#  frontend:
-#    build: ./frontend
-#    ports:
-#      - "5173:5173"
-#    # Keeping node_modules in the container seperate.
-#    # Using ./frontend as a volume lets us update files on the fly and have the page
-#    # still autoupdate.
-#    volumes:
-#      - ./frontend:/app
-#      - /app/node_modules
-#    stdin_open: true
-#  backend-api-service:
-#    build:
-#      context: ./backend/packages/
-#      dockerfile: ../docker/local_dev/Dockerfile.api-service
-#    ports:
-#      - "5000:5000"
-#    env_file: ./secrets/backend.env
-#    depends_on:
-#      database:
-#        condition: service_healthy
-#      migrations:
-#        condition: service_completed_successfully
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    # Keeping node_modules in the container seperate.
+    # Using ./frontend as a volume lets us update files on the fly and have the page
+    # still autoupdate.
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    stdin_open: true
+  backend-api-service:
+    build:
+      context: ./backend/packages/
+      dockerfile: ../docker/local_dev/Dockerfile.api-service
+    ports:
+      - "5000:5000"
+    env_file: ./secrets/backend.env
+    environment:
+      RSS_PLAYER_ALLOWED_ORIGINS: http://localhost:5173
+      RSS_PLAYER_DB_SERVICE_URL: http://backend-db-service:5001
+      RSS_PLAYER_ENVIRONMENT: dev
+      RSS_PLAYER_SECRET_KEY: dev-secret-key-7Th41h!tDGU@vI1^8&9%
+    depends_on:
+      database:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
   backend-db-service:
     build:
       context: ./backend/packages/

@@ -12,8 +12,8 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_prefixed_env(prefix="RSS_PLAYER")
 
-    secret_key = os.getenv("RSS_PLAYER_SECRET_KEY", "dev-secret-key")
-    is_production = os.getenv("RSS_PLAYER_ENVIRONMENT", "dev") == "production"
+    secret_key = os.getenv("RSS_PLAYER_SECRET_KEY")
+    is_production = os.getenv("RSS_PLAYER_ENVIRONMENT", "production") == "production"
 
     app.config["SECRET_KEY"] = secret_key
     app.config["SESSION_COOKIE_SECURE"] = is_production

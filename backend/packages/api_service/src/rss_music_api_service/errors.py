@@ -30,7 +30,7 @@ _ERROR_RESPONSE_VALUES = {
         "error": "ValueNotUnique",
         "message": "This {field} is already in use",
         "field": "unknown",
-        "code": 403,
+        "code": 409,
     },
 }
 
