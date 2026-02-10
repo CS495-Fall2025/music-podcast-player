@@ -42,7 +42,7 @@ export default {
     trackTitle() {
       return this.trackObj.title || "Track title not found";
     },
-    // Returns the track's description, if there's no description, returns placeholder.
+    // Returns the track's (sanitized) description, if there's no description, returns placeholder.
     trackDescription() {
       return (
         sanitizeText(this.trackObj.description) || "Track description not found"
