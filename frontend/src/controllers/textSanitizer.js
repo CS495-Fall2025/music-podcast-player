@@ -6,7 +6,7 @@ export function sanitizeText(
   allowedAttr = ["href", "target"],
 ) {
   if (!rawText) return null;
-  if (typeof rawText != string) return null;
+  if (typeof rawText !== "string") return null;
 
   return DOMPurify.sanitize(rawText, {
     ALLOWED_TAGS: allowedTags,
