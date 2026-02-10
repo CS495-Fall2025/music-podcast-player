@@ -9,7 +9,7 @@
       <div class="track-title">{{ trackTitle }}</div>
       <div class="track-artist">{{ trackArtist }}</div>
     </div>
-    <div class="track-description">{{ trackDescription }}</div>
+    <div class="track-description" v-html="trackDescription"></div>
   </div>
 </template>
 

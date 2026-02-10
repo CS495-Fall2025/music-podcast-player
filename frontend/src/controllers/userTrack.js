@@ -1,4 +1,5 @@
 import { currentTrack } from "./localFeedStore.js";
+import { sanitizeText } from "./textSanitizer.js";
 
 export default {
   name: "userTrack",
@@ -20,12 +21,14 @@ export default {
   computed: {
     // Returns a trackObj if the track exists, otherwise return placeholder values to prevent crashing.
     trackObj() {
-      return this.track || {
-        image: "",
-        artist: "",
-        title: "",
-        description: ""
-      }
+      return (
+        this.track || {
+          image: "",
+          artist: "",
+          title: "",
+          description: "",
+        }
+      );
     },
     // Returns the track's image, if there's no image, returns placeholder.
     trackImage() {
@@ -41,7 +44,9 @@ export default {
     },
     // Returns the track's description, if there's no description, returns placeholder.
     trackDescription() {
-      return this.trackObj.description || "Track description not found";
+      return (
+        sanitizeText(this.trackObj.description) || "Track description not found"
+      );
     },
   },
 };
