@@ -9,7 +9,6 @@ import {
 } from "../controllers/searchHistory.js";
 import { requestFeeds } from "../controllers/backendFeedParser.js";
 
-const emit = defineEmits(["select"]);
 const showHistory = ref(false);
 const boxRef = ref(null);
 const buttonRef = ref(null);
