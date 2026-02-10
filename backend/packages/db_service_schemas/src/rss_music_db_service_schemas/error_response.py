@@ -8,7 +8,10 @@ class ErrorType(Enum):
     INVALID_FORMAT = "InvalidFormat"
     # Doesn't match expected schema.
     INVALID_ARGUMENT = "InvalidArgument"
+    # An object argument that must be unique was not unique.
     NOT_UNIQUE = "NotUnique"
+    # Credentials were invalid
+    INVALID_CREDENTIALS = "InvalidCredentials"
 
 
 class ErrorResponse(Schema):

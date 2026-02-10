@@ -5,7 +5,7 @@ from rss_music_db_service_schemas import ErrorResponse, ErrorType
 import rss_music_db_service_schemas.users.requests as db_user_requests
 
 from rss_music_db_service import errors
-from rss_music_db_service.users import create, exists
+from rss_music_db_service.users import create, exists, login
 from rss_music_db_service.basic_validation import validate_json
 
 
@@ -43,6 +43,7 @@ async def create_user(request: Request):
         "code": 201
     }
 
+
 @users.post("/exists")
 async def user_exists(request: Request):
     result = await validate_json(request, db_user_requests.UserExistsRequest())
@@ -70,4 +71,32 @@ async def user_exists(request: Request):
     return {
         "code": 200,
         "exists": found_flag,
+    }
+
+
+@users.post("/login")
+async def user_login(request: Request):
+    result = await validate_json(request, db_user_requests.UserLoginRequest())
+
+    if isinstance(result, JSONResponse):
+        return result
+    
+    user = login.authenticate_user(result["username"], result["password"])
+
+    if user is None:
+        response_data = {
+            "code": 409,
+            "error": ErrorType.INVALID_CREDENTIALS,
+            "message": "The provided credentials are invalid",
+        }
+
+        return JSONResponse(
+            status_code=401,
+            content=ErrorResponse().dump(response_data)
+        )
+
+    return {
+        "code": 200,
+        "username": user.username,
+        "id": user.id,
     }

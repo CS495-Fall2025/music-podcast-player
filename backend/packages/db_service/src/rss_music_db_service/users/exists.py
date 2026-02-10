@@ -21,7 +21,7 @@ def user_exists_by_email(email: str) -> bool:
     return False
 
 
-def user_exists_by_int(id: int) -> bool:
+def user_exists_by_id(id: int) -> bool:
     with make_session() as session:
         user = session.query(User).filter(User.id == id).first()
 

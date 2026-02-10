@@ -18,33 +18,6 @@ class UserNotFoundError(Exception):
     pass
 
 
-def verify_password(stored_salt_and_hash: bytes, provided_password: str) -> bool:
-    """
-    Verify a password against stored salt + hash.
-    """
-    salt = stored_salt_and_hash[:16]
-    stored_hash = stored_salt_and_hash[16:]
-
-    computed_hash = hashlib.scrypt(
-        provided_password.encode("utf-8"), salt=salt, n=16384, r=8, p=1, dklen=32
-    )
-
-    return computed_hash == stored_hash
-
-
-def authenticate_user(username: str, password: str) -> User:
-    with make_session() as session:
-        user = session.query(User).filter(User.username == username).first()
-
-        if not user:
-            raise InvalidCredentialsError("Invalid credentials")
-
-        if not verify_password(user.password, password):
-            raise InvalidCredentialsError("Invalid credentials")
-
-        return user
-
-
 def generate_jwt(
     user: User, secret_key: str, expires_in_hours: int = 1, token_type: str = "access"
 ) -> str:
