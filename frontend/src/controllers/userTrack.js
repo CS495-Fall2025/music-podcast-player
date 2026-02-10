@@ -20,12 +20,14 @@ export default {
   computed: {
     // Returns a trackObj if the track exists, otherwise return placeholder values to prevent crashing.
     trackObj() {
-      return this.track || {
-        image: "",
-        artist: "",
-        title: "",
-        description: ""
-      }
+      return (
+        this.track || {
+          image: "",
+          artist: "",
+          title: "",
+          description: "",
+        }
+      );
     },
     // Returns the track's image, if there's no image, returns placeholder.
     trackImage() {
