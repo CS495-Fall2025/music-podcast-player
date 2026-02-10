@@ -1,4 +1,4 @@
-from rss_music_backend.external_apis.concrete import PodcastIndexAPI
+from rss_music_api_service.external_apis.concrete import PodcastIndexAPI
 
 AUTHENTICATION_HEADERS = {"User-Agent", "X-Auth-Key", "X-Auth-Date", "Authorization"}
 

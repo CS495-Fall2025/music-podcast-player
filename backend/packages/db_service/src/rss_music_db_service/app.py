@@ -6,8 +6,11 @@ from rss_music_data_model import initialize_engine
 from rss_music_db_service.routes import users
 
 
-initialize_engine(os.getenv("DATABASE_URL"))
+def create_app() -> FastAPI:
+    initialize_engine(os.getenv("DATABASE_URL"))
 
 
-app = FastAPI()
-app.include_router(users, prefix="/users")
+    app = FastAPI()
+    app.include_router(users, prefix="/users")
+
+    return app

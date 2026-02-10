@@ -1,9 +1,9 @@
 import pytest
 from sqlalchemy import select
 
-from rss_music_backend.database import User
+from rss_music_data_model import User
 
-ENDPOINT_URL = "/auth/signup"
+ENDPOINT_URL = "/users/create"
 
 
 def test_empty_post_returns_invalid_format(client) -> None:
@@ -11,23 +11,19 @@ def test_empty_post_returns_invalid_format(client) -> None:
 
     assert response.status_code == 400
 
-    data = response.get_json()
-
-    assert 400 == data["code"]
+    data = response.json()
 
     assert "InvalidFormat" == data["error"]
 
 
 def test_malformed_post_returns_invalid_format(client) -> None:
     response = client.post(
-        ENDPOINT_URL, data="NOT_JSON", content_type="application/json"
+        ENDPOINT_URL, content=b"NOT_JSON", headers={"Content-Type": "application/json"}
     )
 
     assert response.status_code == 400
 
-    data = response.get_json()
-
-    assert 400 == data["code"]
+    data = response.json()
 
     assert "InvalidFormat" == data["error"]
 
@@ -43,9 +39,7 @@ def test_missing_arg_returns_invalid_argument(client) -> None:
 
     assert response.status_code == 400
 
-    data = response.get_json()
-
-    assert 400 == data["code"]
+    data = response.json()
 
     assert "InvalidArgument" == data["error"]
 
@@ -62,8 +56,7 @@ def test_short_username_returns_invalid_argument(client) -> None:
 
     assert response.status_code == 400
 
-    data = response.get_json()
-    assert 400 == data["code"]
+    data = response.json()
 
     assert "InvalidArgument" == data["error"]
 
@@ -80,9 +73,7 @@ def test_long_username_returns_invalid_argument(client) -> None:
 
     assert response.status_code == 400
 
-    data = response.get_json()
-
-    assert 400 == data["code"]
+    data = response.json()
 
     assert "InvalidArgument" == data["error"]
 
@@ -99,9 +90,7 @@ def test_outer_underscore_username_returns_invalid_argument(client) -> None:
 
     assert response.status_code == 400
 
-    data = response.get_json()
-
-    assert 400 == data["code"]
+    data = response.json()
 
     assert "InvalidArgument" == data["error"]
 
@@ -118,9 +107,7 @@ def test_illegal_characters_username_returns_invalid_argument(client) -> None:
 
     assert response.status_code == 400
 
-    data = response.get_json()
-
-    assert 400 == data["code"]
+    data = response.json()
 
     assert "InvalidArgument" == data["error"]
 
@@ -137,9 +124,7 @@ def test_invalid_email_returns_invalid_argument(client) -> None:
 
     assert response.status_code == 400
 
-    data = response.get_json()
-
-    assert 400 == data["code"]
+    data = response.json()
 
     assert "InvalidArgument" == data["error"]
 
@@ -156,9 +141,7 @@ def test_short_password_returns_invalid_argument(client) -> None:
 
     assert response.status_code == 400
 
-    data = response.get_json()
-
-    assert 400 == data["code"]
+    data = response.json()
 
     assert "InvalidArgument" == data["error"]
 
@@ -175,9 +158,7 @@ def test_long_password_returns_invalid_argument(client) -> None:
 
     assert response.status_code == 400
 
-    data = response.get_json()
-
-    assert 400 == data["code"]
+    data = response.json()
 
     assert "InvalidArgument" == data["error"]
 
@@ -202,9 +183,7 @@ def test_weak_password_returns_invalid_argument(client, password) -> None:
 
     assert response.status_code == 400
 
-    data = response.get_json()
-
-    assert 400 == data["code"]
+    data = response.json()
 
     assert "InvalidArgument" == data["error"]
 
@@ -221,9 +200,7 @@ def test_successful_signup(client, db_session) -> None:
 
     assert response.status_code == 201
 
-    data = response.get_json()
-
-    assert 201 == data["code"]
+    data = response.json()
 
     query = select(User).where(User.username == "t3st_user57")
     results = list(db_session.execute(query).scalars())
@@ -253,13 +230,12 @@ def test_duplicate_username_returns_error(client, db_session) -> None:
     results = list(db_session.execute(query).scalars())
     print([result.__dict__ for result in results])
 
-    assert response.status_code == 403
+    assert response.status_code == 409
 
-    data = response.get_json()
+    data = response.json()
 
-    assert 403 == data["code"]
-    assert "username" == data["field"]
-    assert "This username is already in use" == data["message"]
+    assert "username" == data["details"]["field"]
+    assert "The username or email has been used already" == data["message"]
 
 
 def test_duplicate_email_returns_error(client, db_session) -> None:
@@ -284,10 +260,9 @@ def test_duplicate_email_returns_error(client, db_session) -> None:
     results = list(db_session.execute(query).scalars())
     print([result.__dict__ for result in results])
 
-    assert response.status_code == 403
+    assert response.status_code == 409
 
-    data = response.get_json()
+    data = response.json()
 
-    assert 403 == data["code"]
-    assert "email" == data["field"]
-    assert "This email is already in use" == data["message"]
+    assert "email" == data["details"]["field"]
+    assert "The username or email has been used already" == data["message"]

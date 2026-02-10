@@ -2,26 +2,26 @@ import hashlib
 
 import pytest
 
-from rss_music_backend.auth import signup
+from rss_music_db_service.users import create
 
 
 def test_makes_user_with_username() -> None:
     expected = "username"
-    user = signup._make_user(expected, "email@domain.com", "password")
+    user = create._make_user(expected, "email@domain.com", "password")
 
     assert expected == user.username
 
 
 def test_makes_user_with_email() -> None:
     expected = "email@domain.com"
-    user = signup._make_user("username", expected, "password")
+    user = create._make_user("username", expected, "password")
 
     assert expected == user.email
 
 
 def test_makes_user_with_hashed_and_salted_password() -> None:
     password = "password"
-    user = signup._make_user("username", "email@domain.com", password)
+    user = create._make_user("username", "email@domain.com", password)
 
     pass_bytes = password.encode("utf-8")
     salt = user.password[:16]
@@ -44,7 +44,7 @@ def test_makes_user_with_hashed_and_salted_password() -> None:
     ],
 )
 def test_identifies_username_not_unique_error(error) -> None:
-    actual = signup._parse_database_unique_constraint_error(error)
+    actual = create._parse_database_unique_constraint_error(error)
 
     assert "username" == actual
 
@@ -61,6 +61,6 @@ def test_identifies_username_not_unique_error(error) -> None:
     ],
 )
 def test_identifies_email_not_unique_error(error) -> None:
-    actual = signup._parse_database_unique_constraint_error(error)
+    actual = create._parse_database_unique_constraint_error(error)
 
     assert "email" == actual

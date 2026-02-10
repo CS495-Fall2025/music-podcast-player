@@ -12,7 +12,6 @@ async def validate_json(request: Request, schema: Schema) -> JSONResponse | dict
         data = await request.json()
     except JSONDecodeError:
         response_data = {
-            "code": 400,
             "error": ErrorType.INVALID_FORMAT,
             "message": "Expected a JSON body",
         }
@@ -24,14 +23,9 @@ async def validate_json(request: Request, schema: Schema) -> JSONResponse | dict
     try:
         valid_request = schema.load(data)
     except ValidationError as error:
-        message_lines = [
-            f"{field}: {' + '.join(issues)}"
-            for field, issues in error.messages_dict.items()
-        ]
         response_data = {
-            "code": 400,
             "error": ErrorType.INVALID_ARGUMENT,
-            "message": "\n".join(message_lines),
+            "message": "Request did not match expected schema",
             "details": error.messages_dict,
         }
         return JSONResponse(

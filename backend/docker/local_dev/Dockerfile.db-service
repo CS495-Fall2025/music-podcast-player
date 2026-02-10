@@ -27,4 +27,4 @@ RUN uv sync --group local
 EXPOSE 5001
 
 # Run the backend
-CMD ["uv", "run", "uvicorn", "rss_music_db_service.app:app", "--host", "0.0.0.0", "--port", "5001"]
+CMD ["uv", "run", "uvicorn", "rss_music_db_service.app:create_app", "--host", "0.0.0.0", "--port", "5001", "--factory"]

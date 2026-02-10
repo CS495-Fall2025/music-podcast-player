@@ -15,7 +15,6 @@ class ErrorType(Enum):
 
 
 class ErrorResponse(Schema):
-    code = fields.Int(validate=validate.Range(min=400, max=599))
     error = fields.Enum(ErrorType, by_value=True, required=True)
     message = fields.Str(required=True)
     details = fields.Dict(keys=fields.Str())

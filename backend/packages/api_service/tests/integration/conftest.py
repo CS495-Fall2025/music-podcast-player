@@ -1,21 +1,27 @@
+import os
 from pathlib import Path
 
 import pytest
 from unittest import mock
 
-from rss_music_backend import create_app
-from rss_music_backend.database import Base, get_engine, make_session
+from rss_music_api_service import create_app
 
 ALEMBIC_CONFIG_PATH = Path(__file__).parent.parent.parent / "alembic.ini"
 
 
 @pytest.fixture
 def app():
+    os.environ["RSS_PLAYER_ALLOWED_ORIGINS"] = "http://test.frontend.com"
+    os.environ["RSS_PLAYER_PODCAST_INDEX_KEY"] = "test-index-api-key"
+    os.environ["RSS_PLAYER_PODCAST_INDEX_SECRET"] = "test-index-api-secret"
+    os.environ["RSS_PLAYER_SECRET_KEY"] = "test-secret-key"
+
     app = create_app()
 
-    # Allow exceptions to propegate and fail tests. Additionally, use an in-memory
-    # SQLite database.
-    app.config.update({"TESTING": True, "DATABASE_CONNECTION": "sqlite:///:memory:"})
+    # Allow exceptions to propegate and fail tests.
+    app.config.update({
+        "TESTING": True,
+    })
 
     yield app
 
@@ -31,16 +37,3 @@ def client(app):
 
     with mock.patch("requests.Session.send", side_effect=fail_request) as _:
         yield app.test_client()
-
-
-@pytest.fixture
-def db_session(app):
-    with app.app_context():
-        engine = get_engine()
-        Base.metadata.create_all(engine)
-
-        try:
-            with make_session() as session:
-                yield session
-        finally:
-            Base.metadata.drop_all(engine)
