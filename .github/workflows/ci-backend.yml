@@ -10,6 +10,10 @@ on:
         required: false
         type: boolean
         default: false
+      tests:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   backend-check-linting:
@@ -35,6 +39,7 @@ jobs:
       - run: pip install ruff
       - run: python -m ruff format --check
   backend-check-testing:
+    if: inputs.tests
     runs-on: ubuntu-latest
     container:
       image: python:3.13-alpine

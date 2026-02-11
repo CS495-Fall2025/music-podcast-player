@@ -32,6 +32,7 @@ jobs:
     uses: ./.github/workflows/ci-backend.yml
     with:
       package-path: backend/packages/api_service
+      tests: true
   backend-common-validators-ci:
     uses: ./.github/workflows/ci-backend.yml
     with:
@@ -46,6 +47,7 @@ jobs:
     with:
       package-path: backend/packages/db_service
       uses_psycopg2: true
+      tests: true
   backend-db-service-schemas-ci:
     uses: ./.github/workflows/ci-backend.yml
     with:
