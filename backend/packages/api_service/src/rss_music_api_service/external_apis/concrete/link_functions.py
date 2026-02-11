@@ -3,12 +3,14 @@ import requests
 from rss_music_api_service.data import Rss
 from rss_music_api_service.external_apis.auth import identity
 from rss_music_api_service.external_apis import errors
+from rss_music_api_service.logging_config import log_request, get_logger
 
 import xml.etree.ElementTree as ET
 
 TIMEOUT = (3, 10)
 
 MAX_FEED_SIZE = 10_000_000
+logger = get_logger(__name__)
 
 
 class LinkFunctions:
@@ -315,14 +317,50 @@ class LinkFunctions:
             or "Mozilla/5.0 (compatible; rss-music-backend/1.0)",
             "Accept": "application/rss+xml, application/xml, text/xml, */*; q=0.1",
         }
+        
+        log_request(
+            logger,
+            "info",
+            "external_request_sent",
+            "Request sent to RSS feed URL",
+            service="RSSFeed",
+            url=url,
+        )
 
         try:
             response = requests.get(
                 url, headers=headers, timeout=TIMEOUT, allow_redirects=True
             )
+            
+            level = "info" if response.status_code < 400 else "warn"
+            log_request(
+                logger,
+                level,
+                "external_response_received",
+                "Response received from RSS feed URL",
+                service="RSSFeed",
+                status_code=response.status_code,
+            )
         except requests.Timeout:
+            log_request(
+                logger,
+                "error",
+                "external_timeout",
+                "RSS feed timeout",
+                service="RSSFeed",
+                url=url,
+            )
             raise errors.ExternalAPITimeoutError("Feed")
-        except requests.RequestException:
+        except requests.RequestException as e:
+            log_request(
+                logger,
+                "error",
+                "external_error",
+                "Error fetching RSS feed",
+                service="RSSFeed",
+                url=url,
+                error=str(e),
+            )
             raise errors.ExternalAPITransportError(
                 "An error occurred while sending a request to the Feed"
             )

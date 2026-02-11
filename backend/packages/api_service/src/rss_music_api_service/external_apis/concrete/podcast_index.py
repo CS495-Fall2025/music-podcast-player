@@ -10,9 +10,11 @@ from rss_music_api_service.data import Feed
 from rss_music_api_service.external_apis.auth import identity
 from rss_music_api_service.external_apis import errors
 from rss_music_api_service.schemas import SearchFeedsResponseSchema
+from rss_music_api_service.logging_config import log_request, get_logger
 
 API_URL = "https://api.podcastindex.org/api/1.0/"
 TIMEOUT = (3, 10)  # 3 Seconds to connect, 10 seconds to recieve response.
+logger = get_logger(__name__)
 
 
 class PodcastIndexAPI:
@@ -26,12 +28,46 @@ class PodcastIndexAPI:
             request, context = cls._make_search_request(
                 query, count, start, auth_headers
             )
+            
+            log_request(
+                logger,
+                "info",
+                "external_request_sent",
+                "Request sent to PodcastIndex API",
+                service="PodcastIndexAPI",
+                url=request.url,
+            )
 
             try:
                 response = session.send(request, timeout=TIMEOUT)
+                
+                level = "info" if response.status_code < 400 else "warn"
+                log_request(
+                    logger,
+                    level,
+                    "external_response_received",
+                    "Response received from PodcastIndex API",
+                    service="PodcastIndexAPI",
+                    status_code=response.status_code,
+                )
             except requests.Timeout:
+                log_request(
+                    logger,
+                    "error",
+                    "external_timeout",
+                    "PodcastIndex API timeout",
+                    service="PodcastIndexAPI",
+                )
                 raise errors.ExternalAPITimeoutError("PodcastIndexAPI")
-            except requests.RequestException:
+            except requests.RequestException as e:
+                log_request(
+                    logger,
+                    "error",
+                    "external_error",
+                    "Error sending request to PodcastIndex API",
+                    service="PodcastIndexAPI",
+                    error=str(e),
+                )
                 raise errors.ExternalAPITransportError(
                     "An error occurred while sending a request to the PodcastIndexAPI"
                 )
