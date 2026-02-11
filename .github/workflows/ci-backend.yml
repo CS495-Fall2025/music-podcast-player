@@ -1,0 +1,50 @@
+name: Continuous Integration Checks (Backend)
+
+on:
+  workflow_call:
+    inputs:
+      package-path:
+        required: true
+        type: string
+      uses_psycopg2:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  backend-check-linting:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.13-alpine
+    defaults:
+      run:
+        working-directory: ${{ inputs.package-path }}
+    steps:
+      - uses: actions/checkout@v3
+      - run: pip install ruff
+      - run: python -m ruff check
+  backend-check-formatting:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.13-alpine
+    defaults:
+      run:
+        working-directory: ${{ inputs.package-path }}
+    steps:
+      - uses: actions/checkout@v3
+      - run: pip install ruff
+      - run: python -m ruff format --check
+  backend-check-testing:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.13-alpine
+    defaults:
+      run:
+        working-directory: ${{ inputs.package-path }}
+    steps:
+      - uses: actions/checkout@v3
+      - run: apk add postgresql-dev gcc python3-dev musl-dev
+        if: inputs.uses_psycopg2
+      - run: apk add uv
+      - run: uv sync --group dev
+      - run: uv run python -m pytest
