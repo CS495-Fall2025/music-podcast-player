@@ -12,7 +12,7 @@ def wsgi_launch(environ, start_response):
 
 def create_app() -> Flask:
     configure_logging()
-    
+
     app = Flask(__name__)
     app.config.from_prefixed_env(prefix="RSS_PLAYER")
 

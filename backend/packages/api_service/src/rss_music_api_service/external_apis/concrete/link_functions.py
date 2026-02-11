@@ -317,7 +317,7 @@ class LinkFunctions:
             or "Mozilla/5.0 (compatible; rss-music-backend/1.0)",
             "Accept": "application/rss+xml, application/xml, text/xml, */*; q=0.1",
         }
-        
+
         log_request(
             logger,
             "info",
@@ -331,7 +331,7 @@ class LinkFunctions:
             response = requests.get(
                 url, headers=headers, timeout=TIMEOUT, allow_redirects=True
             )
-            
+
             level = "info" if response.status_code < 400 else "warn"
             log_request(
                 logger,

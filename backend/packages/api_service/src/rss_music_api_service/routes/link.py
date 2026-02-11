@@ -13,7 +13,13 @@ logger = get_logger(__name__)
 
 @LINK_BP.after_request
 def log_response(response):
-    level = "info" if response.status_code < 400 else "warn" if response.status_code < 500 else "error"
+    level = (
+        "info"
+        if response.status_code < 400
+        else "warn"
+        if response.status_code < 500
+        else "error"
+    )
     log_request(
         logger,
         level,
@@ -34,7 +40,7 @@ def get_link_feed() -> dict:
         "Link feed request received",
         route="/link/feed",
     )
-    
+
     try:
         data = {"url": request.args.get("url", "")}
 

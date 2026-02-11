@@ -13,7 +13,13 @@ logger = get_logger(__name__)
 
 @SEARCH_BP.after_request
 def log_response(response):
-    level = "info" if response.status_code < 400 else "warn" if response.status_code < 500 else "error"
+    level = (
+        "info"
+        if response.status_code < 400
+        else "warn"
+        if response.status_code < 500
+        else "error"
+    )
     log_request(
         logger,
         level,
@@ -34,7 +40,7 @@ def get_search_feeds() -> dict:
         "Search feeds request received",
         route="/search/feeds",
     )
-    
+
     try:
         data = request.args
         validated_request = SearchFeedsRequestSchema().load(data)

@@ -9,10 +9,12 @@ def get_current_user_id() -> str | None:
     token = request.cookies.get("access_token")
     if not token:
         return None
-    
+
     try:
         secret_key = current_app.config.get("SECRET_KEY")
-        payload = login.verify_jwt(token, secret_key, expected_type=login.TokenType.ACCESS)
+        payload = login.verify_jwt(
+            token, secret_key, expected_type=login.TokenType.ACCESS
+        )
         return str(payload.get("sub"))
     except (login.InvalidTokenError, login.UserNotFoundError, Exception):
         return None

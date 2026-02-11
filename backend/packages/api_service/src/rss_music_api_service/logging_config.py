@@ -8,9 +8,19 @@ from typing import Any
 
 
 """Change ordering of logs to match expected format."""
+
+
 def order_keys(logger, name, event_dict):
     ordered = OrderedDict()
-    for key in ["timestamp", "level", "event", "message", "userId", "route", "statusCode"]:
+    for key in [
+        "timestamp",
+        "level",
+        "event",
+        "message",
+        "userId",
+        "route",
+        "statusCode",
+    ]:
         if key in event_dict:
             ordered[key] = event_dict[key]
     for key, value in event_dict.items():

@@ -5,7 +5,7 @@ from marshmallow import ValidationError
 from rss_music_api_service.auth import signup, login, pkce
 from rss_music_api_service.auth.current_user import get_current_user_id
 from rss_music_api_service.errors import RequestError, get_error_response
-from rss_music_api_service.internal_apis import db_service 
+from rss_music_api_service.internal_apis import db_service
 from rss_music_api_service.internal_apis import errors as db_errors
 from rss_music_api_service.schemas import SignUpRequestSchema
 from rss_music_api_service.logging_config import log_request, get_logger
@@ -16,7 +16,13 @@ logger = get_logger(__name__)
 
 @AUTH_BP.after_request
 def log_response(response):
-    level = "info" if response.status_code < 400 else "warn" if response.status_code < 500 else "error"
+    level = (
+        "info"
+        if response.status_code < 400
+        else "warn"
+        if response.status_code < 500
+        else "error"
+    )
     log_request(
         logger,
         level,
@@ -39,7 +45,7 @@ def post_signup() -> dict:
         user_id=get_current_user_id(),
         route="/auth/signup",
     )
-    
+
     try:
         data = request.get_json(silent=True)
 
@@ -103,7 +109,7 @@ def post_login() -> tuple:
         user_id=get_current_user_id(),
         route="/auth/login",
     )
-    
+
     try:
         data = request.get_json(silent=True)
 
@@ -190,7 +196,7 @@ def post_verify() -> tuple:
         user_id=get_current_user_id(),
         route="/auth/verify",
     )
-    
+
     token = request.cookies.get("access_token")
 
     if not token:
@@ -204,7 +210,9 @@ def post_verify() -> tuple:
     secret_key = current_app.config.get("SECRET_KEY")
 
     try:
-        payload = login.verify_jwt(token, secret_key, expected_type=login.TokenType.ACCESS)
+        payload = login.verify_jwt(
+            token, secret_key, expected_type=login.TokenType.ACCESS
+        )
         user_id = payload.get("sub")
 
         # Verify user still exists in database
@@ -215,7 +223,6 @@ def post_verify() -> tuple:
                 "error": "UserNotFound",
                 "message": "User not found",
             }, 401
-
 
         user_info = {
             "id": payload.get("sub"),
@@ -254,7 +261,7 @@ def post_refresh() -> tuple:
         user_id=get_current_user_id(),
         route="/auth/refresh",
     )
-    
+
     refresh_token = request.cookies.get("refresh_token")
 
     if not refresh_token:
@@ -267,7 +274,9 @@ def post_refresh() -> tuple:
     secret_key = current_app.config.get("SECRET_KEY")
 
     try:
-        payload = login.verify_jwt(refresh_token, secret_key, expected_type=login.TokenType.REFRESH)
+        payload = login.verify_jwt(
+            refresh_token, secret_key, expected_type=login.TokenType.REFRESH
+        )
     except login.UserNotFoundError:
         return {"code": 401, "error": "UserNotFound", "message": "User not found"}, 401
     except login.InvalidTokenError as e:
@@ -283,9 +292,12 @@ def post_refresh() -> tuple:
             "message": "User not found",
         }, 401
 
-
     new_access_token = login.generate_jwt(
-        user_id, username, secret_key, expires_in_hours=1, token_type=login.TokenType.ACCESS
+        user_id,
+        username,
+        secret_key,
+        expires_in_hours=1,
+        token_type=login.TokenType.ACCESS,
     )
 
     is_production = current_app.config.get("SESSION_COOKIE_SECURE", True)
@@ -316,7 +328,7 @@ def post_logout() -> tuple:
         user_id=get_current_user_id(),
         route="/auth/logout",
     )
-    
+
     response = flask.make_response({"success": True}, 200)
     response.set_cookie("access_token", "", httponly=True, max_age=0)
     response.set_cookie("refresh_token", "", httponly=True, max_age=0)

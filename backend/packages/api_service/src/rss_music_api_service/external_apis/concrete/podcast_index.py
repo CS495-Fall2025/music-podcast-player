@@ -28,7 +28,7 @@ class PodcastIndexAPI:
             request, context = cls._make_search_request(
                 query, count, start, auth_headers
             )
-            
+
             log_request(
                 logger,
                 "info",
@@ -40,7 +40,7 @@ class PodcastIndexAPI:
 
             try:
                 response = session.send(request, timeout=TIMEOUT)
-                
+
                 level = "info" if response.status_code < 400 else "warn"
                 log_request(
                     logger,
