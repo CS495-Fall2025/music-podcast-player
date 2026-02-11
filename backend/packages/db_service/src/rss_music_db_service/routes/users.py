@@ -81,7 +81,7 @@ async def user_login(request: Request):
 
     if isinstance(result, JSONResponse):
         return result
-    
+
     user = login.authenticate_user(result["username"], result["password"])
 
     if user is None:
@@ -91,8 +91,7 @@ async def user_login(request: Request):
         }
 
         return JSONResponse(
-            status_code=401,
-            content=ErrorResponse().dump(response_data)
+            status_code=401, content=ErrorResponse().dump(response_data)
         )
 
     response_data = {

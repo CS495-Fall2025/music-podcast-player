@@ -211,17 +211,13 @@ def test_weak_password_returns_invalid_argument(client, password) -> None:
 
     assert "InvalidArgument" == data["error"]
 
+
 # DB
 def test_successful_signup(client) -> None:
-    def generate_success(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+    def generate_success(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_users_create_success(request)
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_success
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_success) as _:
         response = client.post(
             ENDPOINT_URL,
             json={
@@ -244,10 +240,7 @@ def test_duplicate_username_returns_error(client) -> None:
     ) -> Response:
         return db_service_mock.generate_users_create_not_unique(request, "username")
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_duplicate_username
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_duplicate_username) as _:
         response = client.post(
             ENDPOINT_URL,
             json={
@@ -268,15 +261,10 @@ def test_duplicate_username_returns_error(client) -> None:
 
 
 def test_duplicate_email_returns_error(client) -> None:
-    def generate_duplicate_email(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+    def generate_duplicate_email(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_users_create_not_unique(request, "email")
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_duplicate_email
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_duplicate_email) as _:
         response = client.post(
             ENDPOINT_URL,
             json={
@@ -297,15 +285,10 @@ def test_duplicate_email_returns_error(client) -> None:
 
 
 def test_reports_when_invalid_format_recieved(client) -> None:
-    def generate_invalid_format(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+    def generate_invalid_format(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_invalid_format(request)
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_invalid_format
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_invalid_format) as _:
         response = client.post(
             ENDPOINT_URL,
             json={
@@ -329,10 +312,7 @@ def test_reports_when_invalid_argument_recieved(client) -> None:
     ) -> Response:
         return db_service_mock.generate_invalid_argument(request)
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_invalid_argument
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_invalid_argument) as _:
         response = client.post(
             ENDPOINT_URL,
             json={
@@ -351,15 +331,10 @@ def test_reports_when_invalid_argument_recieved(client) -> None:
 
 
 def test_reports_when_db_service_timeout(client) -> None:
-    def generate_timeout(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+    def generate_timeout(request: PreparedRequest, *args, **kwargs) -> Response:
         raise exceptions.Timeout()
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_timeout
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_timeout) as _:
         response = client.post(
             ENDPOINT_URL,
             json={

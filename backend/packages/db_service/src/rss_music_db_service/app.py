@@ -9,7 +9,6 @@ from rss_music_db_service.routes import users
 def create_app() -> FastAPI:
     initialize_engine(os.getenv("DATABASE_URL"))
 
-
     app = FastAPI()
     app.include_router(users, prefix="/users")
 

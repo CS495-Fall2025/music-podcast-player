@@ -8,7 +8,4 @@ class UserLoginResponse(Schema):
         required=True,
         validate=common_validate.username,
     )
-    id = fields.Int(
-        required=True,
-        validate=validate.Range(min=0)
-    )
+    id = fields.Int(required=True, validate=validate.Range(min=0))

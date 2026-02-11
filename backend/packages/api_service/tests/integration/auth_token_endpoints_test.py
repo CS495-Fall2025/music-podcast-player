@@ -34,10 +34,6 @@ def create_test_token(
 
 @pytest.fixture
 def test_user():
-    username = "test_user"
-    email = "test@example.com"
-    password = "Password123!"
-
     return {
         "username": "test_user",
         "email": "test@example.com",
@@ -119,15 +115,11 @@ def test_verify_with_invalid_token_returns_error(client) -> None:
 
 def test_verify_with_valid_token_returns_user_info(logged_in_client, test_user) -> None:
     """Test /auth/verify with valid access token."""
-    def generate_user_exists(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+
+    def generate_user_exists(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_users_exists(request, True)
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_user_exists
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_user_exists) as _:
         response = logged_in_client.post("/auth/verify")
 
     assert response.status_code == 200
@@ -181,18 +173,13 @@ def test_verify_with_wrong_token_type_returns_error(client, test_user) -> None:
 
 
 def test_verify_reports_timeout(logged_in_client, test_user) -> None:
-    def generate_timeout(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+    def generate_timeout(request: PreparedRequest, *args, **kwargs) -> Response:
         raise exceptions.Timeout()
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_timeout
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_timeout) as _:
         response = logged_in_client.post("/auth/verify")
 
-    assert response.status_code == 504 
+    assert response.status_code == 504
     data = response.get_json()
 
     assert 504 == data["code"]
@@ -200,18 +187,13 @@ def test_verify_reports_timeout(logged_in_client, test_user) -> None:
 
 
 def test_verify_reports_invalid_response(logged_in_client, test_user) -> None:
-    def generate_timeout(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+    def generate_timeout(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_invalid_format(request)
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_timeout
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_timeout) as _:
         response = logged_in_client.post("/auth/verify")
 
-    assert response.status_code == 502 
+    assert response.status_code == 502
     data = response.get_json()
 
     assert 502 == data["code"]
@@ -247,15 +229,11 @@ def test_refresh_with_invalid_token_returns_error(client) -> None:
 
 def test_refresh_with_valid_token_returns_new_access_token(logged_in_client) -> None:
     """Test /auth/refresh with valid refresh token."""
-    def generate_user_exists(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+
+    def generate_user_exists(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_users_exists(request, True)
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_user_exists
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_user_exists) as _:
         response = logged_in_client.post("/auth/refresh")
 
     assert response.status_code == 200
@@ -314,6 +292,7 @@ def test_refresh_with_wrong_token_type_returns_error(client, test_user) -> None:
 
 def test_refresh_with_deleted_user_returns_error(client, test_user) -> None:
     """Test /auth/refresh when the user has been deleted from database."""
+
     def generate_user_doesnt_exist(
         request: PreparedRequest, *args, **kwargs
     ) -> Response:
@@ -329,10 +308,7 @@ def test_refresh_with_deleted_user_returns_error(client, test_user) -> None:
 
     client.set_cookie("refresh_token", refresh_token)
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_user_doesnt_exist
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_user_doesnt_exist) as _:
         response = client.post("/auth/refresh")
 
     assert response.status_code == 401
@@ -343,18 +319,13 @@ def test_refresh_with_deleted_user_returns_error(client, test_user) -> None:
 
 
 def test_refresh_reports_timeout(logged_in_client) -> None:
-    def generate_timeout(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+    def generate_timeout(request: PreparedRequest, *args, **kwargs) -> Response:
         raise exceptions.Timeout()
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_timeout
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_timeout) as _:
         response = logged_in_client.post("/auth/refresh")
 
-    assert response.status_code == 504 
+    assert response.status_code == 504
     data = response.get_json()
 
     assert 504 == data["code"]
@@ -362,15 +333,10 @@ def test_refresh_reports_timeout(logged_in_client) -> None:
 
 
 def test_refresh_reports_invalid_response(logged_in_client) -> None:
-    def generate_timeout(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+    def generate_timeout(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_invalid_format(request)
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_timeout
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_timeout) as _:
         response = logged_in_client.post("/auth/refresh")
 
     assert response.status_code == 502
@@ -421,15 +387,11 @@ def test_logout_without_being_logged_in(client) -> None:
 
 def test_logout_invalidates_access_token(logged_in_client) -> None:
     """Test that after logout, the old access token cannot be used."""
-    def generate_user_exists(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+
+    def generate_user_exists(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_users_exists(request, True)
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_user_exists
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_user_exists) as _:
         # Verify we're logged in
         response = logged_in_client.post("/auth/verify")
         assert response.status_code == 200
@@ -448,15 +410,11 @@ def test_logout_invalidates_access_token(logged_in_client) -> None:
 
 def test_logout_invalidates_refresh_token(logged_in_client) -> None:
     """Test that after logout, the old refresh token cannot be used."""
-    def generate_user_exists(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+
+    def generate_user_exists(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_users_exists(request, True)
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_user_exists
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_user_exists) as _:
         # Verify we can refresh
         response = logged_in_client.post("/auth/refresh")
         assert response.status_code == 200

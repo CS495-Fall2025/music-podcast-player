@@ -12,7 +12,7 @@ from rss_music_db_service_schemas.users import (
 from rss_music_api_service.internal_apis import errors
 
 
-TIMEOUT = (2, 5) # 2 Seconds to connect, 5 seconds to recieve response.
+TIMEOUT = (2, 5)  # 2 Seconds to connect, 5 seconds to recieve response.
 
 
 def create_user(username: str, email: str, password: str) -> None:
@@ -54,15 +54,19 @@ def try_user_login(username: str, password: str) -> tuple[int, str] | None:
     return response_data["id"], response_data["username"]
 
 
-def _create_user_request(username: str, email: str, password: str) -> requests.PreparedRequest:
+def _create_user_request(
+    username: str, email: str, password: str
+) -> requests.PreparedRequest:
     service_url = current_app.config["DB_SERVICE_URL"]
     url = urljoin(service_url, "users/create")
 
-    request_data = db_requests.CreateUserRequest().dump({
-        "username": username,
-        "email": email,
-        "password": password,
-    })
+    request_data = db_requests.CreateUserRequest().dump(
+        {
+            "username": username,
+            "email": email,
+            "password": password,
+        }
+    )
     request = requests.Request("POST", url, json=request_data)
 
     return request.prepare()
@@ -95,22 +99,28 @@ def _create_user_exists_request(id: int) -> requests.PreparedRequest:
     service_url = current_app.config["DB_SERVICE_URL"]
     url = urljoin(service_url, "users/exists")
 
-    request_data = db_requests.UserExistsRequest().dump({
-        "id": id,
-    })
+    request_data = db_requests.UserExistsRequest().dump(
+        {
+            "id": id,
+        }
+    )
     request = requests.Request("POST", url, json=request_data)
 
     return request.prepare()
 
 
-def _create_user_login_request(username: str, password: str) -> requests.PreparedRequest:
+def _create_user_login_request(
+    username: str, password: str
+) -> requests.PreparedRequest:
     service_url = current_app.config["DB_SERVICE_URL"]
     url = urljoin(service_url, "users/login")
 
-    request_data = db_requests.UserLoginRequest().dump({
-        "username": username,
-        "password": password,
-    })
+    request_data = db_requests.UserLoginRequest().dump(
+        {
+            "username": username,
+            "password": password,
+        }
+    )
     request = requests.Request("POST", url, json=request_data)
 
     return request.prepare()

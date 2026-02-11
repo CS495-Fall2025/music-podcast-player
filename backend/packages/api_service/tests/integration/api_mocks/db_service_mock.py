@@ -10,10 +10,12 @@ from rss_music_db_service_schemas.users import (
 
 
 def generate_invalid_format(_request: PreparedRequest) -> Response:
-    sdata = ErrorResponse().dumps({
-        "error": ErrorType.INVALID_FORMAT,
-        "message": "Expected a JSON body",
-    })
+    sdata = ErrorResponse().dumps(
+        {
+            "error": ErrorType.INVALID_FORMAT,
+            "message": "Expected a JSON body",
+        }
+    )
 
     response = Response()
     response.status_code = 400
@@ -24,13 +26,15 @@ def generate_invalid_format(_request: PreparedRequest) -> Response:
 
 
 def generate_invalid_argument(_request: PreparedRequest) -> Response:
-    sdata = ErrorResponse().dumps({
-        "error": ErrorType.INVALID_ARGUMENT,
-        "message": "Request did not match expected schema",
-        "details": {
-            "fieldname": ["Expected something cooler"],
-        },
-    })
+    sdata = ErrorResponse().dumps(
+        {
+            "error": ErrorType.INVALID_ARGUMENT,
+            "message": "Request did not match expected schema",
+            "details": {
+                "fieldname": ["Expected something cooler"],
+            },
+        }
+    )
 
     response = Response()
     response.status_code = 400
@@ -44,9 +48,11 @@ def generate_users_create_success(request: PreparedRequest) -> Response:
     body = json.loads(request.body.decode("UTF-8"))
     request_data = db_requests.CreateUserRequest().load(body)
 
-    sdata = db_responses.CreateUserResponse().dumps({
-        "username": request_data["username"],
-    })
+    sdata = db_responses.CreateUserResponse().dumps(
+        {
+            "username": request_data["username"],
+        }
+    )
 
     response = Response()
     response.status_code = 201
@@ -54,16 +60,18 @@ def generate_users_create_success(request: PreparedRequest) -> Response:
     response.headers = {"Content-Type": "application/json"}
 
     return response
-    
+
 
 def generate_users_create_not_unique(_request: PreparedRequest, field: str) -> Response:
-    sdata = ErrorResponse().dumps({
-        "error": ErrorType.NOT_UNIQUE,
-        "message": "The username or email has been used already",
-        "details": {
-            "field": field,
-        },
-    })
+    sdata = ErrorResponse().dumps(
+        {
+            "error": ErrorType.NOT_UNIQUE,
+            "message": "The username or email has been used already",
+            "details": {
+                "field": field,
+            },
+        }
+    )
 
     response = Response()
     response.status_code = 409
@@ -74,9 +82,11 @@ def generate_users_create_not_unique(_request: PreparedRequest, field: str) -> R
 
 
 def generate_users_exists(_request: PreparedRequest, exists: bool) -> Response:
-    sdata = db_responses.UserExistsResponse().dumps({
-        "exists": exists,
-    })
+    sdata = db_responses.UserExistsResponse().dumps(
+        {
+            "exists": exists,
+        }
+    )
 
     response = Response()
     response.status_code = 200
@@ -90,10 +100,12 @@ def generate_users_login_success(request: PreparedRequest, id: int) -> Response:
     body = json.loads(request.body.decode("UTF-8"))
     request_data = db_requests.UserLoginRequest().load(body)
 
-    sdata = db_responses.UserLoginResponse().dumps({
-        "username": request_data["username"],
-        "id": id,
-    })
+    sdata = db_responses.UserLoginResponse().dumps(
+        {
+            "username": request_data["username"],
+            "id": id,
+        }
+    )
 
     response = Response()
     response.status_code = 200
@@ -104,10 +116,12 @@ def generate_users_login_success(request: PreparedRequest, id: int) -> Response:
 
 
 def generate_users_login_failure(_request: PreparedRequest) -> Response:
-    sdata = ErrorResponse().dumps({
-        "error": ErrorType.INVALID_CREDENTIALS,
-        "message": "The provided credentials are invalid",
-    })
+    sdata = ErrorResponse().dumps(
+        {
+            "error": ErrorType.INVALID_CREDENTIALS,
+            "message": "The provided credentials are invalid",
+        }
+    )
 
     response = Response()
     response.status_code = 401

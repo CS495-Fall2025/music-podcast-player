@@ -200,8 +200,6 @@ def test_successful_signup(client, db_session) -> None:
 
     assert response.status_code == 201
 
-    data = response.json()
-
     query = select(User).where(User.username == "t3st_user57")
     results = list(db_session.execute(query).scalars())
 

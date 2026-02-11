@@ -3,10 +3,7 @@ import os
 
 from rss_music_data_model import User
 from rss_music_db_service_schemas import ErrorResponse, ErrorType
-from rss_music_db_service_schemas.users import (
-    requests as db_requests,
-    responses as db_responses,
-)
+from rss_music_db_service_schemas.users import responses as db_responses
 
 ENDPOINT_URL = "/users/login"
 
@@ -16,7 +13,7 @@ def make_password_hash(password: str) -> bytes:
     hash = hashlib.scrypt(
         password.encode("utf-8"), salt=salt, n=16384, r=8, p=1, dklen=32
     )
-    
+
     return salt + hash
 
 
@@ -51,7 +48,7 @@ def test_fail_to_login_to_nonexistant_user(client, db_session) -> None:
         },
     )
 
-    assert response.status_code == 401 
+    assert response.status_code == 401
 
     response_data = ErrorResponse().load(response.json())
 
@@ -78,7 +75,7 @@ def test_fail_to_login_wrong_password(client, db_session) -> None:
         },
     )
 
-    assert response.status_code == 401 
+    assert response.status_code == 401
 
     response_data = ErrorResponse().load(response.json())
 
@@ -111,4 +108,3 @@ def test_login_success(client, db_session) -> None:
 
     assert user.id == response_data["id"]
     assert username == response_data["username"]
-

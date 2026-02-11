@@ -4,7 +4,6 @@ from marshmallow import ValidationError
 
 from rss_music_api_service.auth import signup, login, pkce
 from rss_music_api_service.errors import RequestError, get_error_response
-from rss_music_api_service.internal_apis import db_service 
 from rss_music_api_service.internal_apis import errors as db_errors
 from rss_music_api_service.schemas import SignUpRequestSchema
 
@@ -32,9 +31,9 @@ def post_signup() -> dict:
         )
     except db_errors.InternalAPIUniquenessError as error:
         return get_error_response(RequestError.VALUE_NOT_UNIQUE, {"field": error.field})
-    except db_errors.InternalAPIBadResponseError as error:
+    except db_errors.InternalAPIBadResponseError:
         return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
-    except db_errors.InternalAPITransportError as error:
+    except db_errors.InternalAPITransportError:
         return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     return {
@@ -113,9 +112,9 @@ def post_login() -> tuple:
             "error": "InvalidCredentials",
             "message": "Invalid credentials",
         }, 401
-    except db_errors.InternalAPIBadResponseError as error:
+    except db_errors.InternalAPIBadResponseError:
         return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
-    except db_errors.InternalAPITransportError as error:
+    except db_errors.InternalAPITransportError:
         return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     secret_key = current_app.config.get("SECRET_KEY", "dev-secret-key")
@@ -168,8 +167,9 @@ def post_verify() -> tuple:
     secret_key = current_app.config.get("SECRET_KEY")
 
     try:
-        payload = login.verify_jwt(token, secret_key, expected_type=login.TokenType.ACCESS)
-        user_id = payload.get("sub")
+        payload = login.verify_jwt(
+            token, secret_key, expected_type=login.TokenType.ACCESS
+        )
 
         user_info = {
             "id": payload.get("sub"),
@@ -192,9 +192,9 @@ def post_verify() -> tuple:
             "error": "InvalidToken",
             "message": str(e),
         }, 401
-    except db_errors.InternalAPIBadResponseError as error:
+    except db_errors.InternalAPIBadResponseError:
         return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
-    except db_errors.InternalAPITransportError as error:
+    except db_errors.InternalAPITransportError:
         return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
 
@@ -216,21 +216,27 @@ def post_refresh() -> tuple:
     secret_key = current_app.config.get("SECRET_KEY")
 
     try:
-        payload = login.verify_jwt(refresh_token, secret_key, expected_type=login.TokenType.REFRESH)
+        payload = login.verify_jwt(
+            refresh_token, secret_key, expected_type=login.TokenType.REFRESH
+        )
     except login.UserNotFoundError:
         return {"code": 401, "error": "UserNotFound", "message": "User not found"}, 401
     except login.InvalidTokenError as e:
         return {"code": 401, "error": "InvalidToken", "message": str(e)}, 401
-    except db_errors.InternalAPIBadResponseError as error:
+    except db_errors.InternalAPIBadResponseError:
         return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
-    except db_errors.InternalAPITransportError as error:
+    except db_errors.InternalAPITransportError:
         return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     user_id = payload.get("sub")
     username = payload.get("name")
 
     new_access_token = login.generate_jwt(
-        user_id, username, secret_key, expires_in_hours=1, token_type=login.TokenType.ACCESS
+        user_id,
+        username,
+        secret_key,
+        expires_in_hours=1,
+        token_type=login.TokenType.ACCESS,
     )
 
     is_production = current_app.config.get("SESSION_COOKIE_SECURE", True)

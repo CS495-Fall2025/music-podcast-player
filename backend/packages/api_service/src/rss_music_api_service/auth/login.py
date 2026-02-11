@@ -78,7 +78,11 @@ def generate_tokens(user_id: int, username: str, secret_key: str) -> dict:
         user_id, username, secret_key, expires_in_hours=1, token_type=TokenType.ACCESS
     )
     refresh_token = generate_jwt(
-        user_id, username, secret_key, expires_in_hours=168, token_type=TokenType.REFRESH
+        user_id,
+        username,
+        secret_key,
+        expires_in_hours=168,
+        token_type=TokenType.REFRESH,
     )
 
     return {
@@ -88,7 +92,7 @@ def generate_tokens(user_id: int, username: str, secret_key: str) -> dict:
 
 
 def verify_jwt(
-        token: str, secret_key: str, expected_type: TokenType = TokenType.ACCESS
+    token: str, secret_key: str, expected_type: TokenType = TokenType.ACCESS
 ) -> dict:
     """
     Verify a JWT token and check if the user still exists in the database.
@@ -105,8 +109,8 @@ def verify_jwt(
         payload = jwt.decode(token, secret_key, algorithms=["HS256"])
     except jwt.ExpiredSignatureError:
         raise InvalidTokenError("Token has expired")
-    except jwt.InvalidTokenError as e:
-        raise InvalidTokenError("Invalid token")#(f"{e.message}")
+    except jwt.InvalidTokenError:
+        raise InvalidTokenError("Invalid token")
 
     token_type = payload.get("type", "access")
     if token_type != expected_type.value:

@@ -28,5 +28,3 @@ def _verify_password(stored_salt_and_hash: bytes, provided_password: str) -> boo
     )
 
     return computed_hash == stored_hash
-
-

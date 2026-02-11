@@ -1,18 +1,14 @@
 from marshmallow import Schema, fields, validate, validates_schema, ValidationError
 
-
 import rss_music_common_validators as common_validate
 
 
 class UserExistsRequest(Schema):
-    id = fields.Int(
-        validate=validate.Range(min=0)
-    )
+    id = fields.Int(validate=validate.Range(min=0))
     username = fields.Str(
         validate=common_validate.username,
     )
     email = fields.Email()
-
 
     @validates_schema
     def validate(self, data, **kwargs) -> None:

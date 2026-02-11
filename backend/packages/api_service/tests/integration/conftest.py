@@ -20,9 +20,11 @@ def app():
     app = create_app()
 
     # Allow exceptions to propegate and fail tests.
-    app.config.update({
-        "TESTING": True,
-    })
+    app.config.update(
+        {
+            "TESTING": True,
+        }
+    )
 
     yield app
 

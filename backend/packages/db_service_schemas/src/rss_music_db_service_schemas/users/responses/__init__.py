@@ -4,6 +4,7 @@ from rss_music_db_service_schemas.users.responses.user_login import UserLoginRes
 
 
 __all__ = [
+    "CreateUserResponse",
     "UserExistsResponse",
     "UserLoginResponse",
 ]

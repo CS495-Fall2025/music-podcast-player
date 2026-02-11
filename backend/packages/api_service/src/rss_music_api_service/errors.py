@@ -30,9 +30,7 @@ _ERROR_RESPONSE_VALUES = {
     },
     RequestError.INTERNAL_API_TIMEOUT: {
         "error": "InternalApiTimeout",
-        "message": (
-            "We were unable to reach the internal API we use for this request"
-        ),
+        "message": ("We were unable to reach the internal API we use for this request"),
         "code": 504,
     },
     RequestError.INTERNAL_API_BAD_RESPONSE: {
@@ -44,9 +42,7 @@ _ERROR_RESPONSE_VALUES = {
     },
     RequestError.EXTERNAL_API_TIMEOUT: {
         "error": "ExternalApiTimeout",
-        "message": (
-            "We were unable to reach the external API we use for this request"
-        ),
+        "message": ("We were unable to reach the external API we use for this request"),
         "code": 504,
     },
     RequestError.EXTERNAL_API_BAD_RESPONSE: {

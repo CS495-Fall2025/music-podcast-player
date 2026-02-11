@@ -1,6 +1,6 @@
 from enum import Enum
 
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, fields
 
 
 class ErrorType(Enum):

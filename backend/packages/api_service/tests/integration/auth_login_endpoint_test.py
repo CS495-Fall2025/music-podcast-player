@@ -164,15 +164,10 @@ def test_invalid_pkce_verifier_returns_error(client, test_user, pkce_challenge) 
 
 
 def test_invalid_credentials_returns_error(client, test_user, pkce_challenge) -> None:
-    def generate_failed_login(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+    def generate_failed_login(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_users_login_failure(request)
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_failed_login
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_failed_login) as _:
         response = client.post(
             ENDPOINT_URL,
             json={
@@ -193,12 +188,11 @@ def test_successful_login_returns_cookies(client, test_user, pkce_challenge) -> 
     def generate_successful_login(
         request: PreparedRequest, *args, **kwargs
     ) -> Response:
-        return db_service_mock.generate_users_login_success(request, test_user["user_id"])
+        return db_service_mock.generate_users_login_success(
+            request, test_user["user_id"]
+        )
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_successful_login
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_successful_login) as _:
         response = client.post(
             ENDPOINT_URL,
             json={
@@ -236,12 +230,11 @@ def test_successful_login_clears_pkce_from_session(
     def generate_successful_login(
         request: PreparedRequest, *args, **kwargs
     ) -> Response:
-        return db_service_mock.generate_users_login_success(request, test_user["user_id"])
+        return db_service_mock.generate_users_login_success(
+            request, test_user["user_id"]
+        )
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_successful_login
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_successful_login) as _:
         response = client.post(
             ENDPOINT_URL,
             json={
@@ -269,15 +262,10 @@ def test_successful_login_clears_pkce_from_session(
 
 
 def test_login_returns_bad_request(client, test_user, pkce_challenge) -> None:
-    def generate_invalid_format(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+    def generate_invalid_format(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_invalid_format(request)
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_invalid_format
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_invalid_format) as _:
         response = client.post(
             ENDPOINT_URL,
             json={
@@ -296,15 +284,10 @@ def test_login_returns_bad_request(client, test_user, pkce_challenge) -> None:
 
 
 def test_login_returns_timeout(client, test_user, pkce_challenge) -> None:
-    def generate_timeout(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
+    def generate_timeout(request: PreparedRequest, *args, **kwargs) -> Response:
         raise exceptions.Timeout()
 
-    with mock.patch(
-        SEND_METHOD,
-        side_effect=generate_timeout
-    ) as _:
+    with mock.patch(SEND_METHOD, side_effect=generate_timeout) as _:
         response = client.post(
             ENDPOINT_URL,
             json={
