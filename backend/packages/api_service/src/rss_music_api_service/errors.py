@@ -4,8 +4,11 @@ from enum import Enum, auto
 class RequestError(Enum):
     INVALID_FORMAT = auto()
     INVALID_ARGUMENT = auto()
-    EXTERNAL_API_UNAVALIABLE = auto()
+    EXTERNAL_API_TIMEOUT = auto()
+    EXTERNAL_API_BAD_RESPONSE = auto()
     VALUE_NOT_UNIQUE = auto()
+    INTERNAL_API_TIMEOUT = auto()
+    INTERNAL_API_BAD_RESPONSE = auto()
 
 
 _ERROR_RESPONSE_VALUES = {
@@ -19,18 +22,39 @@ _ERROR_RESPONSE_VALUES = {
         "message": "Arguments did not match expected schema",
         "code": 400,
     },
-    RequestError.EXTERNAL_API_UNAVALIABLE: {
-        "error": "ExternalApiUnavaliable",
-        "message": (
-            "The external API we use to process this request is currently unavaliable"
-        ),
-        "code": 503,
-    },
     RequestError.VALUE_NOT_UNIQUE: {
         "error": "ValueNotUnique",
         "message": "This {field} is already in use",
         "field": "unknown",
         "code": 409,
+    },
+    RequestError.INTERNAL_API_TIMEOUT: {
+        "error": "InternalApiTimeout",
+        "message": (
+            "We were unable to reach the internal API we use for this request"
+        ),
+        "code": 504,
+    },
+    RequestError.INTERNAL_API_BAD_RESPONSE: {
+        "error": "InternalApiBadResponse",
+        "message": (
+            "The response from the internal API we use for this request was invalid"
+        ),
+        "code": 502,
+    },
+    RequestError.EXTERNAL_API_TIMEOUT: {
+        "error": "ExternalApiTimeout",
+        "message": (
+            "We were unable to reach the external API we use for this request"
+        ),
+        "code": 504,
+    },
+    RequestError.EXTERNAL_API_BAD_RESPONSE: {
+        "error": "ExternalApiBadResponse",
+        "message": (
+            "The response from the external API we use for this request was invalid"
+        ),
+        "code": 502,
     },
 }
 

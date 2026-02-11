@@ -32,6 +32,10 @@ def post_signup() -> dict:
         )
     except db_errors.InternalAPIUniquenessError as error:
         return get_error_response(RequestError.VALUE_NOT_UNIQUE, {"field": error.field})
+    except db_errors.InternalAPIBadResponseError as error:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPITransportError as error:
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     return {
         "code": 201,
@@ -109,6 +113,10 @@ def post_login() -> tuple:
             "error": "InvalidCredentials",
             "message": "Invalid credentials",
         }, 401
+    except db_errors.InternalAPIBadResponseError as error:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPITransportError as error:
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     secret_key = current_app.config.get("SECRET_KEY", "dev-secret-key")
     tokens = login.generate_tokens(user_id, username, secret_key)
@@ -163,16 +171,6 @@ def post_verify() -> tuple:
         payload = login.verify_jwt(token, secret_key, expected_type=login.TokenType.ACCESS)
         user_id = payload.get("sub")
 
-        # Verify user still exists in database
-        if not db_service.check_user_exists(user_id):
-            return {
-                "valid": False,
-                "code": 401,
-                "error": "UserNotFound",
-                "message": "User not found",
-            }, 401
-
-
         user_info = {
             "id": payload.get("sub"),
             "username": payload.get("name"),
@@ -194,6 +192,10 @@ def post_verify() -> tuple:
             "error": "InvalidToken",
             "message": str(e),
         }, 401
+    except db_errors.InternalAPIBadResponseError as error:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPITransportError as error:
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
 
 @AUTH_BP.post("/refresh")
@@ -219,17 +221,13 @@ def post_refresh() -> tuple:
         return {"code": 401, "error": "UserNotFound", "message": "User not found"}, 401
     except login.InvalidTokenError as e:
         return {"code": 401, "error": "InvalidToken", "message": str(e)}, 401
+    except db_errors.InternalAPIBadResponseError as error:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPITransportError as error:
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     user_id = payload.get("sub")
     username = payload.get("name")
-
-    if not db_service.check_user_exists(user_id):
-        return {
-            "code": 401,
-            "error": "UserNotFound",
-            "message": "User not found",
-        }, 401
-
 
     new_access_token = login.generate_jwt(
         user_id, username, secret_key, expires_in_hours=1, token_type=login.TokenType.ACCESS

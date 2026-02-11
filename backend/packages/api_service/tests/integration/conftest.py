@@ -14,7 +14,8 @@ def app():
     os.environ["RSS_PLAYER_ALLOWED_ORIGINS"] = "http://test.frontend.com"
     os.environ["RSS_PLAYER_PODCAST_INDEX_KEY"] = "test-index-api-key"
     os.environ["RSS_PLAYER_PODCAST_INDEX_SECRET"] = "test-index-api-secret"
-    os.environ["RSS_PLAYER_SECRET_KEY"] = "test-secret-key"
+    os.environ["RSS_PLAYER_SECRET_KEY"] = "test-secret-key-abcdefghijklmnopqrstuvwxyz"
+    os.environ["RSS_PLAYER_DB_SERVICE_URL"] = "http://test.dbservice.com"
 
     app = create_app()
 

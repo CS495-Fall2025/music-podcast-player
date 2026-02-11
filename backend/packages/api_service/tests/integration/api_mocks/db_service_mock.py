@@ -1,3 +1,5 @@
+import json
+
 from requests import PreparedRequest, Response
 
 from rss_music_db_service_schemas import ErrorResponse, ErrorType
@@ -39,7 +41,8 @@ def generate_invalid_argument(_request: PreparedRequest) -> Response:
 
 
 def generate_users_create_success(request: PreparedRequest) -> Response:
-    request_data = db_requests.CreateUserRequest().load(request.body.decode("UTF-8"))
+    body = json.loads(request.body.decode("UTF-8"))
+    request_data = db_requests.CreateUserRequest().load(body)
 
     sdata = db_responses.CreateUserResponse().dumps({
         "username": request_data["username"],
@@ -83,8 +86,9 @@ def generate_users_exists(_request: PreparedRequest, exists: bool) -> Response:
     return response
 
 
-def generate_users_login_success(_request: PreparedRequest, id: int) -> Response:
-    request_data = db_requests.UserLoginRequest().load(request.body.decode("UTF-8"))
+def generate_users_login_success(request: PreparedRequest, id: int) -> Response:
+    body = json.loads(request.body.decode("UTF-8"))
+    request_data = db_requests.UserLoginRequest().load(body)
 
     sdata = db_responses.UserLoginResponse().dumps({
         "username": request_data["username"],

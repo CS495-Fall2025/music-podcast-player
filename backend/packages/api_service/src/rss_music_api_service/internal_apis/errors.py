@@ -20,7 +20,7 @@ class InternalAPIReturnedError(InternalAPIError):
         super().__init__(message)
 
 
-class InternalAPIBadRequestError(InternalAPIReturnedError):
+class InternalAPIBadResponseError(InternalAPIReturnedError):
     def __init__(self, message: str):
         super().__init__(message)
 

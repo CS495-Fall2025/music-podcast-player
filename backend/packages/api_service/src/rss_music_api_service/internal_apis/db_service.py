@@ -73,11 +73,11 @@ def _handle_error(response: requests.Response) -> None:
 
     match error_data["error"]:
         case ErrorType.INVALID_FORMAT:
-            raise errors.InternalAPIBadRequestError(
+            raise errors.InternalAPIBadResponseError(
                 "Recieved InvalidFormat from database service"
             )
         case ErrorType.INVALID_ARGUMENT:
-            raise errors.InternalAPIBadRequestError(
+            raise errors.InternalAPIBadResponseError(
                 "Recieved InvalidArgument from database service"
             )
         case ErrorType.NOT_UNIQUE:
