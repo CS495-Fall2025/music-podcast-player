@@ -109,8 +109,8 @@ def verify_jwt(
         payload = jwt.decode(token, secret_key, algorithms=["HS256"])
     except jwt.ExpiredSignatureError:
         raise InvalidTokenError("Token has expired")
-    except jwt.InvalidTokenError as e:
-        raise InvalidTokenError("Invalid token")  # (f"{e.message}")
+    except jwt.InvalidTokenError:
+        raise InvalidTokenError("Invalid token")
 
     token_type = payload.get("type", "access")
     if token_type != expected_type.value:

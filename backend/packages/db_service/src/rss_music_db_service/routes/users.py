@@ -166,7 +166,7 @@ async def user_login(request: Request, response: Response):
             status_code=result.status_code,
         )
         return result
-    
+
     user = login.authenticate_user(result["username"], result["password"])
 
     if user is None:
@@ -186,8 +186,7 @@ async def user_login(request: Request, response: Response):
         )
 
         return JSONResponse(
-            status_code=401,
-            content=ErrorResponse().dump(response_data)
+            status_code=401, content=ErrorResponse().dump(response_data)
         )
 
     response_data = {

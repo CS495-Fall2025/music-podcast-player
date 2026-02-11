@@ -1,6 +1,6 @@
 import re
 
-from marshmallow import Schema, fields, validate
+from marshmallow import validate
 
 
 username = validate.And(

@@ -1,10 +1,5 @@
-import pytest
-
 from rss_music_data_model import User
-from rss_music_db_service_schemas.users import (
-    requests as db_requests,
-    responses as db_responses,
-)
+from rss_music_db_service_schemas.users import responses as db_responses
 
 ENDPOINT_URL = "/users/exists"
 
@@ -33,9 +28,7 @@ def test_malformed_post_returns_invalid_format(client) -> None:
 
 def test_existing_user_returns_true_by_id(client, db_session) -> None:
     user = User(
-        username="testuser",
-        email="testuser@domain.com",
-        password=b"test-password-hash"
+        username="testuser", email="testuser@domain.com", password=b"test-password-hash"
     )
     db_session.add(user)
     db_session.commit()
@@ -51,14 +44,12 @@ def test_existing_user_returns_true_by_id(client, db_session) -> None:
 
     response_data = db_responses.UserExistsResponse().load(response.json())
 
-    assert response_data["exists"] == True
+    assert response_data["exists"]
 
 
 def test_existing_user_returns_true_by_username(client, db_session) -> None:
     user = User(
-        username="testuser",
-        email="testuser@domain.com",
-        password=b"test-password-hash"
+        username="testuser", email="testuser@domain.com", password=b"test-password-hash"
     )
     db_session.add(user)
     db_session.commit()
@@ -74,14 +65,12 @@ def test_existing_user_returns_true_by_username(client, db_session) -> None:
 
     response_data = db_responses.UserExistsResponse().load(response.json())
 
-    assert response_data["exists"] == True
+    assert response_data["exists"]
 
 
 def test_existing_user_returns_true_by_email(client, db_session) -> None:
     user = User(
-        username="testuser",
-        email="testuser@domain.com",
-        password=b"test-password-hash"
+        username="testuser", email="testuser@domain.com", password=b"test-password-hash"
     )
     db_session.add(user)
     db_session.commit()
@@ -97,14 +86,12 @@ def test_existing_user_returns_true_by_email(client, db_session) -> None:
 
     response_data = db_responses.UserExistsResponse().load(response.json())
 
-    assert response_data["exists"] == True
+    assert response_data["exists"]
 
 
 def test_nonexistant_user_returns_false(client, db_session) -> None:
     user = User(
-        username="testuser",
-        email="testuser@domain.com",
-        password=b"test-password-hash"
+        username="testuser", email="testuser@domain.com", password=b"test-password-hash"
     )
 
     response = client.post(
@@ -118,4 +105,4 @@ def test_nonexistant_user_returns_false(client, db_session) -> None:
 
     response_data = db_responses.UserExistsResponse().load(response.json())
 
-    assert response_data["exists"] == False
+    assert not response_data["exists"]

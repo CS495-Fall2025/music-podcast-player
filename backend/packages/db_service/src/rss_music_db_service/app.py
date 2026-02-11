@@ -12,7 +12,6 @@ def create_app() -> FastAPI:
     
     initialize_engine(os.getenv("DATABASE_URL"))
 
-
     app = FastAPI()
     app.include_router(users, prefix="/users")
 

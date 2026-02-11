@@ -268,7 +268,7 @@ def test_returns_no_results_when_no_feeds_found(client) -> None:
         assert 0 == len(data["feeds"])
 
 
-def test_returns_unavaliable_when_request_times_out(client) -> None:
+def test_returns_timeout_when_request_times_out(client) -> None:
     def return_timeout(request: PreparedRequest, *args, **kwargs) -> Response:
         raise exceptions.Timeout()
 
@@ -277,16 +277,16 @@ def test_returns_unavaliable_when_request_times_out(client) -> None:
             ENDPOINT_URL, query_string={"query": "query", "count": "5"}
         )
 
-        assert response.status_code == 503
+        assert response.status_code == 504
 
         data = response.get_json()
 
-        assert 503 == data["code"]
+        assert 504 == data["code"]
 
-        assert "ExternalApiUnavaliable" == data["error"]
+        assert "ExternalApiTimeout" == data["error"]
 
 
-def test_returns_unavaliable_when_api_responds_bad_request(client) -> None:
+def test_returns_bad_response_when_api_responds_bad_request(client) -> None:
     def return_bad_request(request: PreparedRequest, *args, **kwargs) -> Response:
         return podcastindex_mock.generate_bad_request_response(request)
 
@@ -295,16 +295,16 @@ def test_returns_unavaliable_when_api_responds_bad_request(client) -> None:
             ENDPOINT_URL, query_string={"query": "query", "count": "5"}
         )
 
-        assert response.status_code == 503
+        assert response.status_code == 502
 
         data = response.get_json()
 
-        assert 503 == data["code"]
+        assert 502 == data["code"]
 
-        assert "ExternalApiUnavaliable" == data["error"]
+        assert "ExternalApiBadResponse" == data["error"]
 
 
-def test_returns_unavaliable_when_api_responds_bad_authentication(client) -> None:
+def test_returns_bad_response_when_api_responds_bad_authentication(client) -> None:
     def return_bad_authentication(
         request: PreparedRequest, *args, **kwargs
     ) -> Response:
@@ -315,10 +315,10 @@ def test_returns_unavaliable_when_api_responds_bad_authentication(client) -> Non
             ENDPOINT_URL, query_string={"query": "query", "count": "5"}
         )
 
-        assert response.status_code == 503
+        assert response.status_code == 502
 
         data = response.get_json()
 
-        assert 503 == data["code"]
+        assert 502 == data["code"]
 
-        assert "ExternalApiUnavaliable" == data["error"]
+        assert "ExternalApiBadResponse" == data["error"]

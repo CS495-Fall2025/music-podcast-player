@@ -14,8 +14,8 @@ from rss_music_api_service.logging_config import log_request, get_logger
 
 
 TIMEOUT = (2, 5)  # 2 Seconds to connect, 5 seconds to recieve response.
-logger = get_logger(__name__)
 
+logger = get_logger(__name__)
 
 def create_user(username: str, email: str, password: str) -> None:
     request = _create_user_request(username, email, password)
@@ -79,11 +79,11 @@ def _handle_error(response: requests.Response) -> None:
 
     match error_data["error"]:
         case ErrorType.INVALID_FORMAT:
-            raise errors.InternalAPIBadRequestError(
+            raise errors.InternalAPIBadResponseError(
                 "Recieved InvalidFormat from database service"
             )
         case ErrorType.INVALID_ARGUMENT:
-            raise errors.InternalAPIBadRequestError(
+            raise errors.InternalAPIBadResponseError(
                 "Recieved InvalidArgument from database service"
             )
         case ErrorType.NOT_UNIQUE:

@@ -64,6 +64,10 @@ def post_signup() -> dict:
         )
     except db_errors.InternalAPIUniquenessError as error:
         return get_error_response(RequestError.VALUE_NOT_UNIQUE, {"field": error.field})
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPITransportError:
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     return {
         "code": 201,
@@ -150,6 +154,10 @@ def post_login() -> tuple:
             "error": "InvalidCredentials",
             "message": "Invalid credentials",
         }, 401
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPITransportError:
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     secret_key = current_app.config.get("SECRET_KEY", "dev-secret-key")
     tokens = login.generate_tokens(user_id, username, secret_key)
@@ -245,6 +253,10 @@ def post_verify() -> tuple:
             "error": "InvalidToken",
             "message": str(e),
         }, 401
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPITransportError:
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
 
 @AUTH_BP.post("/refresh")
@@ -281,6 +293,10 @@ def post_refresh() -> tuple:
         return {"code": 401, "error": "UserNotFound", "message": "User not found"}, 401
     except login.InvalidTokenError as e:
         return {"code": 401, "error": "InvalidToken", "message": str(e)}, 401
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPITransportError:
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     user_id = payload.get("sub")
     username = payload.get("name")
