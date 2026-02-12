@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { completeLogin } from "../auth/authService";
 import * as pkce from "../auth/pkce";
+import loadConfig from "../config";
 
 const router = useRouter();
 const username = ref("");
@@ -23,8 +24,9 @@ onMounted(async () => {
     sessionStorage.setItem("pkce_verifier", codeVerifier);
 
     // notify backend of PKCE challenge
+		const config = await loadConfig();
     const response = await fetch(
-      `${import.meta.env.VITE_AUTH_API}/auth?code_challenge=${encodeURIComponent(codeChallenge)}`,
+      `${config.backendUrl}/auth?code_challenge=${encodeURIComponent(codeChallenge)}`,
       {
         method: "GET",
         credentials: "include",
@@ -60,8 +62,9 @@ const handleLogin = async (e) => {
       throw new Error("PKCE verifier not found. Please refresh the page.");
     }
 
+		const config = await loadConfig();
     const response = await fetch(
-      `${import.meta.env.VITE_AUTH_API}/auth/login`,
+      `${config.backendUrl}/auth/login`,
       {
         method: "POST",
         headers: {

@@ -1,7 +1,11 @@
+import loadConfig from "../config";
 import { feed, feedTracks } from "./localFeedStore.js";
 
-export function requestLinkedFeeds(url) {
-  fetch(`http://localhost:5000/link/feed?url=${encodeURIComponent(url)}`)
+
+export async function requestLinkedFeeds(url) {
+  const config = await loadConfig();
+
+  fetch(`${config.backendUrl}/link/feed?url=${encodeURIComponent(url)}`)
     .then((response) => {
       if (!response.ok) {
         console.log(`Request returned status ${response.status}`);

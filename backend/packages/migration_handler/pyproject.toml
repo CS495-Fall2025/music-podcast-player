@@ -1,0 +1,30 @@
+[project]
+name = "rss-music-migration-handler"
+version = "0.1.0"
+dependencies = [
+	"alembic>=1.13,<2.0",
+	"rss-music-data-model==0.1.0",
+]
+
+
+[dependency-groups]
+dev = [
+	"pytest>=8.4,<9.0",
+	"ruff>=0.13,<1.0",
+]
+lambda = [
+	"boto3>=1.42,<2.0",
+]
+
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+
+[tool.uv.sources]
+rss-music-data-model = { path = "../data_model" }
