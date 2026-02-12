@@ -1,6 +1,8 @@
 <style src="../style.css"></style>
 
 <script setup>
+import { ref } from "vue";
+import TranscriptSidebar from "./TranscriptSidebar.vue";
 import BoostModal from "./BoostModal.vue";
 import { useMiniPlayer } from "../controllers/miniplayer.js";
 
@@ -30,6 +32,8 @@ const {
   onEnded,
   formatTime,
 } = useMiniPlayer();
+
+const transcriptOpen = ref(false);
 </script>
 
 <template>
@@ -112,8 +116,18 @@ const {
         <img :src="skipIcon" alt="Skip" class="play-icon" />
         <!-- Skip Icon -->
       </button>
+      <button
+      class="media-button"
+      @click="transcriptOpen = true"
+      :disabled="!ready"
+      ></button>
       <BoostModal />
     </div>
+    <TranscriptSidebar
+    v-if="transcriptOpen"
+    :track="currentTrack"
+    @close="transcriptOpen = false"
+    />
   </div>
 </template>
 

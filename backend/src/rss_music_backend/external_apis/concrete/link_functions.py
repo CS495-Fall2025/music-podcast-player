@@ -274,6 +274,11 @@ class LinkFunctions:
                 else:
                     art_url = ""
 
+                transcript = ""
+                transcript_el = item.find(pc("transcript"))
+                if transcript_el is not None:
+                    transcript = transcript_el.attrib.get("url", "").strip()    
+
                 item_data = {
                     "title": title,
                     "link": link,
@@ -284,6 +289,7 @@ class LinkFunctions:
                     "enclosure_length": enclosure_length,
                     "enclosure_type": enclosure_type,
                     "image": art_url,
+                    "transcript": transcript,
                 }
                 parsed_items.append(item_data)
 
