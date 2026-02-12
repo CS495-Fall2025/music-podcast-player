@@ -2,10 +2,10 @@ name: Development Continuous Deployment Checks
 description: Shows how the changes in a PR would affect the current deployment.
 
 on:
-  pull_request:
-    branches:
-      - dev
-      - split-backend # DELETEME
+#  pull_request:
+#    branches:
+#      - dev
+  workflow_dispatch:
 
 jobs:
   build:
