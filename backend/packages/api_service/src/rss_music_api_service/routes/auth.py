@@ -127,12 +127,15 @@ def post_login() -> tuple:
 
     response = flask.make_response({"success": True}, 200)
 
+    same_site = current_app.config.get("SAME_SITE", "yes") == "yes"
+    same_site_value = "Lax" if same_site else "None"
+
     response.set_cookie(
         "access_token",
         tokens["access_token"],
         httponly=True,
         secure=is_production,
-        samesite="Lax",
+        samesite=same_site_value,
         max_age=3600,
     )
 
@@ -141,7 +144,7 @@ def post_login() -> tuple:
         tokens["refresh_token"],
         httponly=True,
         secure=is_production,
-        samesite="Lax",
+        samesite=same_site_value,
         max_age=604800,
     )
 
@@ -240,14 +243,17 @@ def post_refresh() -> tuple:
     )
 
     is_production = current_app.config.get("SESSION_COOKIE_SECURE", True)
+    same_site = current_app.config.get("SAME_SITE", "yes") == "yes"
+    same_site_value = "Lax" if same_site else "None"
 
     response = flask.make_response({"success": True}, 200)
+
     response.set_cookie(
         "access_token",
         new_access_token,
         httponly=True,
         secure=is_production,
-        samesite="Lax",
+        samesite=same_site_value,
         max_age=3600,
     )
 

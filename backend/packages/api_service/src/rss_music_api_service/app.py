@@ -20,6 +20,7 @@ def create_app() -> Flask:
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     app.config["PERMANENT_SESSION_LIFETIME"] = 3600
+    app.config["SCRIPT_NAME"] = "/prod"
 
     CORS(
         app,

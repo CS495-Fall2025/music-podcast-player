@@ -209,6 +209,7 @@ class RSSMusicPlayerStack(Stack):
             default_method_options=apigw.MethodOptions(
                 authorization_type=apigw.AuthorizationType.IAM,
             ),
+            proxy=True,
         )
 
         CfnOutput(
@@ -253,6 +254,7 @@ class RSSMusicPlayerStack(Stack):
                 "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{frontend_domain}",
                 "RSS_PLAYER_ENVIRONMENT": "production",
                 "RSS_PLAYER_DB_SERVICE_URL": db_service_api.url,
+                "RSS_PLAYER_SAME_SITE": "no",
                 "PODCAST_INDEX_KEY_ROUTE": "/rss-music-player/podcast-index-api/key",
                 "PODCAST_INDEX_SECRET_ROUTE": "/rss-music-player/podcast-index-api/secret",
                 "SECRET_KEY_ROUTE": "/rss-music-player/jwt/key",
@@ -277,6 +279,7 @@ class RSSMusicPlayerStack(Stack):
             self,
             "RSSMusicPlayerApiServiceApi",
             handler=function,
+            proxy=True,
         )
 
         CfnOutput(
@@ -290,6 +293,9 @@ class RSSMusicPlayerStack(Stack):
     def _deploy_frontend(
         self, bucket: s3.Bucket, distribution: cloudfront.Distribution, api_url: str
     ) -> s3_deploy.BucketDeployment:
+        if api_url.endswith("/"):
+            api_url = api_url[0:-1]
+
         config = {
             "backendUrl": api_url,
         }

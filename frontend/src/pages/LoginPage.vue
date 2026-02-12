@@ -26,7 +26,7 @@ onMounted(async () => {
     // notify backend of PKCE challenge
 		const config = await loadConfig();
     const response = await fetch(
-      `${config.backendUrl}/auth?code_challenge=${encodeURIComponent(codeChallenge)}`,
+      `${config.backendUrl}/auth/?code_challenge=${encodeURIComponent(codeChallenge)}`,
       {
         method: "GET",
         credentials: "include",
