@@ -1,3 +1,4 @@
+import hashlib
 import os
 from pathlib import Path
 import json
@@ -7,24 +8,27 @@ from aws_cdk import (
     Duration,
     Stack,
     RemovalPolicy,
+    CustomResource,
     aws_apigateway as apigw,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
     aws_ec2 as ec2,
+    aws_iam as iam,
     aws_lambda as _lambda,
     aws_rds as rds,
     aws_ssm as ssm,
     aws_s3 as s3,
     aws_s3_deployment as s3_deploy,
+    custom_resources as cr,
 )
 from constructs import Construct
 
 BACKEND_PATH = Path(__file__).parent.parent.parent / "backend"
 FRONTEND_PATH = Path(__file__).parent.parent.parent / "frontend"
-BACKEND_BUILD = os.environ.get(
-    "BACKEND_BUILD_PATH", str(BACKEND_PATH / "lambda_build/backend_build.zip")
-)
-FRONTEND_BUILD = os.environ.get("FRONTEND_BUILD_PATH", str(FRONTEND_PATH / "dist"))
+BACKEND_BUILD = Path(os.environ.get(
+    "BACKEND_BUILD_PATH", BACKEND_PATH / "builds"
+))
+FRONTEND_BUILD = os.environ.get("FRONTEND_BUILD_PATH", FRONTEND_PATH / "dist")
 
 
 class RSSMusicPlayerStack(Stack):
@@ -32,23 +36,28 @@ class RSSMusicPlayerStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # Things in this VPC can reach the database, but not the outside internet.
-        # database_vpc = ec2.Vpc(self, "RSSMusicPlayerDatabaseVpc", max_azs=3)
-        # database = self._make_database(database_vpc)
+        database_vpc = ec2.Vpc(self, "RSSMusicPlayerDatabaseVpc", max_azs=3)
+        database = self._make_database(database_vpc)
+
+        migration_function = self._make_migration_function(database, database_vpc)
+        migration_resource = self._make_migration_resource(migration_function, database)
 
         frontend_bucket = self._make_frontend_bucket()
         frontend_distribution = self._make_frontend_distribution(frontend_bucket)
 
         # For when we split the backend.
-        # database_function = self._make_database_function(
-        #    database, database_vpc
-        # )
-        backend_function = self._make_backend_function(
-            frontend_distribution.domain_name
+        db_service_function = self._make_db_service_function(
+           database, database_vpc
         )
+        db_service_api = self._make_db_service_api(db_service_function)
 
-        backend_rest_api = self._make_rest_api(backend_function)
+        api_service_function = self._make_api_service_function(
+            frontend_distribution.domain_name,
+            db_service_api,
+        )
+        api_service_api = self._make_api_service_api(api_service_function)
 
-        self._deploy_frontend(frontend_bucket, backend_rest_api.url)
+        self._deploy_frontend(frontend_bucket, frontend_distribution, api_service_api.url)
 
     def _make_frontend_bucket(self) -> s3.Bucket:
         bucket = s3.Bucket(
@@ -117,35 +126,104 @@ class RSSMusicPlayerStack(Stack):
         )
 
         return distribution
+    
+    def _make_migration_function(self, database, database_vpc) -> _lambda.Function:
+        code = _lambda.Code.from_asset(str(BACKEND_BUILD / "migration-handler-build.zip"))
 
-    def _make_database_function(self, database, database_vpc) -> _lambda.Function:
         function = _lambda.Function(
             self,
-            "RSSMusicPlayerBackendDatabaseFunction",
-            # code=_lambda.Code.from_asset(),
+            "RSSMusicPlayerMigrationFunction",
+            code=code,
             runtime=_lambda.Runtime.PYTHON_3_12,
-            # handler="lambda_handler.handler",
+            handler="lambda_handler.handler",
             memory_size=256,
             architecture=_lambda.Architecture.ARM_64,
             environment={
-                "DATABASE_CONNECTION_PARTIAL": "postgresql://{user}:{password}@"
+                "DATABASE_URL_PARTIAL": "postgresql://{user}:{password}@"
                 f"{database.db_instance_endpoint_address}:"
                 f"{database.db_instance_endpoint_port}",
                 "DATABASE_SECRET_ARN": database.secret.secret_arn,
             },
             vpc=database_vpc,
-            timeout=Duration.seconds(3),
+            timeout=Duration.seconds(5),
         )
 
         database.secret.grant_read(function)
 
         return function
 
-    def _make_backend_function(self, frontend_domain) -> _lambda.Function:
+    def _make_migration_resource(
+            self,
+            migration_function: _lambda.Function,
+            database: rds.DatabaseInstance,
+    ) -> cr.AwsCustomResource:
+        provider = cr.Provider(
+            self,
+            "RSSMusicPlayerMigrationProvider",
+            on_event_handler=migration_function,
+        )
+
+        migration_resource = CustomResource(#cr.AwsCustomResource(
+            self,
+            "RSSMusicPlayerMigrationRunner",
+            service_token=provider.service_token,
+        )
+
+        migration_resource.node.add_dependency(database)
+
+        return migration_resource
+
+    def _make_db_service_function(self, database, database_vpc) -> _lambda.Function:
+        function = _lambda.Function(
+            self,
+            "RSSMusicPlayerDatabaseServiceFunction",
+            code=_lambda.Code.from_asset(str(BACKEND_BUILD / "db-service-build.zip")),
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="lambda_handler.handler",
+            memory_size=256,
+            architecture=_lambda.Architecture.ARM_64,
+            environment={
+                "DATABASE_URL_PARTIAL": "postgresql://{user}:{password}@"
+                f"{database.db_instance_endpoint_address}:"
+                f"{database.db_instance_endpoint_port}",
+                "DATABASE_SECRET_ARN": database.secret.secret_arn,
+            },
+            vpc=database_vpc,
+            timeout=Duration.seconds(10),
+        )
+
+        database.secret.grant_read(function)
+
+        return function
+
+    def _make_db_service_api(self, function: _lambda.Function) -> apigw.LambdaRestApi:
+        api = apigw.LambdaRestApi(
+            self,
+            "RSSMusicPlayerDatabaseServiceApi",
+            handler=function,
+            endpoint_configuration=apigw.EndpointConfiguration(
+                types=[
+                    apigw.EndpointType.REGIONAL,
+                ],
+            ),
+            default_method_options=apigw.MethodOptions(
+                authorization_type=apigw.AuthorizationType.IAM,
+            ),
+        )
+
+        CfnOutput(
+            self,
+            "RSSMusicPlayerDatabaseServiceURL",
+            value=api.url,
+        )
+
+        return api
+
+    def _make_api_service_function(self, frontend_domain, db_service_api) -> _lambda.Function:
         # These are REFERENCES to keys that MUST be created manually. AWS doesn't
         # support creating SecureString parameters through the CDK, and we'd need to set
         # the values manually anyways.
-        backend_secrets = [
+        secrets = [
             ssm.StringParameter.from_secure_string_parameter_attributes(
                 self,
                 "RSSMusicPlayerPodcastIndexAPIKey",
@@ -156,47 +234,61 @@ class RSSMusicPlayerStack(Stack):
                 "RSSMusicPlayerPodcastIndexAPISecret",
                 parameter_name="/rss-music-player/podcast-index-api/secret",
             ),
+            ssm.StringParameter.from_secure_string_parameter_attributes(
+                self,
+                "RSSMusicPlayerJwtSecretKey",
+                parameter_name="/rss-music-player/jwt/key",
+            ),
         ]
 
         function = _lambda.Function(
             self,
-            "RSSMusicPlayerBackendInternetFunction",
-            code=_lambda.Code.from_asset(str(BACKEND_BUILD)),
+            "RSSMusicPlayerApiServiceFunction",
+            code=_lambda.Code.from_asset(str(BACKEND_BUILD / "api-service-build.zip")),
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="lambda_handler.handler",
             memory_size=512,
             architecture=_lambda.Architecture.ARM_64,
             environment={
                 "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{frontend_domain}",
+                "RSS_PLAYER_ENVIRONMENT": "production",
+                "RSS_PLAYER_DB_SERVICE_URL": db_service_api.url,
                 "PODCAST_INDEX_KEY_ROUTE": "/rss-music-player/podcast-index-api/key",
                 "PODCAST_INDEX_SECRET_ROUTE": "/rss-music-player/podcast-index-api/secret",
+                "SECRET_KEY_ROUTE": "/rss-music-player/jwt/key",
             },
-            timeout=Duration.seconds(3),
+            timeout=Duration.seconds(12),
         )
 
-        for secret in backend_secrets:
+        for secret in secrets:
             secret.grant_read(function)
+
+        function.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["execute-api:Invoke"],
+                resources=[db_service_api.arn_for_execute_api()]
+            )
+        )
 
         return function
 
-    def _make_rest_api(self, function: _lambda.Function) -> apigw.LambdaRestApi:
+    def _make_api_service_api(self, function: _lambda.Function) -> apigw.LambdaRestApi:
         api = apigw.LambdaRestApi(
             self,
-            "RSSMusicPlayerBackendRestApi",
+            "RSSMusicPlayerApiServiceApi",
             handler=function,
-            proxy=True,
         )
 
         CfnOutput(
             self,
-            "RSSMusicPlayerBackendURL",
+            "RSSMusicPlayerApiServiceURL",
             value=api.url,
         )
 
         return api
 
     def _deploy_frontend(
-        self, bucket: s3.Bucket, api_url: str
+        self, bucket: s3.Bucket, distribution: cloudfront.Distribution, api_url: str
     ) -> s3_deploy.BucketDeployment:
         config = {
             "backendUrl": api_url,
@@ -213,6 +305,8 @@ class RSSMusicPlayerStack(Stack):
                 ),
             ],
             destination_bucket=bucket,
+            distribution=distribution,
+            distribution_paths=["/*"],
         )
 
         return deployment
@@ -244,6 +338,7 @@ class RSSMusicPlayerStack(Stack):
             credentials=rds.Credentials.from_generated_secret(
                 username="rssmusicplayer"
             ),
+            database_name="rssmusicplayer",
             backup_retention=Duration.days(1),
             removal_policy=RemovalPolicy.DESTROY,
         )
@@ -264,3 +359,12 @@ class RSSMusicPlayerStack(Stack):
         )
 
         return database
+
+    def _get_file_hash(self, path: Path) -> str:
+        hash = hashlib.sha256()
+
+        with open(path, "rb") as file:
+            while chunk := file.read(2048):
+                hash.update(chunk)
+
+        return hash.hexdigest()

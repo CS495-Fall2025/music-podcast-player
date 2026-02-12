@@ -24,7 +24,6 @@ jobs:
           tags: backend-build-{{ inputs.package-name }}:latest
           load: true
       - run: docker run --rm -v ${{ github.workspace }}/build:/mnt/result --platform linux/arm64 backend-build:latest
-      - run: mv build/backend_build.zip build/${{ inputs.package-name }}-build.zip
       - uses: actions/upload-artifact@v4
         with:
           name: backend-build-{{ inputs.package-name }}

@@ -10,6 +10,21 @@ dependencies = [
 ]
 
 
+[project.optional-dependencies]
+dev = [
+	"pytest>=8.4,<9.0",
+	"ruff>=0.13,<1.0",
+	"httpx>=0.28,<1.0",
+]
+local = [
+	"uvicorn>=0.40,<1.0",
+]
+lambda = [
+	"boto3>=1.42,<2.0",
+	"mangum>=0.21,<1.0",
+]
+
+
 [dependency-groups]
 dev = [
 	"pytest>=8.4,<9.0",
@@ -21,6 +36,7 @@ local = [
 ]
 lambda = [
 	"boto3>=1.42,<2.0",
+	"mangum>=0.21,<1.0",
 ]
 
 

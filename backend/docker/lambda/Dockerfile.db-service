@@ -22,10 +22,10 @@ RUN uv sync --no-install-project --group lambda
 # Install backend package (dependencies cached)
 WORKDIR /app/build
 COPY ./packages/db_service ./db_service
-RUN uv pip install ./db_service -t ../
+RUN uv pip install ./db_service[lambda] -t ../
 
 WORKDIR /app
-#COPY ./packages/db_service/lambda_handler.py lambda_handler.py
+COPY ./packages/db_service/lambda_handler.py lambda_handler.py
 
 # Package dynamic libraries used by some packages.
 COPY ./docker/scripts/copy_lib_requirements.py ./
@@ -38,4 +38,4 @@ RUN rm -rf ./bin
 RUN find . -name "__pycache__" -type d -exec rm -rf {} +
 RUN rm copy_lib_requirements.py
 
-CMD ["zip", "/mnt/result/backend_build.zip", "-r", "."]
+CMD ["zip", "/mnt/result/db-service-build.zip", "-r", "."]

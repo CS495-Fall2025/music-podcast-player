@@ -21,7 +21,7 @@ RUN uv sync --no-install-project --group lambda
 # Install backend package (dependencies cached)
 WORKDIR /app/build
 COPY ./packages/api_service ./api_service
-RUN uv pip install ./api_service -t ../
+RUN uv pip install ./api_service[lambda] -t ../
 
 WORKDIR /app
 COPY ./packages/api_service/lambda_handler.py lambda_handler.py
@@ -37,4 +37,4 @@ RUN rm -rf ./bin
 RUN find . -name "__pycache__" -type d -exec rm -rf {} +
 #RUN rm copy_lib_requirements.py
 
-CMD ["zip", "/mnt/result/backend_build.zip", "-r", "."]
+CMD ["zip", "/mnt/result/api-service-build.zip", "-r", "."]

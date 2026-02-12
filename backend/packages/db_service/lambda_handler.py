@@ -38,10 +38,11 @@ def get_rotated_secrets() -> None:
 
 
 assign_library_directory()
-app_handler = Mangum(create_app())
+app_handler = None
 
 
 def handler(event, context):
+    global app_handler
     secrets = get_rotated_secrets()
 
     secrets_updated = False

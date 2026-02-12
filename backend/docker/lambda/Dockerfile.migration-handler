@@ -20,15 +20,19 @@ RUN uv sync --no-install-project --group lambda
 # Install backend package (dependencies cached)
 WORKDIR /app/build
 COPY ./packages/migration_handler ./migration_handler
-RUN uv pip install ./migration_handler -t ../
+RUN uv pip install ./migration_handler[lambda] -t ../
 
 WORKDIR /app
-#COPY ./packages/migration_handler/lambda_handler.py lambda_handler.py
+COPY ./packages/migration_handler/lambda_handler.py lambda_handler.py
 
 # Package dynamic libraries used by some packages.
 COPY ./docker/scripts/copy_lib_requirements.py ./
 RUN mkdir lib
 RUN python3 copy_lib_requirements.py
+
+# Bring in migrations and configuration.
+COPY ./packages/migration_handler/migrations migrations
+COPY ./packages/migration_handler/alembic.ini alembic.ini
 
 # Remove unneeded files
 RUN rm -rf ./build
@@ -36,4 +40,4 @@ RUN rm -rf ./bin
 RUN find . -name "__pycache__" -type d -exec rm -rf {} +
 RUN rm copy_lib_requirements.py
 
-CMD ["zip", "/mnt/result/backend_build.zip", "-r", "."]
+CMD ["zip", "/mnt/result/migration-handler-build.zip", "-r", "."]

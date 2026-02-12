@@ -1,10 +1,10 @@
 import os
-from pathlib import Path
-
 import awsgi
 import boto3
+from requests_aws4auth import AWS4Auth
 
 from rss_music_api_service import create_app
+from rss_music_api_service.internal_apis import auth
 
 
 # Populate secret "environment variables" from AWS SSM Parameters so they are read when
@@ -27,7 +27,22 @@ def populate_static_secrets() -> None:
         os.environ[env_var] = value
 
 
+def create_auth_generator() -> None:
+    session = boto3.Session()
+    credentials = session.get_credentials()
+    auth_generator = AWS4Auth(
+        credentials.access_key,
+        credentials.secret_key,
+        "us-east-1",
+        "execute-api",
+        session_token=credentials.token,
+    )
+
+    auth.set_auth(auth_generator)
+
+
 populate_static_secrets()
+create_auth_generator()
 app = create_app()
 
 
