@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:
       - dev
+      - split-backend # DELETEME
 
 jobs:
   build:
