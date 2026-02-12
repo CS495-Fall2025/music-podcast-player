@@ -1,6 +1,7 @@
 [project]
 name = "rss-music-migration-handler"
 version = "0.1.0"
+requires-python = ">=3.12,<4.0"
 dependencies = [
 	"alembic>=1.13,<2.0",
 	"rss-music-data-model==0.1.0",
