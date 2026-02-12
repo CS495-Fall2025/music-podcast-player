@@ -3,16 +3,49 @@ from flask import Blueprint, request, session, current_app
 from marshmallow import ValidationError
 
 from rss_music_api_service.auth import signup, login, pkce
+from rss_music_api_service.auth.current_user import get_current_user_id
 from rss_music_api_service.errors import RequestError, get_error_response
+from rss_music_api_service.internal_apis import db_service
 from rss_music_api_service.internal_apis import errors as db_errors
 from rss_music_api_service.schemas import SignUpRequestSchema
+from rss_music_api_service.logging_config import log_request, get_logger
 
-# All routes added to this BP are under "/auth"
 AUTH_BP = Blueprint("auth", __name__, url_prefix="/auth")
+logger = get_logger(__name__)
+
+
+@AUTH_BP.after_request
+def log_response(response):
+    level = (
+        "info"
+        if response.status_code < 400
+        else "warn"
+        if response.status_code < 500
+        else "error"
+    )
+    log_request(
+        logger,
+        level,
+        "response_sent",
+        "Sending response",
+        user_id=get_current_user_id(),
+        route=request.path,
+        status_code=response.status_code,
+    )
+    return response
 
 
 @AUTH_BP.post("/signup")
 def post_signup() -> dict:
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Signup request received",
+        user_id=get_current_user_id(),
+        route="/auth/signup",
+    )
+
     try:
         data = request.get_json(silent=True)
 
@@ -72,6 +105,15 @@ def post_login() -> tuple:
     Authenticate user with username, password, and PKCE verifier.
     Returns JWT if successful.
     """
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Login request received",
+        user_id=get_current_user_id(),
+        route="/auth/login",
+    )
+
     try:
         data = request.get_json(silent=True)
 
@@ -154,6 +196,15 @@ def post_verify() -> tuple:
     Verify a JWT token from httpOnly cookie and check if the user still exists.
     Frontend calls this to validate tokens on app startup.
     """
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Token verification request received",
+        user_id=get_current_user_id(),
+        route="/auth/verify",
+    )
+
     token = request.cookies.get("access_token")
 
     if not token:
@@ -170,6 +221,16 @@ def post_verify() -> tuple:
         payload = login.verify_jwt(
             token, secret_key, expected_type=login.TokenType.ACCESS
         )
+        user_id = payload.get("sub")
+
+        # Verify user still exists in database
+        if not db_service.check_user_exists(user_id):
+            return {
+                "valid": False,
+                "code": 401,
+                "error": "UserNotFound",
+                "message": "User not found",
+            }, 401
 
         user_info = {
             "id": payload.get("sub"),
@@ -204,6 +265,15 @@ def post_refresh() -> tuple:
     Use a refresh token to get a new access token.
     This allows users to stay logged in without re-entering credentials.
     """
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Token refresh request received",
+        user_id=get_current_user_id(),
+        route="/auth/refresh",
+    )
+
     refresh_token = request.cookies.get("refresh_token")
 
     if not refresh_token:
@@ -230,6 +300,13 @@ def post_refresh() -> tuple:
 
     user_id = payload.get("sub")
     username = payload.get("name")
+
+    if not db_service.check_user_exists(user_id):
+        return {
+            "code": 401,
+            "error": "UserNotFound",
+            "message": "User not found",
+        }, 401
 
     new_access_token = login.generate_jwt(
         user_id,
@@ -259,6 +336,15 @@ def post_logout() -> tuple:
     """
     Log out by clearing authentication cookies.
     """
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Logout request received",
+        user_id=get_current_user_id(),
+        route="/auth/logout",
+    )
+
     response = flask.make_response({"success": True}, 200)
     response.set_cookie("access_token", "", httponly=True, max_age=0)
     response.set_cookie("refresh_token", "", httponly=True, max_age=0)
