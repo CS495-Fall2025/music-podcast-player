@@ -13,7 +13,7 @@ from rss_music_db_service_schemas.users import (
 from rss_music_api_service.internal_apis import auth, errors
 
 
-TIMEOUT = (2, 5)  # 2 Seconds to connect, 5 seconds to recieve response.
+TIMEOUT = (5, 10)  # 2 Seconds to connect, 5 seconds to recieve response.
 
 
 def create_user(username: str, email: str, password: str) -> None:
@@ -135,9 +135,9 @@ def _create_user_login_request(
 def _send_request(request: requests.PreparedRequest) -> requests.Response:
     with requests.Session() as session:
         auth_obj = auth.get_auth()
-        if auth_obj is not None:
-            session.auth = auth_obj
         try:
+            if auth_obj is not None:
+                request = auth_obj(request)
             return session.send(request, timeout=TIMEOUT)
         except requests.Timeout:
             raise errors.InternalAPITimeoutError("DBService")

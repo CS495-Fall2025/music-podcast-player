@@ -33,7 +33,7 @@ def create_auth_generator() -> None:
     auth_generator = AWS4Auth(
         credentials.access_key,
         credentials.secret_key,
-        "us-east-1",
+        "us-east-2",
         "execute-api",
         session_token=credentials.token,
     )
