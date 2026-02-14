@@ -22,14 +22,12 @@ const props = defineProps({
 });
 defineEmits(["close"]);
 
-
 const trackRef = toRef(props, "track");
 
 const { loading, error, text } = useTranscriptSidebar(trackRef);
 </script>
 
 <style scoped>
-
 .transcript-sidebar {
   position: absolute;
   right: 0;
@@ -47,7 +45,6 @@ const { loading, error, text } = useTranscriptSidebar(trackRef);
 
   z-index: calc(var(--player-z) + 1);
 }
-
 
 @media (max-width: 600px) {
   .transcript-sidebar {

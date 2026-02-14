@@ -277,7 +277,7 @@ class LinkFunctions:
                 transcript = ""
                 transcript_el = item.find(pc("transcript"))
                 if transcript_el is not None:
-                    transcript = transcript_el.attrib.get("url", "").strip()    
+                    transcript = transcript_el.attrib.get("url", "").strip()
 
                 item_data = {
                     "title": title,

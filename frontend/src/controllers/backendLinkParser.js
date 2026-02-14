@@ -50,7 +50,7 @@ function parseResponse(response) {
         audio: item.enclosure_url,
         image: item.image || feedItem.art_url,
         value: valueObject,
-        transcript: item.transcript || "", 
+        transcript: item.transcript || "",
       };
       newFeedTracks.push(track);
       // console.log(track);

@@ -118,19 +118,18 @@ const transcriptOpen = ref(false);
         <!-- Skip Icon -->
       </button>
       <button
-      class="media-button"
-      @click="transcriptOpen = !transcriptOpen"
-      :disabled="!ready"
+        class="media-button"
+        @click="transcriptOpen = !transcriptOpen"
+        :disabled="!ready"
       >
-
-      <img :src="transcriptIcon" alt="Transcript" class="play-icon"/>
-    </button>
+        <img :src="transcriptIcon" alt="Transcript" class="play-icon" />
+      </button>
       <BoostModal />
     </div>
     <TranscriptSidebar
-    v-if="transcriptOpen"
-    :track="currentTrack"
-    @close="transcriptOpen = false"
+      v-if="transcriptOpen"
+      :track="currentTrack"
+      @close="transcriptOpen = false"
     />
   </div>
 </template>
@@ -138,7 +137,7 @@ const transcriptOpen = ref(false);
 <style scoped>
 .player-box {
   position: relative;
-  
+
   background-color: var(--player-background);
 
   padding: clamp(8px, 1.5vh, 16px);

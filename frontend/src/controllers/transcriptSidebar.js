@@ -28,11 +28,14 @@ export function useTranscriptSidebar(trackRef) {
     loading.value = true;
     try {
       const resp = await fetch(url);
-      if (!resp.ok) throw new Error(`Transcript request failed (${resp.status})`);
+      if (!resp.ok)
+        throw new Error(`Transcript request failed (${resp.status})`);
 
       const contentType = resp.headers.get("content-type") || "";
       if (!isSupportedTranscript(url, contentType)) {
-        throw new Error("Unsupported transcript format. Only VTT and plain text are supported.");
+        throw new Error(
+          "Unsupported transcript format. Only VTT and plain text are supported.",
+        );
       }
 
       text.value = await resp.text();
