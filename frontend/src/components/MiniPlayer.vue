@@ -22,6 +22,7 @@ const {
   rewindIcon,
   shuffleIcon,
   repeatIcon,
+  transcriptIcon,
   togglePlay,
   skipToNextTrack,
   skipToPreviousTrack,
@@ -118,9 +119,12 @@ const transcriptOpen = ref(false);
       </button>
       <button
       class="media-button"
-      @click="transcriptOpen = true"
+      @click="transcriptOpen = !transcriptOpen"
       :disabled="!ready"
-      ></button>
+      >
+
+      <img :src="transcriptIcon" alt="Transcript" class="play-icon"/>
+    </button>
       <BoostModal />
     </div>
     <TranscriptSidebar
@@ -133,6 +137,8 @@ const transcriptOpen = ref(false);
 
 <style scoped>
 .player-box {
+  position: relative;
+  
   background-color: var(--player-background);
 
   padding: clamp(8px, 1.5vh, 16px);

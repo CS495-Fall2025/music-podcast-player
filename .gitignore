@@ -1,2 +1,5 @@
 # Docker secrets directory
 secrets/
+
+# MAC DS_Store
+.DS_STORE

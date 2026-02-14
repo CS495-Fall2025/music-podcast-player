@@ -7,6 +7,7 @@ import skipIcon from "../assets/images/forward-icon.svg";
 import rewindIcon from "../assets/images/backward-icon.svg";
 import shuffleIcon from "../assets/images/random-icon.svg";
 import repeatIcon from "../assets/images/undo-arrow-icon.svg";
+import transcriptIcon from "../assets/images/transcript-icon.svg";
 
 export function useMiniPlayer() {
   const isPlaying = ref(false);
@@ -179,6 +180,7 @@ export function useMiniPlayer() {
     rewindIcon,
     shuffleIcon,
     repeatIcon,
+    transcriptIcon,
 
     // methods
     togglePlay,
