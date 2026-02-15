@@ -37,6 +37,9 @@ def get_rotated_secrets() -> None:
 
 
 def handler(event, context):
+    if event.get("RequestType") == "Delete":
+        return
+
     assign_library_directory()
     secrets = get_rotated_secrets()
 

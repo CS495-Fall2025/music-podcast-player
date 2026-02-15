@@ -36,7 +36,12 @@ class RSSMusicPlayerStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # Things in this VPC can reach the database, but not the outside internet.
-        database_vpc = ec2.Vpc(self, "RSSMusicPlayerDatabaseVpc", max_azs=3)
+        database_vpc = ec2.Vpc(
+            self,
+            "RSSMusicPlayerDatabaseVpc",
+            max_azs=3,
+            nat_gateways=0
+        )
         database = self._make_database(database_vpc)
 
         migration_function = self._make_migration_function(database, database_vpc)
@@ -334,7 +339,7 @@ class RSSMusicPlayerStack(Stack):
             ),
             vpc=database_vpc,
             vpc_subnets=ec2.SubnetSelection(
-                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
             ),
             security_groups=[security_group],
             multi_az=False,
