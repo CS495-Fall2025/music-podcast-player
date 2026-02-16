@@ -6,7 +6,6 @@ import json
 from aws_cdk import (
     CfnOutput,
     Duration,
-    SecretValue,
     Stack,
     RemovalPolicy,
     CustomResource,
@@ -33,7 +32,7 @@ BACKEND_BUILD = Path(os.environ.get(
 ))
 FRONTEND_BUILD = os.environ.get("FRONTEND_BUILD_PATH", FRONTEND_PATH / "dist")
 
-#DB_USERNAME = "rssmusicplayer"
+API_SERVICE_PREFIX = "/api/v1"
 
 
 class RSSMusicPlayerStack(Stack):
@@ -49,7 +48,7 @@ class RSSMusicPlayerStack(Stack):
         migration_resource = self._make_migration_resource(migration_function, database)
 
         frontend_bucket = self._make_frontend_bucket()
-        frontend_distribution = self._make_frontend_distribution(frontend_bucket)
+        distribution = self._make_public_distribution(frontend_bucket)
 
         # For when we split the backend.
         db_service_function = self._make_db_service_function(
@@ -58,12 +57,13 @@ class RSSMusicPlayerStack(Stack):
         db_service_api = self._make_db_service_api(db_service_function)
 
         api_service_function = self._make_api_service_function(
-            frontend_distribution.domain_name,
+            distribution.domain_name,
             db_service_api,
         )
         api_service_api = self._make_api_service_api(api_service_function)
+        self._attach_api_service_to_distribution(api_service_api, distribution)
 
-        self._deploy_frontend(frontend_bucket, frontend_distribution, api_service_api.url)
+        self._deploy_frontend(frontend_bucket, distribution, f"https://{distribution.distribution_domain_name}{API_SERVICE_PREFIX}")
 
     def _make_frontend_bucket(self) -> s3.Bucket:
         bucket = s3.Bucket(
@@ -84,7 +84,7 @@ class RSSMusicPlayerStack(Stack):
 
         return bucket
 
-    def _make_frontend_distribution(self, bucket: s3.Bucket) -> cloudfront.Distribution:
+    def _make_public_distribution(self, bucket: s3.Bucket) -> cloudfront.Distribution:
         access_control = cloudfront.S3OriginAccessControl(
             self,
             "RSSMusicPlayerFrontendBucketOAC",
@@ -277,6 +277,7 @@ class RSSMusicPlayerStack(Stack):
                 "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{frontend_domain}",
                 "RSS_PLAYER_ENVIRONMENT": "production",
                 "RSS_PLAYER_DB_SERVICE_URL": db_service_api.url,
+                "RSS_PLAYER_API_ROOT": API_SERVICE_PREFIX,
                 "PODCAST_INDEX_KEY_ROUTE": "/rss-music-player/podcast-index-api/key",
                 "PODCAST_INDEX_SECRET_ROUTE": "/rss-music-player/podcast-index-api/secret",
                 "SECRET_KEY_ROUTE": "/rss-music-player/jwt/key",
@@ -303,20 +304,13 @@ class RSSMusicPlayerStack(Stack):
         )
 
         api.add_routes(
-            path="/{proxy+}",
+            path=API_SERVICE_PREFIX + "/{proxy+}",
             methods=[apigw2.HttpMethod.ANY],
             integration=apigw2_int.HttpLambdaIntegration(
                 "RSSMusicPlayerApiServiceApiIntegration",
                 handler=function
             )
         )
-
-        #api = apigw.LambdaRestApi(
-        #    self,
-        #    "RSSMusicPlayerApiServiceApi",
-        #    handler=function,
-        #    proxy=True,
-        #)
 
         CfnOutput(
             self,
@@ -325,6 +319,21 @@ class RSSMusicPlayerStack(Stack):
         )
 
         return api
+
+    def _attach_api_service_to_distribution(self, api: apigw2.HttpApi, dist: cloudfront.Distribution) -> None:
+        api_origin = origins.HttpOrigin(
+            domain_name=f"{api.api_id}.execute-api.{self.region}.amazonaws.com",
+        )
+
+        dist.add_behavior(
+            path_pattern="/api/v1/*",
+            origin=api_origin,
+            cache_policy=cloudfront.CachePolicy.CACHING_DISABLED,
+            origin_request_policy=cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+            allowed_methods=cloudfront.AllowedMethods.ALLOW_ALL,
+            viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        )
+
 
     def _deploy_frontend(
         self, bucket: s3.Bucket, distribution: cloudfront.Distribution, api_url: str

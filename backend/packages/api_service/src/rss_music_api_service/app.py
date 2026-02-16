@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Blueprint, Flask
 from flask_cors import CORS
 import os
 
@@ -21,6 +21,9 @@ def create_app() -> Flask:
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     app.config["PERMANENT_SESSION_LIFETIME"] = 3600
     app.config["SCRIPT_NAME"] = "/prod"
+
+    if "API_ROOT" not in app.config:
+        app.config["API_ROOT"] = "/"
 
     CORS(
         app,
@@ -51,5 +54,9 @@ def apply_blueprints(app: Flask) -> None:
         AUTH_BP,
     ]
 
+    root_bp = Blueprint("root", __name__, url_prefix=app.config["API_ROOT"])
+
     for blueprint in blueprints:
-        app.register_blueprint(blueprint)
+        root_bp.register_blueprint(blueprint)
+
+    app.register_blueprint(root_bp)
