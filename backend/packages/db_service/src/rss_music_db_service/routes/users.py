@@ -1,4 +1,4 @@
-from fastapi import status, APIRouter, Request
+from fastapi import status, APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 
 from rss_music_db_service_schemas import ErrorResponse, ErrorType
@@ -8,16 +8,36 @@ import rss_music_db_service_schemas.users.responses as db_user_responses
 from rss_music_db_service import errors
 from rss_music_db_service.users import create, exists, login
 from rss_music_db_service.basic_validation import validate_json
+from rss_music_db_service.logging_config import log_request, get_logger
 
 
 users = APIRouter()
+logger = get_logger(__name__)
 
 
 @users.post("/create", status_code=status.HTTP_201_CREATED)
-async def create_user(request: Request):
+async def create_user(request: Request, response: Response):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Create user request received",
+        route="/users/create",
+    )
+
     result = await validate_json(request, db_user_requests.CreateUserRequest())
 
     if isinstance(result, JSONResponse):
+        response.status_code = result.status_code
+        level = "warn" if result.status_code < 500 else "error"
+        log_request(
+            logger,
+            level,
+            "response_sent",
+            "Response sent",
+            route="/users/create",
+            status_code=result.status_code,
+        )
         return result
 
     try:
@@ -34,6 +54,15 @@ async def create_user(request: Request):
                 "field": error.field,
             },
         }
+        response.status_code = 409
+        log_request(
+            logger,
+            "warn",
+            "response_sent",
+            "Response sent",
+            route="/users/create",
+            status_code=409,
+        )
         return JSONResponse(
             status_code=409,
             content=ErrorResponse().dump(response_data),
@@ -42,14 +71,42 @@ async def create_user(request: Request):
     response_data = {
         "username": result["username"],
     }
+
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route="/users/create",
+        status_code=201,
+    )
+
     return db_user_responses.CreateUserResponse().dump(response_data)
 
 
 @users.post("/exists")
-async def user_exists(request: Request):
+async def user_exists(request: Request, response: Response):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "User exists request received",
+        route="/users/exists",
+    )
+
     result = await validate_json(request, db_user_requests.UserExistsRequest())
 
     if isinstance(result, JSONResponse):
+        response.status_code = result.status_code
+        level = "warn" if result.status_code < 500 else "error"
+        log_request(
+            logger,
+            level,
+            "response_sent",
+            "Response sent",
+            route="/users/exists",
+            status_code=result.status_code,
+        )
         return result
 
     found_flag = False
@@ -72,14 +129,42 @@ async def user_exists(request: Request):
     response_data = {
         "exists": found_flag,
     }
+
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route="/users/exists",
+        status_code=200,
+    )
+
     return db_user_responses.UserExistsResponse().dump(response_data)
 
 
 @users.post("/login")
-async def user_login(request: Request):
+async def user_login(request: Request, response: Response):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "User login request received",
+        route="/users/login",
+    )
+
     result = await validate_json(request, db_user_requests.UserLoginRequest())
 
     if isinstance(result, JSONResponse):
+        response.status_code = result.status_code
+        level = "warn" if result.status_code < 500 else "error"
+        log_request(
+            logger,
+            level,
+            "response_sent",
+            "Response sent",
+            route="/users/login",
+            status_code=result.status_code,
+        )
         return result
 
     user = login.authenticate_user(result["username"], result["password"])
@@ -90,6 +175,16 @@ async def user_login(request: Request):
             "message": "The provided credentials are invalid",
         }
 
+        response.status_code = 401
+        log_request(
+            logger,
+            "warn",
+            "response_sent",
+            "Response sent",
+            route="/users/login",
+            status_code=401,
+        )
+
         return JSONResponse(
             status_code=401, content=ErrorResponse().dump(response_data)
         )
@@ -98,4 +193,14 @@ async def user_login(request: Request):
         "username": user.username,
         "id": user.id,
     }
+
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route="/users/login",
+        status_code=200,
+    )
+
     return db_user_responses.UserLoginResponse().dump(response_data)

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import UserFeed from "../src/controllers/userFeed.js";
-import { feedTracks } from "../src/controllers/localFeedStore.js";
+import { feed } from "../src/controllers/localFeedStore.js";
 
 describe("UserFeed", () => {
   // Test component name is set correctly
@@ -13,15 +13,15 @@ describe("UserFeed", () => {
     expect(UserFeed.components.Track).toBeDefined();
   });
 
-  // Test computed property returns feedTracks with correct data
-  it("computes feedTracks correctly", () => {
+  // Test computed property returns feed with correct data
+  it("computes feed correctly", () => {
     const testTrack = { type: "track", title: "Test Track", audio: "test.mp3" };
-    feedTracks.push(testTrack);
+    feed.push(testTrack);
 
-    const computed = UserFeed.computed.feedTracks();
-    expect(computed).toBe(feedTracks);
+    const computed = UserFeed.computed.feed();
+    expect(computed).toBe(feed);
     expect(computed[0]).toEqual(testTrack);
 
-    feedTracks.splice(0, feedTracks.length);
+    feed.splice(0, feed.length);
   });
 });

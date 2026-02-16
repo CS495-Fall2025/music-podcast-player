@@ -24,7 +24,7 @@ onMounted(async () => {
     sessionStorage.setItem("pkce_verifier", codeVerifier);
 
     // notify backend of PKCE challenge
-		const config = await loadConfig();
+    const config = await loadConfig();
     const response = await fetch(
       `${config.backendUrl}/auth/?code_challenge=${encodeURIComponent(codeChallenge)}`,
       {
@@ -62,22 +62,19 @@ const handleLogin = async (e) => {
       throw new Error("PKCE verifier not found. Please refresh the page.");
     }
 
-		const config = await loadConfig();
-    const response = await fetch(
-      `${config.backendUrl}/auth/login`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          username: username.value,
-          password: password.value,
-          code_verifier: storedVerifier,
-        }),
+    const config = await loadConfig();
+    const response = await fetch(`${config.backendUrl}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      credentials: "include",
+      body: JSON.stringify({
+        username: username.value,
+        password: password.value,
+        code_verifier: storedVerifier,
+      }),
+    });
 
     if (!response.ok) {
       const data = await response.json();

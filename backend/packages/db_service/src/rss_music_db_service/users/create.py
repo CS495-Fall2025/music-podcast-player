@@ -5,6 +5,9 @@ from sqlalchemy.exc import IntegrityError
 
 from rss_music_data_model import User, make_session
 from rss_music_db_service.errors import NotUniqueError
+from rss_music_db_service.logging_config import log_request, get_logger
+
+logger = get_logger(__name__)
 
 
 def create_and_add_user(username: str, email: str, password: str) -> None:
@@ -34,6 +37,17 @@ def _attempt_add_user(user: User) -> None | str:
         try:
             session.add(user)
             session.commit()
+
+            log_request(
+                logger,
+                "info",
+                "db_change",
+                "User created in database",
+                operation="INSERT",
+                table="users",
+                username=user.username,
+            )
+
             return None
         except IntegrityError as error:
             session.rollback()

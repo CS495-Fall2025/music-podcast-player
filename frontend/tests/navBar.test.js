@@ -104,7 +104,7 @@ describe("useNavbar", () => {
     const { logout } = await import("../src/auth/authService.js");
 
     navbar.dropdownOpen.value = true;
-    await navbar.handleLogout();
+    navbar.handleLogout();
 
     expect(logout).toHaveBeenCalled();
     expect(window.location.reload).toHaveBeenCalled();

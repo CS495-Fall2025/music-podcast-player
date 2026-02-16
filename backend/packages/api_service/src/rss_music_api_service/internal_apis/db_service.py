@@ -11,9 +11,11 @@ from rss_music_db_service_schemas.users import (
 )
 
 from rss_music_api_service.internal_apis import auth, errors
-
+from rss_music_api_service.logging_config import log_request, get_logger
 
 TIMEOUT = (5, 10)  # 2 Seconds to connect, 5 seconds to recieve response.
+
+logger = get_logger(__name__)
 
 
 def create_user(username: str, email: str, password: str) -> None:
@@ -133,15 +135,58 @@ def _create_user_login_request(
 
 
 def _send_request(request: requests.PreparedRequest) -> requests.Response:
+    log_request(
+        logger,
+        "info",
+        "internal_request_sent",
+        "Request sent to DB service",
+        service="DBService",
+        url=request.url,
+        method=request.method,
+    )
+
     with requests.Session() as session:
         auth_obj = auth.get_auth()
         try:
             if auth_obj is not None:
                 request = auth_obj(request)
-            return session.send(request, timeout=TIMEOUT)
+            response = session.send(request, timeout=TIMEOUT)
+
+            level = (
+                "info"
+                if response.status_code < 400
+                else "warn"
+                if response.status_code < 500
+                else "error"
+            )
+            log_request(
+                logger,
+                level,
+                "internal_response_received",
+                "Response received from DB service",
+                service="DBService",
+                status_code=response.status_code,
+            )
+
+            return response
         except requests.Timeout:
+            log_request(
+                logger,
+                "error",
+                "internal_timeout",
+                "DB service timeout",
+                service="DBService",
+            )
             raise errors.InternalAPITimeoutError("DBService")
-        except requests.RequestException:
+        except requests.RequestException as e:
+            log_request(
+                logger,
+                "error",
+                "internal_error",
+                "Error communicating with DB service",
+                service="DBService",
+                error=str(e),
+            )
             raise errors.InternalAPITransportError(
                 "An error occurred while sending a request to the database service"
             )
