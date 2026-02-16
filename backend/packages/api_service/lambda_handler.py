@@ -1,5 +1,5 @@
 import os
-import awsgi
+import apig_wsgi
 import boto3
 from requests_aws4auth import AWS4Auth
 
@@ -44,10 +44,4 @@ def create_auth_generator() -> None:
 populate_static_secrets()
 create_auth_generator()
 app = create_app()
-
-
-# This is a short term solution! Most REST APIs for Lambda run on either AWS Lambda
-# Powertools, and awsgi hasn't been maintained in years. However, to avoid a merge
-# conflict and refactor, I'm using this for now.
-def handler(event, context):
-    return awsgi.response(app, event, context)
+handler = apig_wsgi.make_lambda_handler(app)
