@@ -277,7 +277,6 @@ class RSSMusicPlayerStack(Stack):
                 "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{frontend_domain}",
                 "RSS_PLAYER_ENVIRONMENT": "production",
                 "RSS_PLAYER_DB_SERVICE_URL": db_service_api.url,
-                "RSS_PLAYER_SAME_SITE": "no",
                 "PODCAST_INDEX_KEY_ROUTE": "/rss-music-player/podcast-index-api/key",
                 "PODCAST_INDEX_SECRET_ROUTE": "/rss-music-player/podcast-index-api/secret",
                 "SECRET_KEY_ROUTE": "/rss-music-player/jwt/key",
