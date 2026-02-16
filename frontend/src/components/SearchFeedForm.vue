@@ -1,7 +1,7 @@
 <style src="../style.css"></style>
 
 <script setup>
-import { ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import {
   canSubmit,
   onUserInputBlur,
@@ -11,6 +11,7 @@ import {
 
 import SearchHistory from "./SearchHistory.vue";
 const showHistory = ref(false);
+const historyWrapper = ref(null);
 
 function handleHistorySelect(value) {
   const input = document.getElementById("query-input");
@@ -23,6 +24,19 @@ function handleHistorySelect(value) {
 
   showHistory.value = false;
 }
+function handleClickOutside(event) {
+  if (!showHistory.value) return;
+  if (historyWrapper.value && !historyWrapper.value.contains(event.target)) {
+    showHistory.value = false;
+  }
+}
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
 </script>
 
 <template>
@@ -31,6 +45,7 @@ function handleHistorySelect(value) {
       <label for="query-input" class="input-label">
         Search the PodcastIndex for feeds:
       </label>
+      <div class="input-row">
       <input
         type="text"
         id="query-input"
@@ -39,14 +54,18 @@ function handleHistorySelect(value) {
         @blur="onUserInputBlur"
         @input="onUserInputInput"
       />
+      <div class="history-wrapper" ref="historyWrapper">
       <button
         type="button"
         class="history-button"
-        @click="showHistory = !showHistory"
+        aria-label="Recent searches"
+        @click.stop="showHistory = !showHistory"
       >
         🕘
       </button>
       <SearchHistory v-if="showHistory" @select="handleHistorySelect" />
+      </div>
+      </div>
       <span class="error-message" v-if="!canSubmit"
         >Search query has incorrect length or is using disallowed
         characters.</span
@@ -58,6 +77,7 @@ function handleHistorySelect(value) {
 
 <style scoped>
 .search-feed-form {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -69,9 +89,19 @@ function handleHistorySelect(value) {
   gap: 3px;
   margin-bottom: 2px;
 }
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 .history-button {
   background: transparent;
   border: none;
   cursor: pointer;
+}
+.history-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 </style>
