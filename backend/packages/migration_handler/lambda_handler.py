@@ -21,19 +21,16 @@ def get_rotated_secrets() -> None:
     connection_url = os.environ["DATABASE_URL_PARTIAL"]
 
     db_credentials = json.loads(
-        secrets_client.get_secret_value(
-            SecretId=os.environ["DATABASE_SECRET_ARN"]
-        )["SecretString"]
+        secrets_client.get_secret_value(SecretId=os.environ["DATABASE_SECRET_ARN"])[
+            "SecretString"
+        ]
     )
 
     connection_url = connection_url.format(
-        user=db_credentials["username"],
-        password=db_credentials["password"]
+        user=db_credentials["username"], password=db_credentials["password"]
     )
 
-    return {
-        "DATABASE_URL": connection_url
-    }
+    return {"DATABASE_URL": connection_url}
 
 
 def handler(event, context):
