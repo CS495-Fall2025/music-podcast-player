@@ -6,10 +6,13 @@ import json
 from aws_cdk import (
     CfnOutput,
     Duration,
+    SecretValue,
     Stack,
     RemovalPolicy,
     CustomResource,
-    aws_apigateway as apigw,
+    aws_apigatewayv2 as apigw2,
+    aws_apigatewayv2_integrations as apigw2_int,
+    aws_apigatewayv2_authorizers as apigw2_auth,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
     aws_ec2 as ec2,
@@ -30,21 +33,19 @@ BACKEND_BUILD = Path(os.environ.get(
 ))
 FRONTEND_BUILD = os.environ.get("FRONTEND_BUILD_PATH", FRONTEND_PATH / "dist")
 
+#DB_USERNAME = "rssmusicplayer"
+
 
 class RSSMusicPlayerStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Things in this VPC can reach the database, but not the outside internet.
-        database_vpc = ec2.Vpc(
-            self,
-            "RSSMusicPlayerDatabaseVpc",
-            max_azs=3,
-            nat_gateways=0
-        )
-        database = self._make_database(database_vpc)
+        database_vpc = self._make_database_vpc()
+        security_groups = self._make_security_groups(database_vpc)
+        database = self._make_database(database_vpc, security_groups["database"])
 
-        migration_function = self._make_migration_function(database, database_vpc)
+        migration_function = self._make_migration_function(database, database_vpc, security_groups["function"])
         migration_resource = self._make_migration_resource(migration_function, database)
 
         frontend_bucket = self._make_frontend_bucket()
@@ -52,7 +53,7 @@ class RSSMusicPlayerStack(Stack):
 
         # For when we split the backend.
         db_service_function = self._make_db_service_function(
-           database, database_vpc
+           database, database_vpc, security_groups["function"]
         )
         db_service_api = self._make_db_service_api(db_service_function)
 
@@ -132,7 +133,7 @@ class RSSMusicPlayerStack(Stack):
 
         return distribution
     
-    def _make_migration_function(self, database, database_vpc) -> _lambda.Function:
+    def _make_migration_function(self, database: rds.DatabaseInstance, database_vpc: ec2.Vpc, group: ec2.SecurityGroup) -> _lambda.Function:
         code = _lambda.Code.from_asset(str(BACKEND_BUILD / "migration-handler-build.zip"))
 
         function = _lambda.Function(
@@ -150,6 +151,7 @@ class RSSMusicPlayerStack(Stack):
                 "DATABASE_SECRET_ARN": database.secret.secret_arn,
             },
             vpc=database_vpc,
+            security_groups=[group],
             timeout=Duration.seconds(5),
         )
 
@@ -178,7 +180,7 @@ class RSSMusicPlayerStack(Stack):
 
         return migration_resource
 
-    def _make_db_service_function(self, database, database_vpc) -> _lambda.Function:
+    def _make_db_service_function(self, database: rds.DatabaseInstance, database_vpc: ec2.Vpc, group: ec2.SecurityGroup) -> _lambda.Function:
         function = _lambda.Function(
             self,
             "RSSMusicPlayerDatabaseServiceFunction",
@@ -194,28 +196,44 @@ class RSSMusicPlayerStack(Stack):
                 "DATABASE_SECRET_ARN": database.secret.secret_arn,
             },
             vpc=database_vpc,
-            timeout=Duration.seconds(10),
+            security_groups=[group],
+            timeout=Duration.seconds(5),
         )
 
         database.secret.grant_read(function)
 
         return function
 
-    def _make_db_service_api(self, function: _lambda.Function) -> apigw.LambdaRestApi:
-        api = apigw.LambdaRestApi(
+    def _make_db_service_api(self, function: _lambda.Function) -> apigw2.HttpApi:
+        api = apigw2.HttpApi(
             self,
             "RSSMusicPlayerDatabaseServiceApi",
-            handler=function,
-            endpoint_configuration=apigw.EndpointConfiguration(
-                types=[
-                    apigw.EndpointType.REGIONAL,
-                ],
-            ),
-            default_method_options=apigw.MethodOptions(
-                authorization_type=apigw.AuthorizationType.IAM,
-            ),
-            proxy=True,
+            default_authorizer=apigw2_auth.HttpIamAuthorizer(),
         )
+
+        api.add_routes(
+            path="/{proxy+}",
+            methods=[apigw2.HttpMethod.ANY],
+            integration=apigw2_int.HttpLambdaIntegration(
+                "RSSMusicPlayerDatabaseServiceApiIntegration",
+                handler=function
+            ),
+        )
+
+        #api = apigw2.HttpApi(
+        #    self,
+        #    "RSSMusicPlayerDatabaseServiceApi",
+        #    handler=function,
+        #    endpoint_configuration=apigw.EndpointConfiguration(
+        #        types=[
+        #            apigw.EndpointType.REGIONAL,
+        #        ],
+        #    ),
+        #    default_method_options=apigw.MethodOptions(
+        #        authorization_type=apigw.AuthorizationType.IAM,
+        #    ),
+        #    proxy=True,
+        #)
 
         CfnOutput(
             self,
@@ -279,13 +297,27 @@ class RSSMusicPlayerStack(Stack):
 
         return function
 
-    def _make_api_service_api(self, function: _lambda.Function) -> apigw.LambdaRestApi:
-        api = apigw.LambdaRestApi(
+    def _make_api_service_api(self, function: _lambda.Function) -> apigw2.HttpApi:
+        api = apigw2.HttpApi(
             self,
             "RSSMusicPlayerApiServiceApi",
-            handler=function,
-            proxy=True,
         )
+
+        api.add_routes(
+            path="/{proxy+}",
+            methods=[apigw2.HttpMethod.ANY],
+            integration=apigw2_int.HttpLambdaIntegration(
+                "RSSMusicPlayerApiServiceApiIntegration",
+                handler=function
+            )
+        )
+
+        #api = apigw.LambdaRestApi(
+        #    self,
+        #    "RSSMusicPlayerApiServiceApi",
+        #    handler=function,
+        #    proxy=True,
+        #)
 
         CfnOutput(
             self,
@@ -322,11 +354,7 @@ class RSSMusicPlayerStack(Stack):
 
         return deployment
 
-    def _make_database(self, database_vpc: ec2.Vpc) -> rds.DatabaseInstance:
-        security_group = ec2.SecurityGroup.from_security_group_id(
-            self, "DefaultSG", database_vpc.vpc_default_security_group
-        )
-
+    def _make_database(self, database_vpc: ec2.Vpc, group: ec2.SecurityGroup) -> rds.DatabaseInstance:
         database = rds.DatabaseInstance(
             self,
             "RSSMusicPlayerDatabase",
@@ -341,7 +369,7 @@ class RSSMusicPlayerStack(Stack):
             vpc_subnets=ec2.SubnetSelection(
                 subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
             ),
-            security_groups=[security_group],
+            security_groups=[group],
             multi_az=False,
             allocated_storage=20,
             publicly_accessible=False,
@@ -358,7 +386,7 @@ class RSSMusicPlayerStack(Stack):
             description="Necessary to allow backend to connect"
         )
 
-        database.add_rotation_single_user(automatically_after=Duration.days(30))
+        #database.add_rotation_single_user(automatically_after=Duration.days(30))
 
         CfnOutput(
             self,
@@ -371,6 +399,26 @@ class RSSMusicPlayerStack(Stack):
 
         return database
 
+    def _make_database_vpc(self) -> ec2.Vpc:
+        vpc = ec2.Vpc(
+            self,
+            "RSSMusicPlayerDatabaseVpc",
+            max_azs=3,
+            nat_gateways=0
+        )
+
+        secrets_endpoint = ec2.InterfaceVpcEndpoint(
+            self,
+            "RSSMusicPlayerDatabaseVpcSecretsEndpoint",
+            vpc=vpc,
+            service=ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
+            subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED,
+            )
+        )
+
+        return vpc
+
     def _get_file_hash(self, path: Path) -> str:
         hash = hashlib.sha256()
 
@@ -379,3 +427,37 @@ class RSSMusicPlayerStack(Stack):
                 hash.update(chunk)
 
         return hash.hexdigest()
+
+    def _make_security_groups(self, vpc: ec2.Vpc) -> dict[str, ec2.SecurityGroup]:
+        groups = {
+            "database": ec2.SecurityGroup(
+                self,
+                "RSSMusicPlayerDatabaseSecurityGroup",
+                vpc=vpc,
+                allow_all_outbound=False,
+            ),
+            "function": ec2.SecurityGroup(
+                self,
+                "RSSMusicPlayerFunctionSecurityGroup",
+                vpc=vpc,
+                allow_all_outbound=True,
+            ),
+            "endpoint": ec2.SecurityGroup(
+                self,
+                "RSSMusicPlayerEndpointSecurityGroup",
+                vpc=vpc,
+                allow_all_outbound=True,
+            )
+        }
+
+        groups["database"].add_ingress_rule(
+            peer=groups["function"],
+            connection=ec2.Port.tcp(5432),
+        )
+        
+        groups["endpoint"].add_ingress_rule(
+            peer=groups["function"],
+            connection=ec2.Port.tcp(443),
+        )
+
+        return groups

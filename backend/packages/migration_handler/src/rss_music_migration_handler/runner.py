@@ -1,7 +1,10 @@
+import logging
 import os
 
 from alembic import command
 from alembic.config import Config
+
+logging.basicConfig(level=logging.INFO)
 
 
 def run() -> None:

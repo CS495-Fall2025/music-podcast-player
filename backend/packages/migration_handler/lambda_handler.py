@@ -47,6 +47,5 @@ def handler(event, context):
         if env_name in os.environ and os.environ[env_name] == value:
             continue
         os.environ[env_name] = value
-        secrets_updated = True
 
     rss_music_migration_handler.run()
