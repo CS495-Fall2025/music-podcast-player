@@ -1,7 +1,10 @@
-name: Continuous Deployment - Development
+name: Development Deployment
 
 on:
-  push:
+#  push:
+#    branches:
+#      - dev
+  pull_request:
     branches:
       - dev
 
@@ -31,7 +34,15 @@ jobs:
           path: builds/dist
       - uses: actions/download-artifact@v5
         with:
-          name: backend-build
+          name: backend-build-api-service
+          path: builds/
+      - uses: actions/download-artifact@v5
+        with:
+          name: backend-build-db-service
+          path: builds/
+      - uses: actions/download-artifact@v5
+        with:
+          name: backend-build-migration-handler
           path: builds/
       - run: apk add nodejs npm
       - run: npm install -g aws-cdk
