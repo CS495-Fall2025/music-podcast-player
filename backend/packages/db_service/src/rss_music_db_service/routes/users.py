@@ -24,7 +24,7 @@ async def create_user(request: Request, response: Response):
         "Create user request received",
         route="/users/create",
     )
-    
+
     result = await validate_json(request, db_user_requests.CreateUserRequest())
 
     if isinstance(result, JSONResponse):
@@ -71,7 +71,7 @@ async def create_user(request: Request, response: Response):
     response_data = {
         "username": result["username"],
     }
-    
+
     log_request(
         logger,
         "info",
@@ -80,7 +80,7 @@ async def create_user(request: Request, response: Response):
         route="/users/create",
         status_code=201,
     )
-    
+
     return db_user_responses.CreateUserResponse().dump(response_data)
 
 
@@ -93,7 +93,7 @@ async def user_exists(request: Request, response: Response):
         "User exists request received",
         route="/users/exists",
     )
-    
+
     result = await validate_json(request, db_user_requests.UserExistsRequest())
 
     if isinstance(result, JSONResponse):
@@ -129,7 +129,7 @@ async def user_exists(request: Request, response: Response):
     response_data = {
         "exists": found_flag,
     }
-    
+
     log_request(
         logger,
         "info",
@@ -138,7 +138,7 @@ async def user_exists(request: Request, response: Response):
         route="/users/exists",
         status_code=200,
     )
-    
+
     return db_user_responses.UserExistsResponse().dump(response_data)
 
 
@@ -151,7 +151,7 @@ async def user_login(request: Request, response: Response):
         "User login request received",
         route="/users/login",
     )
-    
+
     result = await validate_json(request, db_user_requests.UserLoginRequest())
 
     if isinstance(result, JSONResponse):
@@ -174,7 +174,7 @@ async def user_login(request: Request, response: Response):
             "error": ErrorType.INVALID_CREDENTIALS,
             "message": "The provided credentials are invalid",
         }
-        
+
         response.status_code = 401
         log_request(
             logger,
@@ -193,7 +193,7 @@ async def user_login(request: Request, response: Response):
         "username": user.username,
         "id": user.id,
     }
-    
+
     log_request(
         logger,
         "info",
@@ -202,5 +202,5 @@ async def user_login(request: Request, response: Response):
         route="/users/login",
         status_code=200,
     )
-    
+
     return db_user_responses.UserLoginResponse().dump(response_data)

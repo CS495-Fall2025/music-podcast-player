@@ -2,6 +2,7 @@ from urllib.parse import urljoin
 
 from flask import current_app
 import requests
+from marshmallow import exceptions
 
 from rss_music_db_service_schemas import ErrorResponse, ErrorType
 from rss_music_db_service_schemas.users import (
@@ -9,13 +10,13 @@ from rss_music_db_service_schemas.users import (
     responses as db_responses,
 )
 
-from rss_music_api_service.internal_apis import errors
+from rss_music_api_service.internal_apis import auth, errors
 from rss_music_api_service.logging_config import log_request, get_logger
 
-
-TIMEOUT = (2, 5)  # 2 Seconds to connect, 5 seconds to recieve response.
+TIMEOUT = (5, 10)  # 2 Seconds to connect, 5 seconds to recieve response.
 
 logger = get_logger(__name__)
+
 
 def create_user(username: str, email: str, password: str) -> None:
     request = _create_user_request(username, email, password)
@@ -75,7 +76,12 @@ def _create_user_request(
 
 
 def _handle_error(response: requests.Response) -> None:
-    error_data = ErrorResponse().load(response.json())
+    try:
+        error_data = ErrorResponse().load(response.json())
+    except exceptions.ValidationError:
+        raise errors.InternalAPIBadResponseError(
+            "Recieved unexpected data from database service"
+        )
 
     match error_data["error"]:
         case ErrorType.INVALID_FORMAT:
@@ -140,7 +146,10 @@ def _send_request(request: requests.PreparedRequest) -> requests.Response:
     )
 
     with requests.Session() as session:
+        auth_obj = auth.get_auth()
         try:
+            if auth_obj is not None:
+                request = auth_obj(request)
             response = session.send(request, timeout=TIMEOUT)
 
             level = (

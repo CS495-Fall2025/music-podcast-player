@@ -301,13 +301,6 @@ def post_refresh() -> tuple:
     user_id = payload.get("sub")
     username = payload.get("name")
 
-    if not db_service.check_user_exists(user_id):
-        return {
-            "code": 401,
-            "error": "UserNotFound",
-            "message": "User not found",
-        }, 401
-
     new_access_token = login.generate_jwt(
         user_id,
         username,
@@ -319,6 +312,7 @@ def post_refresh() -> tuple:
     is_production = current_app.config.get("SESSION_COOKIE_SECURE", True)
 
     response = flask.make_response({"success": True}, 200)
+
     response.set_cookie(
         "access_token",
         new_access_token,

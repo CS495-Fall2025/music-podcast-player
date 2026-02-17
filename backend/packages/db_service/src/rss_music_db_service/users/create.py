@@ -37,7 +37,7 @@ def _attempt_add_user(user: User) -> None | str:
         try:
             session.add(user)
             session.commit()
-            
+
             log_request(
                 logger,
                 "info",
@@ -47,7 +47,7 @@ def _attempt_add_user(user: User) -> None | str:
                 table="users",
                 username=user.username,
             )
-            
+
             return None
         except IntegrityError as error:
             session.rollback()
