@@ -17,14 +17,14 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: backend
-          file: docker/lambda/Dockerfile.{{ inputs.package-name }}
+          file: docker/lambda/Dockerfile.${{ inputs.package-name }}
           cache-from: type=gha
           cache-to: type=gha
           platforms: linux/arm64
-          tags: backend-build-{{ inputs.package-name }}:latest
+          tags: backend-build-${{ inputs.package-name }}:latest
           load: true
       - run: docker run --rm -v ${{ github.workspace }}/build:/mnt/result --platform linux/arm64 backend-build:latest
       - uses: actions/upload-artifact@v4
         with:
-          name: backend-build-{{ inputs.package-name }}
-          path: ${{ github.workspace }}/build/{{ inputs.package-name }}-build.zip
+          name: backend-build-${{ inputs.package-name }}
+          path: ${{ github.workspace }}/build/${{ inputs.package-name }}-build.zip
