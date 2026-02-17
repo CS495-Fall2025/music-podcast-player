@@ -7,8 +7,8 @@ vi.mock("../src/router", () => ({
   },
 }));
 
-vi.mock("../src/controllers/backendLinkParser.js", () => ({
-  requestLinkedFeeds: vi.fn(),
+vi.mock("../src/controllers/rssParsing.js", () => ({
+  requestFeedFromURL: vi.fn(),
 }));
 
 describe("rssFeedForm controller", () => {
@@ -16,7 +16,7 @@ describe("rssFeedForm controller", () => {
     onUserFeedInputBlur,
     onUserFeedInputInput,
     onUserFeedFormSubmit;
-  let requestLinkedFeeds;
+  let requestFeedFromURL;
 
   // Import fresh modules and reset state before each test
   beforeEach(async () => {
@@ -24,15 +24,13 @@ describe("rssFeedForm controller", () => {
     vi.resetModules();
 
     const formModule = await import("../src/controllers/rssFeedForm.js");
-    const parsingModule = await import(
-      "../src/controllers/backendLinkParser.js"
-    );
+    const parsingModule = await import("../src/controllers/rssParsing.js");
 
     canSubmit = formModule.canSubmit;
     onUserFeedInputBlur = formModule.onUserFeedInputBlur;
     onUserFeedInputInput = formModule.onUserFeedInputInput;
     onUserFeedFormSubmit = formModule.onUserFeedFormSubmit;
-    requestLinkedFeeds = parsingModule.requestLinkedFeeds;
+    requestFeedFromURL = parsingModule.requestFeedFromURL;
   });
 
   describe("URL validation", () => {
@@ -112,7 +110,7 @@ describe("rssFeedForm controller", () => {
       onUserFeedFormSubmit(event);
 
       expect(event.target.reset).toHaveBeenCalled();
-      expect(requestLinkedFeeds).toHaveBeenCalledWith(url);
+      expect(requestFeedFromURL).toHaveBeenCalledWith(url);
       expect(router.push).toHaveBeenCalledWith("/view");
     });
 
@@ -135,7 +133,7 @@ describe("rssFeedForm controller", () => {
       onUserFeedFormSubmit(event);
 
       expect(event.target.reset).not.toHaveBeenCalled();
-      expect(requestLinkedFeeds).not.toHaveBeenCalled();
+      expect(requestFeedFromURL).not.toHaveBeenCalled();
       expect(router.push).not.toHaveBeenCalled();
     });
   });

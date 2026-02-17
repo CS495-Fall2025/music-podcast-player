@@ -4,7 +4,7 @@ import { searchedFeeds } from "./localFeedStore.js";
 export async function requestFeeds(query) {
   const config = await loadConfig();
 
-  return fetch(
+  fetch(
     `${config.backendUrl}/search/feeds?` +
       `query=${encodeURIComponent(query)}&count=50`,
   )
