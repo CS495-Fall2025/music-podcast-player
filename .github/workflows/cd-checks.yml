@@ -23,7 +23,7 @@ jobs:
         working-directory: cdk
     env:
       FRONTEND_BUILD_PATH: "${{ github.workspace }}/builds/dist"
-      BACKEND_BUILD_PATH: "${{ github.workspace }}/builds"
+      BACKEND_BUILD_PATH: "${{ github.workspace }}/builds/backend_build.zip"
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v5
@@ -32,15 +32,7 @@ jobs:
           path: builds/dist
       - uses: actions/download-artifact@v5
         with:
-          name: backend-build-api-service
-          path: builds/
-      - uses: actions/download-artifact@v5
-        with:
-          name: backend-build-db-service
-          path: builds/
-      - uses: actions/download-artifact@v5
-        with:
-          name: backend-build-migration-handler
+          name: backend-build
           path: builds/
       - run: apk add nodejs npm
       - run: npm install -g aws-cdk

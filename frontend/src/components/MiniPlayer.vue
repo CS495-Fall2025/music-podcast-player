@@ -13,7 +13,7 @@ const {
   repeat,
   isShuffle,
   currentTrack,
-  feed,
+  feedTracks,
   playIcon,
   pauseIcon,
   skipIcon,
@@ -81,7 +81,7 @@ const {
         :class="{ 'is-disabled': !isShuffle }"
         @click="toggleShuffle"
         vmodel="ready"
-        :disabled="!ready || !feed.length"
+        :disabled="!ready || !feedTracks.length"
       >
         <img :src="shuffleIcon" alt="Shuffle" class="play-icon" />
       </button>

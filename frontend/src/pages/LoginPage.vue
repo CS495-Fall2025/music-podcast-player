@@ -3,7 +3,6 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { completeLogin } from "../auth/authService";
 import * as pkce from "../auth/pkce";
-import loadConfig from "../config";
 
 const router = useRouter();
 const username = ref("");
@@ -24,9 +23,8 @@ onMounted(async () => {
     sessionStorage.setItem("pkce_verifier", codeVerifier);
 
     // notify backend of PKCE challenge
-    const config = await loadConfig();
     const response = await fetch(
-      `${config.backendUrl}/auth/?code_challenge=${encodeURIComponent(codeChallenge)}`,
+      `${import.meta.env.VITE_AUTH_API}/auth?code_challenge=${encodeURIComponent(codeChallenge)}`,
       {
         method: "GET",
         credentials: "include",
@@ -62,19 +60,21 @@ const handleLogin = async (e) => {
       throw new Error("PKCE verifier not found. Please refresh the page.");
     }
 
-    const config = await loadConfig();
-    const response = await fetch(`${config.backendUrl}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${import.meta.env.VITE_AUTH_API}/auth/login`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          username: username.value,
+          password: password.value,
+          code_verifier: storedVerifier,
+        }),
       },
-      credentials: "include",
-      body: JSON.stringify({
-        username: username.value,
-        password: password.value,
-        code_verifier: storedVerifier,
-      }),
-    });
+    );
 
     if (!response.ok) {
       const data = await response.json();
