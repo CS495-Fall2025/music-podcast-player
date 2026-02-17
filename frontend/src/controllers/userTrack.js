@@ -1,4 +1,5 @@
 import { currentTrack } from "./localFeedStore.js";
+import { sanitizeText } from "./textSanitizer.js";
 
 export default {
   name: "userTrack",
@@ -11,25 +12,41 @@ export default {
   },
 
   methods: {
+    // Sets the currentTrack variable to this track.
     selectTrack() {
       currentTrack.value = this.track;
     },
   },
 
   computed: {
+    // Returns a trackObj if the track exists, otherwise return placeholder values to prevent crashing.
+    trackObj() {
+      return (
+        this.track || {
+          image: "",
+          artist: "",
+          title: "",
+          description: "",
+        }
+      );
+    },
+    // Returns the track's image, if there's no image, returns placeholder.
     trackImage() {
-      return this.track.image?.trim() || "/src/assets/images/default-image.jpg";
+      return this.trackObj.image || "/src/assets/images/default-image.jpg";
     },
+    // Returns the track's artist, if there's no artist, returns placeholder.
     trackArtist() {
-      // not yet working, i think it's a parsing thing, will likely need to change some calls
-      return this.track.trackArtist?.trim() || "Track artist not found";
+      return this.trackObj.artist || "Track artist not found";
     },
+    // Returns the track's title, if there's no title, returns placeholder.
     trackTitle() {
-      return this.track.title?.trim() || "Track title not found";
+      return this.trackObj.title || "Track title not found";
     },
+    // Returns the track's (sanitized) description, if there's no description, returns placeholder.
     trackDescription() {
-      // not yet working, i think it's a parsing thing, will likely need to change some calls
-      return this.track.desc?.trim() || "Track description not found";
+      return (
+        sanitizeText(this.trackObj.description) || "Track description not found"
+      );
     },
   },
 };

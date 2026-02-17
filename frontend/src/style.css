@@ -146,7 +146,7 @@ p {
   font-size: clamp(0.9rem, 2vw, 1rem);
   line-height: 1.6;
   margin: 0 0 var(--spacing-md) 0;
-  max-width: 65ch;
+  /* max-width: 65ch; */
 }
 
 /* ========================================
@@ -154,14 +154,14 @@ p {
    ======================================== */
 
 a {
-  color: #e7e7e7;
+  color: var(--orange);
   text-decoration: underline;
   transition: color var(--transition-standard);
   cursor: pointer;
 }
 
 a:hover {
-  color: var(--light-orange);
+  color: var(--lighter-orange);
 }
 
 /* ========================================
