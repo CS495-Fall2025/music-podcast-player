@@ -1,5 +1,5 @@
 import { ref, watch } from "vue";
-import { currentTrack, feed } from "../controllers/localFeedStore.js";
+import { currentTrack, feedTracks } from "../controllers/localFeedStore.js";
 
 import playIcon from "../assets/images/play-icon.svg";
 import pauseIcon from "../assets/images/pause-icon.svg";
@@ -23,16 +23,18 @@ export function useMiniPlayer() {
 
   const getCurrentIndex = () => {
     if (!currentTrack.value || !currentTrack.value.audio) return -1;
-    return feed.findIndex((track) => track.audio === currentTrack.value.audio);
+    return feedTracks.findIndex(
+      (track) => track.audio === currentTrack.value.audio,
+    );
   };
 
   const buildShuffleOrder = () => {
-    if (!feed.length) return [];
+    if (!feedTracks.length) return [];
     const currentIndex = getCurrentIndex();
     if (currentIndex === -1) return [];
 
     const indices = [];
-    for (let i = 0; i < feed.length; i++) {
+    for (let i = 0; i < feedTracks.length; i++) {
       if (i !== currentIndex) indices.push(i);
     }
 
@@ -94,15 +96,15 @@ export function useMiniPlayer() {
   };
 
   const skipToNextTrack = () => {
-    if (!feed.length) return;
+    if (!feedTracks.length) return;
 
     if (!isShuffle.value || !shuffleOrder.value.length) {
       const i = getCurrentIndex();
       if (i === -1) return;
-      currentTrack.value = feed[(i + 1) % feed.length];
+      currentTrack.value = feedTracks[(i + 1) % feedTracks.length];
     } else {
       shuffleIndex.value = (shuffleIndex.value + 1) % shuffleOrder.value.length;
-      currentTrack.value = feed[shuffleOrder.value[shuffleIndex.value]];
+      currentTrack.value = feedTracks[shuffleOrder.value[shuffleIndex.value]];
     }
 
     isPlaying.value = false;
@@ -117,12 +119,13 @@ export function useMiniPlayer() {
 
       if (!isShuffle.value) {
         const i = getCurrentIndex();
-        if (i > 0) currentTrack.value = feed[i - 1];
+        if (i > 0) currentTrack.value = feedTracks[i - 1];
         else restartSong();
       } else {
         if (shuffleIndex.value > 0) {
           shuffleIndex.value--;
-          currentTrack.value = feed[shuffleOrder.value[shuffleIndex.value]];
+          currentTrack.value =
+            feedTracks[shuffleOrder.value[shuffleIndex.value]];
         } else restartSong();
       }
 
@@ -167,7 +170,7 @@ export function useMiniPlayer() {
     repeat,
     isShuffle,
     currentTrack,
-    feed,
+    feedTracks,
 
     // icons
     playIcon,

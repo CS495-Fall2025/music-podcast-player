@@ -22,7 +22,7 @@ describe("userTrack", () => {
     };
 
     userTrack.methods.selectTrack.call(component);
-    expect(currentTrack.value).toBe(mockTrack.audio);
+    expect(currentTrack.value).toStrictEqual(mockTrack);
 
     currentTrack.value = "";
   });
