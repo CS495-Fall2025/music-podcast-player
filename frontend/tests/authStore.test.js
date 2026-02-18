@@ -4,6 +4,14 @@ describe("useAuth", () => {
   let useAuth;
   let fetchMock;
 
+	// mock config.json
+  const mockConfig = () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ backendUrl: "http://localhost:5000" }),
+    });
+  };
+
   beforeEach(async () => {
     vi.useFakeTimers();
 
@@ -39,6 +47,7 @@ describe("useAuth", () => {
     it("should verify valid token and update state", async () => {
       const auth = useAuth();
 
+			mockConfig();
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -70,6 +79,7 @@ describe("useAuth", () => {
     it("should handle invalid token", async () => {
       const auth = useAuth();
 
+			mockConfig();
       fetchMock.mockResolvedValueOnce({
         ok: false,
       });
@@ -84,6 +94,7 @@ describe("useAuth", () => {
     it("should handle network errors gracefully", async () => {
       const auth = useAuth();
 
+			mockConfig();
       fetchMock.mockRejectedValueOnce(new Error("Network error"));
 
       const result = await auth.verifyToken();
@@ -98,6 +109,7 @@ describe("useAuth", () => {
     it("should return false when response is valid but token is invalid", async () => {
       const auth = useAuth();
 
+			mockConfig();
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ valid: false }),
@@ -114,6 +126,7 @@ describe("useAuth", () => {
     it("should complete login when token is valid", async () => {
       const auth = useAuth();
 
+			mockConfig();
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -137,6 +150,7 @@ describe("useAuth", () => {
     it("should start auto-refresh after successful login", async () => {
       const auth = useAuth();
 
+			mockConfig();
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -156,6 +170,7 @@ describe("useAuth", () => {
     it("should not set authenticated state when token is invalid", async () => {
       const auth = useAuth();
 
+			mockConfig();
       fetchMock.mockResolvedValueOnce({
         ok: false,
       });
@@ -171,6 +186,7 @@ describe("useAuth", () => {
     it("should call logout endpoint and clear state", async () => {
       const auth = useAuth();
 
+			mockConfig();
       // Setup authenticated state
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -181,6 +197,7 @@ describe("useAuth", () => {
       });
       await auth.completeLogin();
 
+			mockConfig();
       // Mock logout endpoint
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -203,6 +220,7 @@ describe("useAuth", () => {
     it("should clear state even if logout endpoint fails", async () => {
       const auth = useAuth();
 
+			mockConfig();
       // Setup authenticated state
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -213,6 +231,7 @@ describe("useAuth", () => {
       });
       await auth.completeLogin();
 
+			mockConfig();
       // Mock logout endpoint failure
       fetchMock.mockRejectedValueOnce(new Error("Network error"));
 
@@ -225,6 +244,7 @@ describe("useAuth", () => {
     it("should stop auto-refresh on logout", async () => {
       const auth = useAuth();
 
+			mockConfig();
       // Setup authenticated state
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -237,6 +257,7 @@ describe("useAuth", () => {
 
       expect(vi.getTimerCount()).toBe(1);
 
+			mockConfig();
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true }),
@@ -252,6 +273,7 @@ describe("useAuth", () => {
     it("should refresh token successfully", async () => {
       const auth = useAuth();
 
+			mockConfig();
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true }),
@@ -272,10 +294,12 @@ describe("useAuth", () => {
     it("should logout when refresh fails", async () => {
       const auth = useAuth();
 
+			mockConfig();
       fetchMock.mockResolvedValueOnce({
         ok: false,
       });
 
+			mockConfig();
       // Mock logout endpoint
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -294,6 +318,7 @@ describe("useAuth", () => {
     it("should handle network errors", async () => {
       const auth = useAuth();
 
+			mockConfig();
       fetchMock.mockRejectedValueOnce(new Error("Network error"));
 
       const result = await auth.refreshToken();
@@ -310,6 +335,7 @@ describe("useAuth", () => {
     it("should refresh token every 30 minutes", async () => {
       const auth = useAuth();
 
+			mockConfig();
       // Complete login to start auto-refresh
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -320,6 +346,7 @@ describe("useAuth", () => {
       });
       await auth.completeLogin();
 
+			mockConfig();
       // Mock successful refresh
       fetchMock.mockResolvedValue({
         ok: true,
@@ -338,6 +365,7 @@ describe("useAuth", () => {
     it("should stop auto-refresh when refresh fails", async () => {
       const auth = useAuth();
 
+			mockConfig();
       // Complete login to start auto-refresh
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -348,8 +376,10 @@ describe("useAuth", () => {
       });
       await auth.completeLogin();
 
+			mockConfig();
       // Mock failed refresh (will trigger logout)
       fetchMock.mockResolvedValueOnce({ ok: false });
+			mockConfig();
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true }),

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { requestFeedFromURL } from "../src/controllers/rssParsing.js";
+import { requestLinkedFeeds } from "../src/controllers/backendLinkParser.js";
 
 vi.mock("../src/router", () => ({
   default: {
@@ -7,8 +7,8 @@ vi.mock("../src/router", () => ({
   },
 }));
 
-vi.mock("../src/controllers/rssParsing.js", () => ({
-  requestFeedFromURL: vi.fn(),
+vi.mock("../src/controllers/backendLinkParser.js", () => ({
+  requestLinkedFeeds: vi.fn(),
 }));
 
 // import after mocks are defined
@@ -37,7 +37,7 @@ describe("feedCard controller", () => {
 
     feedCard.methods.selectTrack.call(component);
 
-    expect(requestFeedFromURL).toHaveBeenCalledWith(mockFeed.url);
+		expect(requestLinkedFeeds).toHaveBeenCalledWith(mockFeed.url);
     expect(router.push).toHaveBeenCalledWith("/view");
   });
 });

@@ -1,5 +1,5 @@
 import loadConfig from "../config";
-import { feed } from "./localFeedStore.js";
+import { feed, feedTracks } from "./localFeedStore.js";
 
 export async function requestLinkedFeeds(url) {
   const config = await loadConfig();
@@ -27,20 +27,21 @@ function parseResponse(response) {
         : [response.feed]
       : null);
 
-  let newAlbum = [];
   let newFeed = [];
+	let newFeedTracks = [];
   const valueObject = parseValue(response);
 
   for (const feedItem of feeds) {
-    let album = {
-      type: "album",
+    let feedObj = {
+      type: "feed",
       artist: feedItem.artist,
-      feedTitle: feedItem.title,
+      title: feedItem.title,
       description: feedItem.description,
       link: feedItem.link,
       image: feedItem.art_url,
     };
-    newAlbum.push(album);
+    newFeed.push(feedObj);
+
     for (const item of feedItem.items) {
       let track = {
         type: "track",
@@ -51,10 +52,10 @@ function parseResponse(response) {
         image: item.image || feedItem.art_url,
         value: valueObject,
       };
-      newFeed.push(track);
-      console.log(track);
+      newFeedTracks.push(track);
     }
-    feed.splice(0, feed.length, ...newFeed);
+		feed.splice(0, feed.length, ...newFeed);
+    feedTracks.splice(0, feed.length, ...newFeedTracks);
   }
 }
 
@@ -85,7 +86,6 @@ function parseValue(response) {
           ? { [valueObject.customKey]: valueObject.customValue }
           : {};
       recipients.push(valueObject);
-      console.log(valueObject);
     }
   }
   return recipients;
