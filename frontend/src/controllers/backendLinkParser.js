@@ -55,7 +55,7 @@ function parseResponse(response) {
       newFeedTracks.push(track);
     }
     feed.splice(0, feed.length, ...newFeed);
-    feedTracks.splice(0, feed.length, ...newFeedTracks);
+    feedTracks.splice(0, feedTracks.length, ...newFeedTracks);
   }
 }
 
