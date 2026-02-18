@@ -37,7 +37,7 @@ describe("feedCard controller", () => {
 
     feedCard.methods.selectTrack.call(component);
 
-		expect(requestLinkedFeeds).toHaveBeenCalledWith(mockFeed.url);
+    expect(requestLinkedFeeds).toHaveBeenCalledWith(mockFeed.url);
     expect(router.push).toHaveBeenCalledWith("/view");
   });
 });

@@ -16,7 +16,7 @@ describe("rssFeedForm controller", () => {
     onUserFeedInputBlur,
     onUserFeedInputInput,
     onUserFeedFormSubmit;
-	let requestLinkedFeeds;
+  let requestLinkedFeeds;
 
   // Import fresh modules and reset state before each test
   beforeEach(async () => {
@@ -24,7 +24,7 @@ describe("rssFeedForm controller", () => {
     vi.resetModules();
 
     const formModule = await import("../src/controllers/rssFeedForm.js");
-		const parsingModule = await import(
+    const parsingModule = await import(
       "../src/controllers/backendLinkParser.js"
     );
 
@@ -32,7 +32,7 @@ describe("rssFeedForm controller", () => {
     onUserFeedInputBlur = formModule.onUserFeedInputBlur;
     onUserFeedInputInput = formModule.onUserFeedInputInput;
     onUserFeedFormSubmit = formModule.onUserFeedFormSubmit;
-		requestLinkedFeeds = parsingModule.requestLinkedFeeds;
+    requestLinkedFeeds = parsingModule.requestLinkedFeeds;
   });
 
   describe("URL validation", () => {
@@ -112,7 +112,7 @@ describe("rssFeedForm controller", () => {
       onUserFeedFormSubmit(event);
 
       expect(event.target.reset).toHaveBeenCalled();
-			expect(requestLinkedFeeds).toHaveBeenCalledWith(url);
+      expect(requestLinkedFeeds).toHaveBeenCalledWith(url);
       expect(router.push).toHaveBeenCalledWith("/view");
     });
 

@@ -24,7 +24,7 @@ describe("backendFeedParser controller", () => {
     const mockFeeds = [{ id: 1, title: "Test Feed" }];
     const mockResponse = { feeds: mockFeeds };
 
-		mockConfig();
+    mockConfig();
     globalThis.fetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve(mockResponse),
@@ -32,7 +32,7 @@ describe("backendFeedParser controller", () => {
 
     await requestFeeds("test query");
 
-		// Check that the backend API was called with correct URL
+    // Check that the backend API was called with correct URL
     expect(globalThis.fetch).toHaveBeenCalledWith(
       "http://localhost:5000/search/feeds?query=test%20query&count=50",
     );
@@ -45,7 +45,7 @@ describe("backendFeedParser controller", () => {
   it("requestFeeds handles fetch error correctly", async () => {
     const consoleSpy = vi.spyOn(console, "log");
 
-		mockConfig();
+    mockConfig();
     globalThis.fetch.mockResolvedValueOnce({
       ok: false,
       status: 404,
@@ -61,7 +61,7 @@ describe("backendFeedParser controller", () => {
     const consoleSpy = vi.spyOn(console, "log");
     const mockError = new Error("Network error");
 
-		mockConfig();
+    mockConfig();
     globalThis.fetch.mockRejectedValueOnce(mockError);
 
     await requestFeeds("test query");

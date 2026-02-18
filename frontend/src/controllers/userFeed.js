@@ -6,7 +6,7 @@ export default {
   components: { Track },
 
   computed: {
-		// Returns feed if a feed is loaded. If a feed is not loaded, returns mock empty feed (until a feed is loaded) to prevent crashing.
+    // Returns feed if a feed is loaded. If a feed is not loaded, returns mock empty feed (until a feed is loaded) to prevent crashing.
     feed() {
       return feed.length
         ? feed[0]

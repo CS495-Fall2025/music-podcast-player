@@ -34,7 +34,7 @@ function clearQuery() {
         Search the PodcastIndex for feeds:
       </label>
 
-			<div class="input-wrap">
+      <div class="input-wrap">
         <input
           type="text"
           id="query-input"

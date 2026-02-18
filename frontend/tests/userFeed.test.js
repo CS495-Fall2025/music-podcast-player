@@ -13,7 +13,7 @@ describe("UserFeed", () => {
     expect(UserFeed.components.Track).toBeDefined();
   });
 
-	// Test computed property returns feedTracks with correct data
+  // Test computed property returns feedTracks with correct data
   it("computes feedTracks correctly", () => {
     const testTrack = { type: "track", title: "Test Track", audio: "test.mp3" };
     feedTracks.push(testTrack);
