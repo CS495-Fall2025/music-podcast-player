@@ -22,6 +22,7 @@ from aws_cdk import (
     aws_s3 as s3,
     aws_s3_deployment as s3_deploy,
     custom_resources as cr,
+    aws_cloudwatch as cloudwatch,
 )
 from constructs import Construct
 
@@ -68,6 +69,8 @@ class RSSMusicPlayerStack(Stack):
             distribution,
             f"https://{distribution.distribution_domain_name}{API_SERVICE_PREFIX}",
         )
+
+        self.make_cloudwatch_dashboard()
 
     def _make_frontend_bucket(self) -> s3.Bucket:
         bucket = s3.Bucket(
@@ -483,3 +486,24 @@ class RSSMusicPlayerStack(Stack):
         )
 
         return groups
+    
+    def make_cloudwatch_dashboard(self):
+        dashboard = cloudwatch.Dashboard(
+            self,
+            "RSSMusicPlayerDashboard",
+            dashboard_name="RSSMusicPlayerDashboard",
+            default_interval=Duration.minutes(5),
+        )
+
+        error_metric = cloudwatch.Metric(
+            namespace="AWS/Lambda",
+            metric_name="Errors",
+            dimensions_map={"FunctionName": "RSSMusicPlayerBackendInternetFunction"},
+            statistic="Sum",
+            period=Duration.minutes(1),
+        )
+
+        dashboard.add_widgets(cloudwatch.GraphWidget(
+            title="Backend Lambda Errors",
+            left=[error_metric],
+        ))
