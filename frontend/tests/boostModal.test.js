@@ -71,7 +71,9 @@ describe("useBoostModal (minimal)", () => {
 
     modal.onSendBoost();
 
-    expect(modal.satsError.value).toBe("Enter a positive integer amount of sats.");
+    expect(modal.satsError.value).toBe(
+      "Enter a positive integer amount of sats.",
+    );
     expect(sendBoost).not.toHaveBeenCalled();
     expect(modal.isOpen.value).toBe(true);
   });
