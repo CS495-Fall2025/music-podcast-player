@@ -70,7 +70,10 @@ class RSSMusicPlayerStack(Stack):
             f"https://{distribution.distribution_domain_name}{API_SERVICE_PREFIX}",
         )
 
-        self.make_cloudwatch_dashboard()
+        self.make_cloudwatch_dashboard(
+            api_service_api=api_service_api,
+            api_service_function=api_service_function
+            )
 
     def _make_frontend_bucket(self) -> s3.Bucket:
         bucket = s3.Bucket(
@@ -487,7 +490,7 @@ class RSSMusicPlayerStack(Stack):
 
         return groups
     
-    def make_cloudwatch_dashboard(self):
+    def make_cloudwatch_dashboard(self, api_service_api, api_service_function):
         dashboard = cloudwatch.Dashboard(
             self,
             "RSSMusicPlayerDashboard",
@@ -498,7 +501,23 @@ class RSSMusicPlayerStack(Stack):
         error_metric = cloudwatch.Metric(
             namespace="AWS/Lambda",
             metric_name="Errors",
-            dimensions_map={"FunctionName": "RSSMusicPlayerBackendInternetFunction"},
+            dimensions_map={"FunctionName": api_service_function.function_name},
+            statistic="Sum",
+            period=Duration.minutes(1),
+        )
+
+        _4xx_metric = cloudwatch.Metric(
+            namespace="AWS/ApiGateway",
+            metric_name="4XXError",
+            dimensions_map={"ApiId": api_service_api.api_id},
+            statistic="Sum",
+            period=Duration.minutes(1),
+        )
+
+        _200_metric = cloudwatch.Metric(
+            namespace="AWS/ApiGateway",
+            metric_name="2XXSuccess",
+            dimensions_map={"ApiId": api_service_api.api_id},
             statistic="Sum",
             period=Duration.minutes(1),
         )
@@ -506,4 +525,12 @@ class RSSMusicPlayerStack(Stack):
         dashboard.add_widgets(cloudwatch.GraphWidget(
             title="Backend Lambda Errors",
             left=[error_metric],
+        ))
+        dashboard.add_widgets(cloudwatch.GraphWidget(
+            title="API Gateway 4XX Errors",
+            left=[_4xx_metric],
+        ))
+        dashboard.add_widgets(cloudwatch.GraphWidget(
+            title="API Gateway 2XX Successes",
+            left=[_200_metric],
         ))
