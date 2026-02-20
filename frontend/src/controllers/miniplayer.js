@@ -7,6 +7,7 @@ import skipIcon from "../assets/images/forward-icon.svg";
 import rewindIcon from "../assets/images/backward-icon.svg";
 import shuffleIcon from "../assets/images/random-icon.svg";
 import repeatIcon from "../assets/images/undo-arrow-icon.svg";
+import reverseIcon from "../assets/images/reverse-icon.svg";
 
 export function useMiniPlayer() {
   const isPlaying = ref(false);
@@ -16,6 +17,7 @@ export function useMiniPlayer() {
   const duration = ref(0);
   const repeat = ref(false);
   const isShuffle = ref(false);
+  const isReverse = ref(false);
   const shuffleOrder = ref([]);
   const shuffleIndex = ref(-1);
   const prevClickTimeout = ref(null);
@@ -60,6 +62,11 @@ export function useMiniPlayer() {
       shuffleOrder.value = [];
       shuffleIndex.value = -1;
     }
+  };
+
+  const toggleReverse = () => {
+    isReverse.value = !isReverse.value;
+    feedTracks.reverse();
   };
 
   watch(currentTrack, () => {
@@ -169,6 +176,7 @@ export function useMiniPlayer() {
     duration,
     repeat,
     isShuffle,
+    isReverse,
     currentTrack,
     feedTracks,
 
@@ -179,12 +187,14 @@ export function useMiniPlayer() {
     rewindIcon,
     shuffleIcon,
     repeatIcon,
+    reverseIcon,
 
     // methods
     togglePlay,
     skipToNextTrack,
     skipToPreviousTrack,
     toggleShuffle,
+    toggleReverse,
     repeatTrack,
     onTimeUpdate,
     onCanPlay,
