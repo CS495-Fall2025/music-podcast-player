@@ -67,6 +67,7 @@ export function useMiniPlayer() {
     }
   };
 
+  // Toggles isReverse.value and reverses feedTracks
   const toggleReverse = () => {
     isReverse.value = !isReverse.value;
     feedTracks.reverse();
