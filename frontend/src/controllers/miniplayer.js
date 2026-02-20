@@ -21,7 +21,7 @@ export function useMiniPlayer() {
   const shuffleOrder = ref([]);
   const shuffleIndex = ref(-1);
   const prevClickTimeout = ref(null);
-  const DOUBLE_CLICK_DELAY = 300;
+  const DOUBLE_CLICK_DELAY = 800;
 
   const getCurrentIndex = () => {
     if (!currentTrack.value || !currentTrack.value.audio) return -1;
@@ -50,6 +50,7 @@ export function useMiniPlayer() {
   };
 
   const toggleShuffle = () => {
+    // Not shuffling
     if (!isShuffle.value) {
       const order = buildShuffleOrder();
       if (!order.length) return;
@@ -57,7 +58,9 @@ export function useMiniPlayer() {
       shuffleOrder.value = order;
       shuffleIndex.value = -1;
       isShuffle.value = true;
-    } else {
+    }
+    // Shuffling
+    else {
       isShuffle.value = false;
       shuffleOrder.value = [];
       shuffleIndex.value = -1;
@@ -105,11 +108,14 @@ export function useMiniPlayer() {
   const skipToNextTrack = () => {
     if (!feedTracks.length) return;
 
+    // Not shuffling
     if (!isShuffle.value || !shuffleOrder.value.length) {
       const i = getCurrentIndex();
       if (i === -1) return;
       currentTrack.value = feedTracks[(i + 1) % feedTracks.length];
-    } else {
+    }
+    // Shuffling
+    else {
       shuffleIndex.value = (shuffleIndex.value + 1) % shuffleOrder.value.length;
       currentTrack.value = feedTracks[shuffleOrder.value[shuffleIndex.value]];
     }
@@ -124,11 +130,14 @@ export function useMiniPlayer() {
       clearTimeout(prevClickTimeout.value);
       prevClickTimeout.value = null;
 
+      // Not shuffling
       if (!isShuffle.value) {
         const i = getCurrentIndex();
         if (i > 0) currentTrack.value = feedTracks[i - 1];
         else restartSong();
-      } else {
+      }
+      // Shuffling
+      else {
         if (shuffleIndex.value > 0) {
           shuffleIndex.value--;
           currentTrack.value =
