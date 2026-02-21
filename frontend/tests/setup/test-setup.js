@@ -5,7 +5,6 @@ import { vi, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
  *
  * This configures the testing environment with:
  * - fake timers for controlling async operations
- * - mock browser APIs (window, document, FormData)
  * - automatic cleanup between tests
  *
  * all tests will run with these mocks applied automatically.
@@ -27,33 +26,16 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.clearAllTimers();
 
-  // Mock browser window object
-  vi.stubGlobal("window", {
-    alert: vi.fn(),
-    Event: vi.fn(),
-  });
+  if (globalThis.localStorage) {
+    globalThis.localStorage.clear();
+  }
 
-  // Mock browser document object
-  vi.stubGlobal("document", {
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    createElement: () => ({
-      contains: vi.fn(),
-      reset: vi.fn(),
-    }),
-  });
-
-  // Mock FormData API
-  vi.stubGlobal(
-    "FormData",
-    vi.fn(() => ({
-      get: vi.fn(),
-      append: vi.fn(),
-    })),
-  );
+  if (globalThis.sessionStorage) {
+    globalThis.sessionStorage.clear();
+  }
 });
 
 // Clean up all global mocks after each test
 afterEach(() => {
-  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
