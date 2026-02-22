@@ -214,3 +214,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# AWS Lambda Packaging
+builds/
+
+# UV Lock (We may add this back in the future)
+uv.lock

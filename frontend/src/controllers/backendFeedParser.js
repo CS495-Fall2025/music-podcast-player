@@ -1,8 +1,12 @@
+import loadConfig from "../config";
 import { searchedFeeds } from "./localFeedStore.js";
 
-export function requestFeeds(query) {
-  fetch(
-    `http://localhost:5000/search/feeds?query=${encodeURIComponent(query)}&count=50`,
+export async function requestFeeds(query) {
+  const config = await loadConfig();
+
+  return fetch(
+    `${config.backendUrl}/search/feeds?` +
+      `query=${encodeURIComponent(query)}&count=50`,
   )
     .then((response) => {
       if (!response.ok) {

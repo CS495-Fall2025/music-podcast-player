@@ -1,0 +1,52 @@
+name: Development Deployment
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    uses: ./.github/workflows/cd-builds.yml
+  deploy-dev-stack:
+    runs-on: ubuntu-latest
+    environment: development
+    permissions:
+      contents: read
+      id-token: write
+    needs: build
+    container:
+      image: python:3.13-alpine
+    defaults:
+      run:
+        working-directory: cdk
+    env:
+      FRONTEND_BUILD_PATH: "${{ github.workspace }}/builds/dist"
+      BACKEND_BUILD_PATH: "${{ github.workspace }}/builds"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v5
+        with:
+          name: frontend-build
+          path: builds/dist
+      - uses: actions/download-artifact@v5
+        with:
+          name: backend-build-api-service
+          path: builds/
+      - uses: actions/download-artifact@v5
+        with:
+          name: backend-build-db-service
+          path: builds/
+      - uses: actions/download-artifact@v5
+        with:
+          name: backend-build-migration-handler
+          path: builds/
+      - run: apk add nodejs npm
+      - run: npm install -g aws-cdk
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -r requirements.txt
+      - uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - run: cdk deploy --require-approval never

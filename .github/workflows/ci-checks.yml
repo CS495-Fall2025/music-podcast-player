@@ -1,0 +1,59 @@
+name: Continuous Integration Checks
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  frontend-check-linting:
+    runs-on: ubuntu-latest
+    container:
+      image: node:24-alpine
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install
+      - run: npm run lint
+  frontend-check-format:
+    runs-on: ubuntu-latest
+    container:
+      image: node:24-alpine
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install
+      - run: npm run format-check
+  backend-api-service-ci:
+    uses: ./.github/workflows/ci-backend.yml
+    with:
+      package-path: backend/packages/api_service
+      tests: true
+  backend-common-validators-ci:
+    uses: ./.github/workflows/ci-backend.yml
+    with:
+      package-path: backend/packages/common_validators
+  backend-data-model-ci:
+    uses: ./.github/workflows/ci-backend.yml
+    with:
+      package-path: backend/packages/data_model
+      uses_psycopg2: true
+  backend-db-service-ci:
+    uses: ./.github/workflows/ci-backend.yml
+    with:
+      package-path: backend/packages/db_service
+      uses_psycopg2: true
+      tests: true
+  backend-db-service-schemas-ci:
+    uses: ./.github/workflows/ci-backend.yml
+    with:
+      package-path: backend/packages/db_service_schemas
+  backend-migration-handler-ci:
+    uses: ./.github/workflows/ci-backend.yml
+    with:
+      package-path: backend/packages/migration_handler
+      uses_psycopg2: true

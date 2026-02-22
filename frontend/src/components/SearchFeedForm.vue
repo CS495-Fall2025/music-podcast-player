@@ -10,26 +10,56 @@ import {
 } from "../controllers/searchFeedForm.js";
 
 import SearchHistory from "./SearchHistory.vue";
+
+const query = ref("");
+const isFocused = ref(false);
+
 const showHistory = ref(false);
 const historyWrapper = ref(null);
 
+function handleFocus(event) {
+  isFocused.value = true;
+  if (query.value.length > 0) event.target.select();
+}
+
+function handleBlur(event) {
+  isFocused.value = false;
+  showHistory.value = false;
+  onUserInputBlur(event);
+}
+
+function clearQuery() {
+  query.value = "";
+  showHistory.value = false;
+  onUserInputInput({ target: { value: "" } });
+}
+
 function handleHistorySelect(value) {
+  query.value = value;
+
   const input = document.getElementById("query-input");
-  input.value = value;
+  if (input) {
+    input.value = value;
+    onUserInputInput({ target: input });
 
-  onUserInputInput({ target: input });
-
-  const form = input.closest("form");
-  form.dispatchEvent(new Event("submit", { cancelable: true }));
+    const form = input.closest("form");
+    if (form) {
+      form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    }
+  } else {
+    onUserInputInput({ target: { value } });
+  }
 
   showHistory.value = false;
 }
+
 function handleClickOutside(event) {
   if (!showHistory.value) return;
   if (historyWrapper.value && !historyWrapper.value.contains(event.target)) {
     showHistory.value = false;
   }
 }
+
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
 });
@@ -45,26 +75,39 @@ onBeforeUnmount(() => {
       <label for="query-input" class="input-label">
         Search the PodcastIndex for feeds:
       </label>
-      <div class="input-row">
-      <input
-        type="text"
-        id="query-input"
-        name="query"
-        placeholder="Search"
-        @blur="onUserInputBlur"
-        @input="onUserInputInput"
-      />
-      <div class="history-wrapper" ref="historyWrapper">
-      <button
-        type="button"
-        class="history-button"
-        aria-label="Recent searches"
-        @click.stop="showHistory = !showHistory"
-      >
-        🕘
-      </button>
-      <SearchHistory v-if="showHistory" @select="handleHistorySelect" />
-      </div>
+      <div class="input-wrap" ref="historyWrapper">
+        <input
+          type="text"
+          id="query-input"
+          name="query"
+          placeholder="Search"
+          v-model="query"
+          @focus="handleFocus"
+          @blur="handleBlur"
+          @input="onUserInputInput"
+        />
+
+        <button
+          type="button"
+          class="history-button"
+          aria-label="Recent searches"
+          @mousedown.prevent
+          @click.stop="showHistory = !showHistory"
+        >
+          🕘
+        </button>
+
+        <SearchHistory v-if="showHistory" @select="handleHistorySelect" />
+
+        <span
+          v-if="isFocused && query.length"
+          role="button"
+          class="clear-button"
+          aria-label="Clear search"
+          @mousedown.prevent="clearQuery"
+        >
+          ✕
+        </span>
       </div>
       <span class="error-message" v-if="!canSubmit"
         >Search query has incorrect length or is using disallowed
@@ -83,25 +126,34 @@ onBeforeUnmount(() => {
   align-items: center;
   padding: 24px;
 }
-.input-div {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  margin-bottom: 2px;
+.input-wrap {
+  position: relative;
 }
-.input-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+
+.input-wrap input {
+  padding-right: 64px;
+  box-sizing: border-box;
 }
+
 .history-button {
+  position: absolute;
+  right: 36px;
+  top: 55%;
+  transform: translateY(-50%);
   background: transparent;
   border: none;
   cursor: pointer;
+  line-height: 1;
 }
-.history-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
+
+.clear-button {
+  position: absolute;
+  right: 12px;
+  top: 55%;
+  transform: translateY(-50%);
+  background: transparent;
+  font-size: 12px;
+  cursor: pointer;
+  line-height: 1;
 }
 </style>

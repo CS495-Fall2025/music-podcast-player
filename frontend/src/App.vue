@@ -1,11 +1,25 @@
 <script setup>
-// Import components here.
+import { onMounted } from "vue";
+import { verifyToken } from "./auth/authService";
 import NavBar from "./components/NavBar.vue";
+
+// Verify stored token on app startup
+onMounted(async () => {
+  await verifyToken();
+});
 </script>
 
 <template>
-  <NavBar />
-  <router-view />
+  <div class="app-wrapper">
+    <NavBar />
+    <router-view />
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+</style>

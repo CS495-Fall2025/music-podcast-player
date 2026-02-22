@@ -1,6 +1,6 @@
 import router from "../router";
 
-import { requestFeedFromURL } from "./rssParsing.js";
+import { requestLinkedFeeds } from "./backendLinkParser.js";
 
 export default {
   name: "feedCard",
@@ -14,7 +14,7 @@ export default {
 
   methods: {
     selectTrack() {
-      requestFeedFromURL(this.feed.url);
+      requestLinkedFeeds(this.feed.url);
       router.push("/view");
     },
   },
