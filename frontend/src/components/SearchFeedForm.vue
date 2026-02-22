@@ -44,7 +44,9 @@ function handleHistorySelect(value) {
 
     const form = input.closest("form");
     if (form) {
-      form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+      form.dispatchEvent(
+        new Event("submit", { cancelable: true, bubbles: true }),
+      );
     }
   } else {
     onUserInputInput({ target: { value } });
@@ -75,17 +77,29 @@ onBeforeUnmount(() => {
       <label for="query-input" class="input-label">
         Search the PodcastIndex for feeds:
       </label>
-      <div class="input-wrap" ref="historyWrapper">
-        <input
-          type="text"
-          id="query-input"
-          name="query"
-          placeholder="Search"
-          v-model="query"
-          @focus="handleFocus"
-          @blur="handleBlur"
-          @input="onUserInputInput"
-        />
+      <div class="input-row" ref="historyWrapper">
+        <div class="input-wrap">
+          <input
+            type="text"
+            id="query-input"
+            name="query"
+            placeholder="Search"
+            v-model="query"
+            @focus="handleFocus"
+            @blur="handleBlur"
+            @input="onUserInputInput"
+          />
+
+          <span
+            v-if="isFocused && query.length"
+            role="button"
+            class="clear-button"
+            aria-label="Clear search"
+            @mousedown.prevent="clearQuery"
+          >
+            ✕
+          </span>
+        </div>
 
         <button
           type="button"
@@ -98,16 +112,6 @@ onBeforeUnmount(() => {
         </button>
 
         <SearchHistory v-if="showHistory" @select="handleHistorySelect" />
-
-        <span
-          v-if="isFocused && query.length"
-          role="button"
-          class="clear-button"
-          aria-label="Clear search"
-          @mousedown.prevent="clearQuery"
-        >
-          ✕
-        </span>
       </div>
       <span class="error-message" v-if="!canSubmit"
         >Search query has incorrect length or is using disallowed
@@ -126,20 +130,22 @@ onBeforeUnmount(() => {
   align-items: center;
   padding: 24px;
 }
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
 .input-wrap {
   position: relative;
 }
 
 .input-wrap input {
-  padding-right: 64px;
+  padding-right: 36px;
   box-sizing: border-box;
 }
 
 .history-button {
-  position: absolute;
-  right: 36px;
-  top: 55%;
-  transform: translateY(-50%);
   background: transparent;
   border: none;
   cursor: pointer;
