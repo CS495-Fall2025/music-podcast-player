@@ -322,3 +322,24 @@ def test_returns_bad_response_when_api_responds_bad_authentication(client) -> No
         assert 502 == data["code"]
 
         assert "ExternalApiBadResponse" == data["error"]
+
+
+def test_tolerates_extra_fields_from_response(client) -> None:
+    def get_extra_response(request: PreparedRequest, *args, **kwargs) -> Response:
+        return podcastindex_mock.generate_extra_response(request)
+
+    with mock.patch(SEND_METHOD, side_effect=get_extra_response) as _:
+        response = client.get(
+            ENDPOINT_URL, query_string={"query": "query", "count": "5"}
+        )
+
+        assert response.status_code == 200
+
+        data = response.get_json()
+
+        assert 200 == data["code"]
+
+        assert "https://rss.net/feed0" == data["feeds"][0]["url"]
+        assert "https://image.net/artwork/feed0" == data["feeds"][0]["art_url"]
+        assert "title0" == data["feeds"][0]["title"]
+        assert "artist0" == data["feeds"][0]["artist"]
