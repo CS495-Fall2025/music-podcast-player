@@ -1,6 +1,6 @@
 from enum import Enum, IntEnum
 
-from marshmallow import Schema, fields, validate
+from marshmallow import EXCLUDE, Schema, fields, validate
 
 
 class PodcastIndexFeedType(IntEnum):
@@ -24,12 +24,19 @@ class Medium(Enum):
 # From https://podcastindex-org.github.io/docs-api/#get-/podcasts/byfeedurl
 # Not described in the response for searching music feeds, but shows up anyways.
 class FeedFundingSchema(Schema):
+    class Meta:
+        # Don't error over extra data in a schema, but remove it.
+        unknown = EXCLUDE
+
     url = fields.URL(required=True, allow_none=True)
     message = fields.Str(required=True, validate=validate.Length(min=1, max=255))
 
 
 # Description from https://podcastindex-org.github.io/docs-api/#get-/search/music/byterm
 class PodcastIndexFeedSchema(Schema):
+    class Meta:
+        unknown = EXCLUDE
+
     id = fields.Int(required=True, validate=validate.Range(min=0))
     podcastGuid = fields.UUID(required=True)
     title = fields.Str(required=True, validate=validate.Length(min=1, max=255))
@@ -82,6 +89,9 @@ class PodcastIndexFeedSchema(Schema):
 
 
 class SearchFeedsResponseSchema(Schema):
+    class Meta:
+        unknown = EXCLUDE
+
     status = fields.Bool(required=True)
     feeds = fields.List(fields.Nested(PodcastIndexFeedSchema), required=True)
     count = fields.Int(required=True, validate=validate.Range(min=0))

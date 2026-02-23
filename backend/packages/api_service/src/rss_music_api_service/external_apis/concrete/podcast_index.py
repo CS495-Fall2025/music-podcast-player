@@ -17,8 +17,8 @@ TIMEOUT = (3, 10)  # 3 Seconds to connect, 10 seconds to recieve response.
 logger = get_logger(__name__)
 
 
+# Using https://podcastindex-org.github.io/docs-api/#get-/search/music/byterm
 class PodcastIndexAPI:
-    # Using https://podcastindex-org.github.io/docs-api/#get-/search/music/byterm
     @classmethod
     def search_music_feeds(
         cls, query: str, count: int = 25, start: int = 0
