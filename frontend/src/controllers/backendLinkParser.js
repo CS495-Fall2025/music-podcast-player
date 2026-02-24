@@ -1,8 +1,10 @@
+import loadConfig from "../config";
 import { feed, feedTracks } from "./localFeedStore.js";
 import loadConfig from "../config";
 
 export async function requestLinkedFeeds(url) {
   const config = await loadConfig();
+
   fetch(`${config.backendUrl}/link/feed?url=${encodeURIComponent(url)}`)
     .then((response) => {
       if (!response.ok) {
@@ -53,7 +55,6 @@ function parseResponse(response) {
         transcript: item.transcript || "",
       };
       newFeedTracks.push(track);
-      // console.log(track);
     }
     feed.splice(0, feed.length, ...newFeed);
     feedTracks.splice(0, feedTracks.length, ...newFeedTracks);
@@ -87,7 +88,6 @@ function parseValue(response) {
           ? { [valueObject.customKey]: valueObject.customValue }
           : {};
       recipients.push(valueObject);
-      // console.log(valueObject);
     }
   }
   return recipients;

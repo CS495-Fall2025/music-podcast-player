@@ -1,0 +1,30 @@
+FROM python:3.13-alpine
+
+WORKDIR /app
+
+# Install uv for better package management.
+RUN pip install uv
+
+# Bring in needed local packages.
+COPY common_validators common_validators
+COPY db_service_schemas db_service_schemas
+
+# Install rss_music_api_service dependencies
+WORKDIR /app/api_service
+
+COPY api_service/pyproject.toml pyproject.toml
+RUN uv sync --no-install-project
+
+# Install rss_music_api_service
+COPY api_service .
+RUN uv sync
+
+# Expose the port for the backend
+EXPOSE 5000
+
+# Configure the environment
+ENV FLASK_APP=rss_music_api_service:create_app
+ENV FLASK_RUN_HOST=0.0.0.0
+
+# Run the backend
+CMD ["uv", "run", "flask", "run"]

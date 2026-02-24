@@ -2,6 +2,8 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
+import loadConfig from "../config";
+
 const router = useRouter();
 const username = ref("");
 const email = ref("");
@@ -64,21 +66,20 @@ const handleSignup = async (e) => {
   loading.value = true;
 
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_AUTH_API}/auth/signup`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // Include cookies in request
-        body: JSON.stringify({
-          username: username.value,
-          email: email.value,
-          password: password.value,
-        }),
+    const config = await loadConfig();
+
+    const response = await fetch(`${config.backendUrl}/auth/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      credentials: "include", // Include cookies in request
+      body: JSON.stringify({
+        username: username.value,
+        email: email.value,
+        password: password.value,
+      }),
+    });
 
     if (!response.ok) {
       const data = await response.json();

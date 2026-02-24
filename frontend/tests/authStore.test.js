@@ -186,8 +186,8 @@ describe("useAuth", () => {
     it("should call logout endpoint and clear state", async () => {
       const auth = useAuth();
 
-      // Setup authenticated state
       mockConfig();
+      // Setup authenticated state
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -220,8 +220,8 @@ describe("useAuth", () => {
     it("should clear state even if logout endpoint fails", async () => {
       const auth = useAuth();
 
-      // Setup authenticated state
       mockConfig();
+      // Setup authenticated state
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -244,8 +244,8 @@ describe("useAuth", () => {
     it("should stop auto-refresh on logout", async () => {
       const auth = useAuth();
 
-      // Setup authenticated state
       mockConfig();
+      // Setup authenticated state
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -335,8 +335,8 @@ describe("useAuth", () => {
     it("should refresh token every 30 minutes", async () => {
       const auth = useAuth();
 
-      // Complete login to start auto-refresh
       mockConfig();
+      // Complete login to start auto-refresh
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -346,9 +346,9 @@ describe("useAuth", () => {
       });
       await auth.completeLogin();
 
-      // Mock successful refresh
       mockConfig();
-      fetchMock.mockResolvedValueOnce({
+      // Mock successful refresh
+      fetchMock.mockResolvedValue({
         ok: true,
         json: async () => ({ success: true }),
       });
@@ -365,8 +365,8 @@ describe("useAuth", () => {
     it("should stop auto-refresh when refresh fails", async () => {
       const auth = useAuth();
 
-      // Complete login to start auto-refresh
       mockConfig();
+      // Complete login to start auto-refresh
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -376,8 +376,8 @@ describe("useAuth", () => {
       });
       await auth.completeLogin();
 
-      // Mock failed refresh (will trigger logout)
       mockConfig();
+      // Mock failed refresh (will trigger logout)
       fetchMock.mockResolvedValueOnce({ ok: false });
       mockConfig();
       fetchMock.mockResolvedValueOnce({

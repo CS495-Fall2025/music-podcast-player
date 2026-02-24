@@ -1,0 +1,30 @@
+name: Build Backend Component
+
+on:
+  workflow_call:
+    inputs:
+      package-name:
+        required: true
+        type: string
+
+jobs:
+  build-backend-component:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/docker/lambda/Dockerfile.${{ inputs.package-name }}
+          cache-from: type=gha
+          cache-to: type=gha
+          platforms: linux/arm64
+          tags: backend-build-${{ inputs.package-name }}:latest
+          load: true
+      - run: docker run --rm -v ${{ github.workspace }}/build:/mnt/result --platform linux/arm64 backend-build-${{ inputs.package-name }}:latest
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-build-${{ inputs.package-name }}
+          path: ${{ github.workspace }}/build/${{ inputs.package-name }}-build.zip

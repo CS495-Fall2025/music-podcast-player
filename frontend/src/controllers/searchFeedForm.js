@@ -2,6 +2,9 @@ import { computed, reactive } from "vue";
 
 import { requestFeeds } from "./backendFeedParser.js";
 
+import { addSearch, loadSearchHistory } from "./searchHistory.js";
+
+loadSearchHistory();
 // true for a given input's name when the value inside it is valid, false otherwise.
 // We assume everything is correct until the user clicks off the input for the first
 // time. We will also check validation on submitting.
@@ -18,7 +21,7 @@ export function onUserInputBlur(event) {
   }
 
   let valid = validateUserSearchQuery(event.target.value);
-  formValidation.userFeedUrl = valid;
+  formValidation.query = valid;
 }
 
 export function onUserInputInput(event) {
@@ -27,7 +30,7 @@ export function onUserInputInput(event) {
   }
 
   let valid = validateUserSearchQuery(event.target.value);
-  formValidation.userFeedUrl = valid;
+  formValidation.query = valid;
 }
 
 export function onUserFormSubmit(event) {
@@ -38,6 +41,7 @@ export function onUserFormSubmit(event) {
 
   if (canSubmit.value) {
     event.target.reset();
+    addSearch(data.get("query"));
     requestFeeds(data.get("query"));
     console.log(data.get("query"));
     //router.push("/view");
@@ -59,7 +63,6 @@ function checkCanSubmit(validationData) {
 
   return true;
 }
-
 // When more inputs are added to this form, this can check all of them.
 function validateAll(formData) {
   formValidation.query = validateUserSearchQuery(formData.get("query"));

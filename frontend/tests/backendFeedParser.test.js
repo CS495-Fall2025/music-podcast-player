@@ -37,6 +37,7 @@ describe("backendFeedParser controller", () => {
       "http://localhost:5000/search/feeds?query=test%20query&count=50",
     );
 
+    await vi.dynamicImportSettled();
     expect(Array.from(searchedFeeds)).toEqual(mockFeeds);
   });
 
