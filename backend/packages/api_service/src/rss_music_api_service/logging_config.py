@@ -59,15 +59,25 @@ def log_request(
     user_id: str | None = None,
     route: str = "",
     status_code: int = 200,
+    details: dict = {},
     **extra_fields: Any,
 ) -> None:
     """Log a request event w/ structured fields."""
     log_method = getattr(logger, level)
+
+    log_kwargs = {
+        "message": message,
+        "userId": user_id or "none",
+        "route": route,
+        "statusCode": status_code,
+    }
+
+    if details:
+        log_kwargs["details"] = details
+
+    log_kwargs |= extra_fields
+
     log_method(
         event,
-        message=message,
-        userId=user_id or "none",
-        route=route,
-        statusCode=status_code,
-        **extra_fields,
+        **log_kwargs,
     )

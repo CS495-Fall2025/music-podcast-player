@@ -1,6 +1,6 @@
 from enum import Enum, IntEnum
 
-from marshmallow import EXCLUDE, Schema, fields, validate
+from marshmallow import EXCLUDE, Schema, fields, validate, validates
 
 
 class PodcastIndexFeedType(IntEnum):
@@ -42,7 +42,7 @@ class PodcastIndexFeedSchema(Schema):
     title = fields.Str(required=True, validate=validate.Length(min=1, max=255))
     url = fields.URL(required=True)
     originalUrl = fields.URL(required=True)
-    link = fields.URL(required=True)
+    link = fields.String(required=True)
     description = fields.Str(required=True, validate=validate.Length(min=0, max=4000))
     author = fields.Str(required=True, validate=validate.Length(min=0, max=255))
     ownerName = fields.Str(required=True, validate=validate.Length(min=0, max=255))
@@ -86,6 +86,12 @@ class PodcastIndexFeedSchema(Schema):
     imageUrlHash = fields.Int(required=True)
     newestItemPubdate = fields.Int(required=True, validate=validate.Range(min=0))
     funding = fields.Nested(FeedFundingSchema)
+
+    @validates("link")
+    def validate_link(self, value: str, **kwargs) -> None:
+        #if value == "":
+        #    return
+        validate.URL()(value)
 
 
 class SearchFeedsResponseSchema(Schema):

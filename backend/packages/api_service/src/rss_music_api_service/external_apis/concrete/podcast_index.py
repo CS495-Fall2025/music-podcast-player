@@ -114,9 +114,9 @@ class PodcastIndexAPI:
             raise errors.ExternalAPIInvalidResponseFormatError(
                 "Could not parse non-json response from the PodcastIndex API"
             )
-        except ValidationError:
+        except ValidationError as error:
             raise errors.ExternalAPIInvalidResponseDataError(
-                "PodcastIndex API response did not match expected schema"
+                f"PodcastIndex API response did not match expected schema: {error.messages}"
             )
 
         feeds = []
