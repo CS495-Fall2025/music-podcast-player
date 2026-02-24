@@ -6,6 +6,7 @@ from rss_music_data_model.users import User
 __all__ = [
     "Base",
     "User",
+    "Playlist",
     "get_engine",
     "initialize_engine",
     "make_session",
