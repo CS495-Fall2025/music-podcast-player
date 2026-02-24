@@ -10,5 +10,5 @@ class UpdatePlaylistRequest(Schema):
     title = fields.Str(
         validate=common_validate.Length(min=1, max=100))
     description = fields.Str(
-        validate=common_validate.Length(max=500)
+        validate=common_validate.Length(max=255)
     )

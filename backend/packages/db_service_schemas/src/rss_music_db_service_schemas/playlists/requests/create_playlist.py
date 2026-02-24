@@ -9,5 +9,5 @@ class CreatePlaylistRequest(Schema):
         validate=common_validate.Length(min=1, max=100))
     description = fields.Str(
         required=False,
-        validate=common_validate.Length(max=500)
+        validate=common_validate.Length(max=255)
     )
