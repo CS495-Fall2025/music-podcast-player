@@ -10,6 +10,16 @@
       <div class="track-artist">{{ trackArtist }}</div>
     </div>
     <div class="track-description" v-html="trackDescription"></div>
+  
+
+  <button
+    class="add-playlist-btn"
+    @click.stop="addToPlaylist"
+    aria-label="Add to playlist"
+    title="Add to playlist"
+  >
+    +
+   </button>
   </div>
 </template>
 
@@ -95,4 +105,27 @@
   line-clamp: 3;
   -webkit-line-clamp: unset;
 }
+
+.add-to-playlist-btn{
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: var(--primary-blue);
+  color: white;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 0.15s ease,opacity 0.15 ease;
+}
+
+.add-to-playlist-btn:hover {
+  transform: scale(1.08);
+  opacity: 0.9;
+}
+
 </style>

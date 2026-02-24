@@ -4,6 +4,12 @@ import { feed, feedTracks } from "./localFeedStore.js";
 export default {
   name: "UserFeed",
   components: { Track },
+  
+  methods: {
+    handleAddToPlaylist(track){
+      console.log("Add to playlist clicked for track", track);
+    },
+  },
 
   computed: {
     // Returns feed if a feed is loaded. If a feed is not loaded, returns mock empty feed (until a feed is loaded) to prevent crashing.
