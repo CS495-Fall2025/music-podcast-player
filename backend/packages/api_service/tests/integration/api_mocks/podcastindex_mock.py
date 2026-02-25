@@ -1,5 +1,6 @@
 import hashlib
 import json
+from typing import Callable
 import uuid
 
 from requests import PreparedRequest, Response
@@ -24,7 +25,7 @@ def generate_valid_response(request: PreparedRequest) -> Response:
     return generate_limited_response(request, max)
 
 
-def generate_extra_response(request: PreparedRequest) -> Response:
+def generate_custom_response(request: PreparedRequest, field_modifier: Callable[[dict], dict]) -> Response:
     parsed_url = urlparse(request.url)
     queries = parse_qs(parsed_url.query)
 
@@ -32,7 +33,7 @@ def generate_extra_response(request: PreparedRequest) -> Response:
     query = queries["q"][0]
 
     data = _generate_limited_response_json(query, max)
-    data["extra"] = "field"
+    field_modifier(data)
 
     sdata = json.dumps(data)
 
