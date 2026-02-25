@@ -112,6 +112,8 @@ class SearchFeedsResponseSchema(Schema):
                 invalid_feeds[index] = error.messages
 
         data["feeds"] = valid_feeds
+
+        # Currently, these are just ignored, but we could log them later.
         data["rejected_feeds"] = invalid_feeds
 
         return data
