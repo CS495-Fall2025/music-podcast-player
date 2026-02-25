@@ -93,7 +93,7 @@ class SearchFeedsResponseSchema(Schema):
     count = fields.Int(required=True, validate=validate.Range(min=0))
     query = fields.Str(required=True, validate=validate.Length(min=1, max=255))
     description = fields.Str(required=True, validate=validate.Length(min=1, max=255))
-    
+
     class Meta:
         # Don't error over extra data in a schema, but remove it.
         unknown = EXCLUDE

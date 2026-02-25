@@ -25,7 +25,9 @@ def generate_valid_response(request: PreparedRequest) -> Response:
     return generate_limited_response(request, max)
 
 
-def generate_custom_response(request: PreparedRequest, field_modifier: Callable[[dict], dict]) -> Response:
+def generate_custom_response(
+    request: PreparedRequest, field_modifier: Callable[[dict], dict]
+) -> Response:
     parsed_url = urlparse(request.url)
     queries = parse_qs(parsed_url.query)
 
