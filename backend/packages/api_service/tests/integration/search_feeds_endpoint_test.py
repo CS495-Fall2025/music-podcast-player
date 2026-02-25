@@ -371,7 +371,7 @@ def test_tolerates_empty_link(client) -> None:
 def test_returns_bad_response_when_expected_field_doesnt_fit_schema(client) -> None:
     def get_custom_response(request: PreparedRequest, *args, **kwargs) -> Response:
         def modifier(data: dict) -> dict:
-            data["feeds"][0]["medium"] = "NonExistantMedium"
+            data["query"] = ""
 
         return podcastindex_mock.generate_custom_response(
             request,
@@ -390,3 +390,28 @@ def test_returns_bad_response_when_expected_field_doesnt_fit_schema(client) -> N
         assert 502 == data["code"]
 
         assert "ExternalApiBadResponse" == data["error"]
+
+
+def test_feed_excluded_when_expected_feed_field_doesnt_fit_schema(client) -> None:
+    def get_custom_response(request: PreparedRequest, *args, **kwargs) -> Response:
+        def modifier(data: dict) -> dict:
+            data["feeds"][0]["medium"] = "NonExistantMedium"
+
+        return podcastindex_mock.generate_custom_response(
+            request,
+            modifier,
+        )
+
+    with mock.patch(SEND_METHOD, side_effect=get_custom_response) as _:
+        response = client.get(
+            ENDPOINT_URL, query_string={"query": "query", "count": "5"}
+        )
+
+        assert response.status_code == 200
+
+        data = response.get_json()
+
+        assert 200 == data["code"]
+
+        # The invalid feed has title "title0".
+        assert "title1" == data["feeds"][0]["title"]

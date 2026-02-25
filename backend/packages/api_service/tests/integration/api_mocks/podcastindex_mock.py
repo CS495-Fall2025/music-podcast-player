@@ -7,15 +7,6 @@ from requests import PreparedRequest, Response
 from urllib.parse import urlparse, parse_qs
 
 
-# def inspect_url(request: PreparedRequest) -> None:
-#    parsed_url = urlparse(request.url)
-#    url = urlunparse(parsed_url._replace(query=""))
-
-#    assert "https://api.podcastindex.org/api/1.0/search/music/byterm" == url, (
-#        "Request was made to to the wrong url"
-#    )
-
-
 def generate_valid_response(request: PreparedRequest) -> Response:
     parsed_url = urlparse(request.url)
     queries = parse_qs(parsed_url.query)
