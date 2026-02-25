@@ -7,6 +7,7 @@ import skipIcon from "../assets/images/forward-icon.svg";
 import rewindIcon from "../assets/images/backward-icon.svg";
 import shuffleIcon from "../assets/images/random-icon.svg";
 import repeatIcon from "../assets/images/undo-arrow-icon.svg";
+import reverseIcon from "../assets/images/reverse-icon.svg";
 
 export function useMiniPlayer() {
   const isPlaying = ref(false);
@@ -16,10 +17,11 @@ export function useMiniPlayer() {
   const duration = ref(0);
   const repeat = ref(false);
   const isShuffle = ref(false);
+  const isReverse = ref(false);
   const shuffleOrder = ref([]);
   const shuffleIndex = ref(-1);
   const prevClickTimeout = ref(null);
-  const DOUBLE_CLICK_DELAY = 300;
+  const DOUBLE_CLICK_DELAY = 800;
 
   const getCurrentIndex = () => {
     if (!currentTrack.value || !currentTrack.value.audio) return -1;
@@ -48,6 +50,7 @@ export function useMiniPlayer() {
   };
 
   const toggleShuffle = () => {
+    // Not shuffling
     if (!isShuffle.value) {
       const order = buildShuffleOrder();
       if (!order.length) return;
@@ -55,11 +58,19 @@ export function useMiniPlayer() {
       shuffleOrder.value = order;
       shuffleIndex.value = -1;
       isShuffle.value = true;
-    } else {
+    }
+    // Shuffling
+    else {
       isShuffle.value = false;
       shuffleOrder.value = [];
       shuffleIndex.value = -1;
     }
+  };
+
+  // Toggles isReverse.value and reverses feedTracks
+  const toggleReverse = () => {
+    isReverse.value = !isReverse.value;
+    feedTracks.reverse();
   };
 
   watch(currentTrack, () => {
@@ -98,11 +109,14 @@ export function useMiniPlayer() {
   const skipToNextTrack = () => {
     if (!feedTracks.length) return;
 
+    // Not shuffling
     if (!isShuffle.value || !shuffleOrder.value.length) {
       const i = getCurrentIndex();
       if (i === -1) return;
       currentTrack.value = feedTracks[(i + 1) % feedTracks.length];
-    } else {
+    }
+    // Shuffling
+    else {
       shuffleIndex.value = (shuffleIndex.value + 1) % shuffleOrder.value.length;
       currentTrack.value = feedTracks[shuffleOrder.value[shuffleIndex.value]];
     }
@@ -117,11 +131,14 @@ export function useMiniPlayer() {
       clearTimeout(prevClickTimeout.value);
       prevClickTimeout.value = null;
 
+      // Not shuffling
       if (!isShuffle.value) {
         const i = getCurrentIndex();
         if (i > 0) currentTrack.value = feedTracks[i - 1];
         else restartSong();
-      } else {
+      }
+      // Shuffling
+      else {
         if (shuffleIndex.value > 0) {
           shuffleIndex.value--;
           currentTrack.value =
@@ -169,6 +186,7 @@ export function useMiniPlayer() {
     duration,
     repeat,
     isShuffle,
+    isReverse,
     currentTrack,
     feedTracks,
 
@@ -179,12 +197,14 @@ export function useMiniPlayer() {
     rewindIcon,
     shuffleIcon,
     repeatIcon,
+    reverseIcon,
 
     // methods
     togglePlay,
     skipToNextTrack,
     skipToPreviousTrack,
     toggleShuffle,
+    toggleReverse,
     repeatTrack,
     onTimeUpdate,
     onCanPlay,
