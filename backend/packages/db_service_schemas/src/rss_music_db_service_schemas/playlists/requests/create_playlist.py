@@ -11,3 +11,4 @@ class CreatePlaylistRequest(Schema):
         required=False,
         validate=common_validate.Length(max=255)
     )
+    created_by_user_id = fields.Int(required=True)
