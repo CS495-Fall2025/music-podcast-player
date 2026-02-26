@@ -6,6 +6,8 @@ from rss_music_db_service_schemas.playlists import requests as playlist_reqs
 
 PLAYLISTS_BP = Blueprint("playlists", __name__)
 
+# Create playlist
+
 
 @PLAYLISTS_BP.post("/create")
 @login_required
@@ -20,11 +22,20 @@ def create_playlist():
     )
     return result, 201
 
+# Get user playlists
+
 
 @PLAYLISTS_BP.get("/user/<int:user_id>")
+@login_required  # Ensure the requester is logged in
 def get_user_playlists(user_id):
+    # Security: Verify the requester IS the user in the URL
+    if get_current_user_id() != user_id:
+        return {"error": "Forbidden", "message": "You cannot view other users' playlists."}, 403
+
     result = db_service.get_user_playlists(user_id)
     return {"playlists": result}, 200
+
+# Update playlist
 
 
 @PLAYLISTS_BP.put("/<int:id>")
@@ -42,6 +53,8 @@ def update_playlist(id):
         description=request_data.get("description")
     )
     return result, 200
+
+# Delete playlist
 
 
 @PLAYLISTS_BP.delete("/<int:id>")

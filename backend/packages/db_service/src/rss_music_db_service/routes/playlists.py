@@ -74,3 +74,21 @@ async def delete_playlist_route(id: int, request: Request, response: Response):
         return JSONResponse(status_code=404, content={"message": "Playlist not found or unauthorized"})
 
     return {"message": "Deleted"}
+
+
+@playlists.get("/user/{user_id}")
+async def get_user_playlists_route(user_id: int):
+    log_request(logger, "info", "request_received",
+                f"List playlists for user {user_id}", route=f"/playlists/user/{user_id}")
+
+    # Fetch from DB logic
+    user_playlists = get_by_user.get_playlists_by_user(user_id)
+
+    # Format response
+    response_data = db_playlist_responses.PlaylistResponse(
+        many=True).dump(user_playlists)
+
+    log_request(logger, "info", "response_sent", "Playlists listed",
+                route=f"/playlists/user/{user_id}", status_code=200)
+
+    return response_data
