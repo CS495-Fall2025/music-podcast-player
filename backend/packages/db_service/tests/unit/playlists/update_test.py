@@ -10,17 +10,15 @@ def test_update_playlist_success(mock_make_session) -> None:
     mock_make_session.return_value.__enter__.return_value = mock_session
 
     existing_playlist = Playlist(
-        id=5, title="Old Title", description="Old Desc", created_by_user_id=1)
+        id=5, title="Old Title", description="Old Desc", created_by_user_id=1
+    )
 
     mock_query = mock_session.query.return_value
     mock_filter = mock_query.filter_by.return_value
     mock_filter.first.return_value = existing_playlist
 
     result = update.update_playlist(
-        playlist_id=5,
-        user_id=1,
-        title="New Title",
-        description="New Desc"
+        playlist_id=5, user_id=1, title="New Title", description="New Desc"
     )
 
     assert result is not None

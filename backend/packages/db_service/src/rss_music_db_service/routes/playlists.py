@@ -1,7 +1,6 @@
 from fastapi import status, APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 
-from rss_music_db_service_schemas import ErrorResponse, ErrorType
 import rss_music_db_service_schemas.playlists.requests as db_playlist_requests
 import rss_music_db_service_schemas.playlists.responses as db_playlist_responses
 
@@ -15,8 +14,13 @@ logger = get_logger(__name__)
 
 @playlists.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_playlist(request: Request, response: Response):
-    log_request(logger, "info", "request_received",
-                "Create playlist request", route="/playlists/create")
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Create playlist request",
+        route="/playlists/create",
+    )
 
     # Validate incoming JSON against Schema
     result = await validate_json(request, db_playlist_requests.CreatePlaylistRequest())
@@ -26,11 +30,17 @@ async def create_playlist(request: Request, response: Response):
     new_playlist = create.create_and_add_playlist(
         title=result["title"],
         user_id=result["created_by_user_id"],
-        description=result.get("description")
+        description=result.get("description"),
     )
 
-    log_request(logger, "info", "response_sent", "Playlist created",
-                route="/playlists/create", status_code=201)
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Playlist created",
+        route="/playlists/create",
+        status_code=201,
+    )
 
     # Return using Response Schema
     return db_playlist_responses.CreatePlaylistResponse().dump(new_playlist)
@@ -38,8 +48,13 @@ async def create_playlist(request: Request, response: Response):
 
 @playlists.put("/{id}")
 async def update_playlist_route(id: int, request: Request, response: Response):
-    log_request(logger, "info", "request_received",
-                f"Update playlist {id}", route=f"/playlists/{id}")
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        f"Update playlist {id}",
+        route=f"/playlists/{id}",
+    )
 
     result = await validate_json(request, db_playlist_requests.UpdatePlaylistRequest())
     if isinstance(result, JSONResponse):
@@ -49,46 +64,68 @@ async def update_playlist_route(id: int, request: Request, response: Response):
         playlist_id=id,
         user_id=result["created_by_user_id"],
         title=result.get("title"),
-        description=result.get("description")
+        description=result.get("description"),
     )
 
     if updated is None:
-        return JSONResponse(status_code=404, content={"message": "Playlist not found or unauthorized"})
+        return JSONResponse(
+            status_code=404, content={"message": "Playlist not found or unauthorized"}
+        )
 
     return db_playlist_responses.UpdatePlaylistResponse().dump(updated)
 
 
 @playlists.delete("/{id}")
 async def delete_playlist_route(id: int, request: Request, response: Response):
-    log_request(logger, "info", "request_received",
-                f"Delete playlist {id}", route=f"/playlists/{id}")
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        f"Delete playlist {id}",
+        route=f"/playlists/{id}",
+    )
 
     result = await validate_json(request, db_playlist_requests.DeletePlaylistRequest())
     if isinstance(result, JSONResponse):
         return result
 
     success = delete.delete_playlist(
-        playlist_id=id, user_id=result["created_by_user_id"])
+        playlist_id=id, user_id=result["created_by_user_id"]
+    )
 
     if not success:
-        return JSONResponse(status_code=404, content={"message": "Playlist not found or unauthorized"})
+        return JSONResponse(
+            status_code=404, content={"message": "Playlist not found or unauthorized"}
+        )
 
     return {"message": "Deleted"}
 
 
 @playlists.get("/user/{user_id}")
 async def get_user_playlists_route(user_id: int):
-    log_request(logger, "info", "request_received",
-                f"List playlists for user {user_id}", route=f"/playlists/user/{user_id}")
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        f"List playlists for user {user_id}",
+        route=f"/playlists/user/{user_id}",
+    )
 
     # Fetch from DB logic
     user_playlists = get_by_user.get_playlists_by_user(user_id)
 
     # Format response
-    response_data = db_playlist_responses.PlaylistResponse(
-        many=True).dump(user_playlists)
+    response_data = db_playlist_responses.PlaylistResponse(many=True).dump(
+        user_playlists
+    )
 
-    log_request(logger, "info", "response_sent", "Playlists listed",
-                route=f"/playlists/user/{user_id}", status_code=200)
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Playlists listed",
+        route=f"/playlists/user/{user_id}",
+        status_code=200,
+    )
 
     return response_data

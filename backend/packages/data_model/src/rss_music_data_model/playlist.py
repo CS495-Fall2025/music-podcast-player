@@ -14,14 +14,11 @@ class Playlist(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    title: Mapped[str] = mapped_column(
-        String(TITLE_MAX_LENGTH), nullable=False)
+    title: Mapped[str] = mapped_column(String(TITLE_MAX_LENGTH), nullable=False)
 
-    description: Mapped[str | None] = mapped_column(
-        String(DESCRIPTION_MAX_LENGTH))
+    description: Mapped[str | None] = mapped_column(String(DESCRIPTION_MAX_LENGTH))
 
-    track_count: Mapped[int] = mapped_column(
-        Integer, default=0, nullable=False)
+    track_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     created_by_user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"), nullable=False

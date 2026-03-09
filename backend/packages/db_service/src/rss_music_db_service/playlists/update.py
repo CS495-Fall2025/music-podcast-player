@@ -4,11 +4,16 @@ from rss_music_db_service.logging_config import log_request, get_logger
 logger = get_logger(__name__)
 
 
-def update_playlist(playlist_id: int, user_id: int, title: str = None, description: str = None) -> Playlist:
+def update_playlist(
+    playlist_id: int, user_id: int, title: str = None, description: str = None
+) -> Playlist:
     with make_session() as session:
         # Secure fetch: Find playlist by ID AND UserID
-        playlist = session.query(Playlist).filter_by(
-            id=playlist_id, created_by_user_id=user_id).first()
+        playlist = (
+            session.query(Playlist)
+            .filter_by(id=playlist_id, created_by_user_id=user_id)
+            .first()
+        )
 
         if not playlist:
             return None
@@ -21,7 +26,14 @@ def update_playlist(playlist_id: int, user_id: int, title: str = None, descripti
         session.commit()
         session.refresh(playlist)
 
-        log_request(logger, "info", "db_change", "Playlist updated",
-                    operation="UPDATE", table="playlists", playlist_id=playlist_id)
+        log_request(
+            logger,
+            "info",
+            "db_change",
+            "Playlist updated",
+            operation="UPDATE",
+            table="playlists",
+            playlist_id=playlist_id,
+        )
 
         return playlist

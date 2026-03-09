@@ -6,8 +6,11 @@ logger = get_logger(__name__)
 
 def delete_playlist(playlist_id: int, user_id: int) -> bool:
     with make_session() as session:
-        playlist = session.query(Playlist).filter_by(
-            id=playlist_id, created_by_user_id=user_id).first()
+        playlist = (
+            session.query(Playlist)
+            .filter_by(id=playlist_id, created_by_user_id=user_id)
+            .first()
+        )
 
         if not playlist:
             return False
@@ -15,6 +18,13 @@ def delete_playlist(playlist_id: int, user_id: int) -> bool:
         session.delete(playlist)
         session.commit()
 
-        log_request(logger, "info", "db_change", "Playlist deleted",
-                    operation="DELETE", table="playlists", playlist_id=playlist_id)
+        log_request(
+            logger,
+            "info",
+            "db_change",
+            "Playlist deleted",
+            operation="DELETE",
+            table="playlists",
+            playlist_id=playlist_id,
+        )
         return True

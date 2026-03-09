@@ -1,6 +1,5 @@
 from marshmallow import Schema, fields
 
-import rss_music_common_validators as common_validate
 
 
 class UpdatePlaylistResponse(Schema):

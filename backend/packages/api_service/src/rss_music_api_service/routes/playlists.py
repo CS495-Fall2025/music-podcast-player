@@ -18,9 +18,10 @@ def create_playlist():
     result = db_service.create_playlist(
         title=request_data["title"],
         user_id=user_id,
-        description=request_data.get("description")
+        description=request_data.get("description"),
     )
     return result, 201
+
 
 # Get user playlists
 
@@ -30,10 +31,14 @@ def create_playlist():
 def get_user_playlists(user_id):
     # Security: Verify the requester IS the user in the URL
     if get_current_user_id() != user_id:
-        return {"error": "Forbidden", "message": "You cannot view other users' playlists."}, 403
+        return {
+            "error": "Forbidden",
+            "message": "You cannot view other users' playlists.",
+        }, 403
 
     result = db_service.get_user_playlists(user_id)
     return {"playlists": result}, 200
+
 
 # Update playlist
 
@@ -50,9 +55,10 @@ def update_playlist(id):
         playlist_id=id,
         user_id=user_id,
         title=request_data.get("title"),
-        description=request_data.get("description")
+        description=request_data.get("description"),
     )
     return result, 200
+
 
 # Delete playlist
 

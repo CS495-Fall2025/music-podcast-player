@@ -10,7 +10,9 @@ def test_delete_playlist_success(mock_make_session) -> None:
     mock_make_session.return_value.__enter__.return_value = mock_session
 
     fake_playlist = Playlist(id=1, created_by_user_id=1)
-    mock_session.query.return_value.filter_by.return_value.first.return_value = fake_playlist
+    mock_session.query.return_value.filter_by.return_value.first.return_value = (
+        fake_playlist
+    )
 
     result = delete.delete_playlist(playlist_id=1, user_id=1)
 
