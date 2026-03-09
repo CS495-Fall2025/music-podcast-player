@@ -32,7 +32,7 @@ async def create_playlist(request: Request, response: Response):
     log_request(logger, "info", "response_sent", "Playlist created",
                 route="/playlists/create", status_code=201)
 
-    # 3. Return using Response Schema
+    # Return using Response Schema
     return db_playlist_responses.CreatePlaylistResponse().dump(new_playlist)
 
 

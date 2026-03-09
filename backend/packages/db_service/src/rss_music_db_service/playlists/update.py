@@ -11,7 +11,6 @@ def update_playlist(playlist_id: int, user_id: int, title: str = None, descripti
             id=playlist_id, created_by_user_id=user_id).first()
 
         if not playlist:
-            # You might want to raise a specific NotFound error here
             return None
 
         if title is not None:
