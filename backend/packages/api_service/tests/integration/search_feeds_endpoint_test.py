@@ -322,3 +322,96 @@ def test_returns_bad_response_when_api_responds_bad_authentication(client) -> No
         assert 502 == data["code"]
 
         assert "ExternalApiBadResponse" == data["error"]
+
+
+def test_tolerates_extra_fields_from_response(client) -> None:
+    def get_custom_response(request: PreparedRequest, *args, **kwargs) -> Response:
+        def modifier(data: dict) -> dict:
+            data["extra"] = "field"
+
+        return podcastindex_mock.generate_custom_response(
+            request,
+            modifier,
+        )
+
+    with mock.patch(SEND_METHOD, side_effect=get_custom_response) as _:
+        response = client.get(
+            ENDPOINT_URL, query_string={"query": "query", "count": "5"}
+        )
+
+        assert response.status_code == 200
+
+        data = response.get_json()
+
+        assert 200 == data["code"]
+
+
+def test_tolerates_empty_link(client) -> None:
+    def get_custom_response(request: PreparedRequest, *args, **kwargs) -> Response:
+        def modifier(data: dict) -> dict:
+            data["feeds"][0]["link"] = ""
+
+        return podcastindex_mock.generate_custom_response(
+            request,
+            modifier,
+        )
+
+    with mock.patch(SEND_METHOD, side_effect=get_custom_response) as _:
+        response = client.get(
+            ENDPOINT_URL, query_string={"query": "query", "count": "5"}
+        )
+
+        assert response.status_code == 200
+
+        data = response.get_json()
+
+        assert 200 == data["code"]
+
+
+def test_returns_bad_response_when_expected_field_doesnt_fit_schema(client) -> None:
+    def get_custom_response(request: PreparedRequest, *args, **kwargs) -> Response:
+        def modifier(data: dict) -> dict:
+            data["query"] = ""
+
+        return podcastindex_mock.generate_custom_response(
+            request,
+            modifier,
+        )
+
+    with mock.patch(SEND_METHOD, side_effect=get_custom_response) as _:
+        response = client.get(
+            ENDPOINT_URL, query_string={"query": "query", "count": "5"}
+        )
+
+        assert response.status_code == 502
+
+        data = response.get_json()
+
+        assert 502 == data["code"]
+
+        assert "ExternalApiBadResponse" == data["error"]
+
+
+def test_feed_excluded_when_expected_feed_field_doesnt_fit_schema(client) -> None:
+    def get_custom_response(request: PreparedRequest, *args, **kwargs) -> Response:
+        def modifier(data: dict) -> dict:
+            data["feeds"][0]["medium"] = "NonExistantMedium"
+
+        return podcastindex_mock.generate_custom_response(
+            request,
+            modifier,
+        )
+
+    with mock.patch(SEND_METHOD, side_effect=get_custom_response) as _:
+        response = client.get(
+            ENDPOINT_URL, query_string={"query": "query", "count": "5"}
+        )
+
+        assert response.status_code == 200
+
+        data = response.get_json()
+
+        assert 200 == data["code"]
+
+        # The invalid feed has title "title0".
+        assert "title1" == data["feeds"][0]["title"]
