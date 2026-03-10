@@ -19,36 +19,38 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="history-box">
-      <div v-if="!saveSearchHistory">
-        <em>Search history is disabled.</em>
-      </div>
+  <div class="history-box">
+    <div v-if="!saveSearchHistory">
+      <em>Search history is disabled.</em>
+    </div>
 
-      <template v-else>
-        <ul v-if="searchHistory.length">
-          <li v-for="item in searchHistory"
+    <template v-else>
+      <ul v-if="searchHistory.length">
+        <li
+          v-for="item in searchHistory"
           :key="item"
-          @click="selectHistory(item)">
+          @click="selectHistory(item)"
+        >
           {{ item }}
-          </li>
+        </li>
       </ul>
 
       <div v-else>
         <em>No recent searches.</em>
       </div>
-      </template>
+    </template>
 
-      <div class="controls">
-        <label>
-          <input
-            type="checkbox"
-            :checked="saveSearchHistory"
-            @change="setSaveHistory($event.target.checked)"
-          />
-          Save search history
-        </label>
-      </div>
+    <div class="controls">
+      <label>
+        <input
+          type="checkbox"
+          :checked="saveSearchHistory"
+          @change="setSaveHistory($event.target.checked)"
+        />
+        Save search history
+      </label>
     </div>
+  </div>
 </template>
 
 <style scoped>
