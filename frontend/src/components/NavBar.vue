@@ -37,7 +37,9 @@
 
         <div v-if="dropdownOpen" class="dropdown-menu">
           <template v-if="isAuthenticated">
-            <button class="dropdown-item" @click="$router.push('/user')">Profile</button>
+            <button class="dropdown-item" @click="$router.push('/user')">
+              Profile
+            </button>
             <button class="dropdown-item" @click="handleLogout">Logout</button>
           </template>
           <template v-else>
