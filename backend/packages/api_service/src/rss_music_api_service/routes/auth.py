@@ -1,3 +1,4 @@
+from functools import wraps
 import flask
 from flask import Blueprint, request, session, current_app
 from marshmallow import ValidationError
@@ -12,6 +13,19 @@ from rss_music_api_service.logging_config import log_request, get_logger
 
 AUTH_BP = Blueprint("auth", __name__, url_prefix="/auth")
 logger = get_logger(__name__)
+
+
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if get_current_user_id() is None:
+            return {
+                "code": 401,
+                "error": "MissingToken",
+                "message": "No token foudn",
+            }, 401
+        return func(*args, **kwargs)
+    return wrapper
 
 
 @AUTH_BP.after_request
