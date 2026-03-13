@@ -213,9 +213,7 @@ def create_playlist(title: str, user_id: int, description: str = None) -> dict:
     if not response.status_code == 201:
         _handle_error(response)
 
-    # Parse the response and return it to the API layer
-    response_data = playlist_responses.CreatePlaylistResponse().load(response.json())
-    return response_data
+    return response.json()
 
 
 def _create_playlist_request(
@@ -250,9 +248,7 @@ def get_user_playlists(user_id: int) -> list[dict]:
     if not response.status_code == 200:
         _handle_error(response)
 
-    # Load as list
-    response_data = playlist_responses.PlaylistResponse(many=True).load(response.json())
-    return response_data
+    return response.json()
 
 
 def _create_get_user_playlists_request(user_id: int) -> requests.PreparedRequest:
@@ -269,7 +265,8 @@ def update_playlist(
     playlist_id: int, user_id: int, title: str = None, description: str = None
 ) -> dict:
     # Prepare request
-    request = _create_update_playlist_request(playlist_id, user_id, title, description)
+    request = _create_update_playlist_request(
+        playlist_id, user_id, title, description)
 
     # Send request
     response = _send_request(request)
@@ -279,7 +276,7 @@ def update_playlist(
         _handle_error(response)
 
     # Return newly updated playlist
-    return playlist_responses.CreatePlaylistResponse().load(response.json())
+    return response.json()
 
 
 def _create_update_playlist_request(
