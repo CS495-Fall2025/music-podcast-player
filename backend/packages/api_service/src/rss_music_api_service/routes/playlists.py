@@ -74,6 +74,8 @@ def update_playlist(id):
 def delete_playlist(id):
     user_id = get_current_user_id()
 
+    user_id = int(user_id)
+
     db_service.delete_playlist(playlist_id=id, user_id=user_id)
 
     return {"message": "Playlist deleted successfully"}, 200
