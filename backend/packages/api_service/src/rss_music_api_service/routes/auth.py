@@ -25,6 +25,7 @@ def login_required(func):
                 "message": "No token foudn",
             }, 401
         return func(*args, **kwargs)
+
     return wrapper
 
 

@@ -1,7 +1,6 @@
 from marshmallow import Schema, fields
 
 
-
 class CreatePlaylistResponse(Schema):
     # Playlist ID
     id = fields.Int(dump_only=True)
