@@ -12,7 +12,6 @@ from rss_music_db_service_schemas.users import (
 
 from rss_music_db_service_schemas.playlists import (
     requests as playlist_requests,
-    responses as playlist_responses,
 )
 
 from rss_music_api_service.internal_apis import auth, errors
