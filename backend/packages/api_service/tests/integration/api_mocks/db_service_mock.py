@@ -102,7 +102,7 @@ def generate_users_login_success(
     body = json.loads(request.body.decode("UTF-8"))
     request_data = db_requests.UserLoginRequest().load(body)
 
-    sdata = json.dumps(
+    sdata = db_responses.UserLoginResponse().dumps(
         {
             "username": request_data["username"],
             "id": id,

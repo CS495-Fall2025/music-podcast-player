@@ -52,12 +52,7 @@ def try_user_login(username: str, password: str) -> tuple[int, str, bool] | None
     if not response.status_code == 200:
         _handle_error(response)
 
-    response_data = response.json()
-
-    if "id" not in response_data or "username" not in response_data:
-        raise errors.InternalAPIBadResponseError(
-            "Recieved unexpected data from database service"
-        )
+    response_data = db_responses.UserLoginResponse().load(response.json())
 
     return (
         response_data["id"],
