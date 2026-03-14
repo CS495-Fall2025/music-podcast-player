@@ -7,6 +7,7 @@ from tests.integration.api_mocks import db_service_mock
 
 ENDPOINT_URL = "/auth/signup"
 SEND_METHOD = "requests.Session.send"
+SEND_VERIFICATION_METHOD = "rss_music_api_service.services.email_service.send_verification_code"
 
 
 def test_empty_post_returns_invalid_format(client) -> None:
@@ -215,9 +216,17 @@ def test_weak_password_returns_invalid_argument(client, password) -> None:
 # DB
 def test_successful_signup(client) -> None:
     def generate_success(request: PreparedRequest, *args, **kwargs) -> Response:
-        return db_service_mock.generate_users_create_success(request)
+        if request.url.endswith("/users/create"):
+            return db_service_mock.generate_users_create_success(request)
 
-    with mock.patch(SEND_METHOD, side_effect=generate_success) as _:
+        if request.url.endswith("/users/set-email-verification-code"):
+            return db_service_mock.generate_operation_success(True)
+
+        assert False, f"Unexpected URL: {request.url}"
+
+    with mock.patch(SEND_METHOD, side_effect=generate_success) as _, mock.patch(
+        SEND_VERIFICATION_METHOD
+    ) as __:
         response = client.post(
             ENDPOINT_URL,
             json={
@@ -232,6 +241,7 @@ def test_successful_signup(client) -> None:
     data = response.get_json()
 
     assert 201 == data["code"]
+    assert True is data["verification_required"]
 
 
 def test_duplicate_username_returns_error(client) -> None:

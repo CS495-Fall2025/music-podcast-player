@@ -96,14 +96,17 @@ def generate_users_exists(_request: PreparedRequest, exists: bool) -> Response:
     return response
 
 
-def generate_users_login_success(request: PreparedRequest, id: int) -> Response:
+def generate_users_login_success(
+    request: PreparedRequest, id: int, email_verified: bool = True
+) -> Response:
     body = json.loads(request.body.decode("UTF-8"))
     request_data = db_requests.UserLoginRequest().load(body)
 
-    sdata = db_responses.UserLoginResponse().dumps(
+    sdata = json.dumps(
         {
             "username": request_data["username"],
             "id": id,
+            "email_verified": email_verified,
         }
     )
 
@@ -125,6 +128,17 @@ def generate_users_login_failure(_request: PreparedRequest) -> Response:
 
     response = Response()
     response.status_code = 401
+    response._content = sdata.encode("UTF-8")
+    response.headers = {"Content-Type": "application/json"}
+
+    return response
+
+
+def generate_operation_success(success: bool) -> Response:
+    sdata = json.dumps({"success": success})
+
+    response = Response()
+    response.status_code = 200
     response._content = sdata.encode("UTF-8")
     response.headers = {"Content-Type": "application/json"}
 
