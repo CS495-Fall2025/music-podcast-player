@@ -40,8 +40,8 @@ def check_user_exists(id: int) -> bool:
     return response_data["exists"]
 
 
-# Returns user_id, username on success, None for invalid credentials.
-def try_user_login(username: str, password: str) -> tuple[int, str] | None:
+# Returns user_id, username, email_verified on success, None for invalid credentials.
+def try_user_login(username: str, password: str) -> tuple[int, str, bool] | None:
     request = _create_user_login_request(username, password)
 
     response = _send_request(request)
@@ -52,9 +52,62 @@ def try_user_login(username: str, password: str) -> tuple[int, str] | None:
     if not response.status_code == 200:
         _handle_error(response)
 
-    response_data = db_responses.UserLoginResponse().load(response.json())
+    response_data = response.json()
 
-    return response_data["id"], response_data["username"]
+    if "id" not in response_data or "username" not in response_data:
+        raise errors.InternalAPIBadResponseError(
+            "Recieved unexpected data from database service"
+        )
+
+    return (
+        response_data["id"],
+        response_data["username"],
+        response_data.get("email_verified", True),
+    )
+
+
+def set_email_verification_code(email: str, code: str, expires_at: str) -> bool:
+    request = _create_set_email_verification_code_request(email, code, expires_at)
+
+    response = _send_request(request)
+
+    if response.status_code != 200:
+        _handle_error(response)
+
+    return bool(response.json().get("success", False))
+
+
+def verify_email(email: str, code: str) -> bool:
+    request = _create_verify_email_request(email, code)
+
+    response = _send_request(request)
+
+    if response.status_code != 200:
+        _handle_error(response)
+
+    return bool(response.json().get("success", False))
+
+
+def set_password_reset_code(email: str, code: str, expires_at: str) -> bool:
+    request = _create_set_password_reset_code_request(email, code, expires_at)
+
+    response = _send_request(request)
+
+    if response.status_code != 200:
+        _handle_error(response)
+
+    return bool(response.json().get("success", False))
+
+
+def reset_password(email: str, code: str, new_password: str) -> bool:
+    request = _create_reset_password_request(email, code, new_password)
+
+    response = _send_request(request)
+
+    if response.status_code != 200:
+        _handle_error(response)
+
+    return bool(response.json().get("success", False))
 
 
 def _create_user_request(
@@ -129,6 +182,67 @@ def _create_user_login_request(
             "password": password,
         }
     )
+    request = requests.Request("POST", url, json=request_data)
+
+    return request.prepare()
+
+
+def _create_set_email_verification_code_request(
+    email: str, code: str, expires_at: str
+) -> requests.PreparedRequest:
+    service_url = current_app.config["DB_SERVICE_URL"]
+    url = urljoin(service_url, "users/set-email-verification-code")
+
+    request_data = {
+        "email": email,
+        "code": code,
+        "expires_at": expires_at,
+    }
+    request = requests.Request("POST", url, json=request_data)
+
+    return request.prepare()
+
+
+def _create_verify_email_request(email: str, code: str) -> requests.PreparedRequest:
+    service_url = current_app.config["DB_SERVICE_URL"]
+    url = urljoin(service_url, "users/verify-email")
+
+    request_data = {
+        "email": email,
+        "code": code,
+    }
+    request = requests.Request("POST", url, json=request_data)
+
+    return request.prepare()
+
+
+def _create_set_password_reset_code_request(
+    email: str, code: str, expires_at: str
+) -> requests.PreparedRequest:
+    service_url = current_app.config["DB_SERVICE_URL"]
+    url = urljoin(service_url, "users/set-password-reset-code")
+
+    request_data = {
+        "email": email,
+        "code": code,
+        "expires_at": expires_at,
+    }
+    request = requests.Request("POST", url, json=request_data)
+
+    return request.prepare()
+
+
+def _create_reset_password_request(
+    email: str, code: str, new_password: str
+) -> requests.PreparedRequest:
+    service_url = current_app.config["DB_SERVICE_URL"]
+    url = urljoin(service_url, "users/reset-password")
+
+    request_data = {
+        "email": email,
+        "code": code,
+        "new_password": new_password,
+    }
     request = requests.Request("POST", url, json=request_data)
 
     return request.prepare()
