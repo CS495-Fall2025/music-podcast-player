@@ -10,6 +10,7 @@ const username = ref("");
 const password = ref("");
 const loading = ref(false);
 const error = ref("");
+const showVerifyPrompt = ref(false);
 
 let codeVerifier = "";
 let codeChallenge = "";
@@ -46,6 +47,7 @@ onMounted(async () => {
 
 const handleLogin = async (e) => {
   e.preventDefault();
+  showVerifyPrompt.value = false;
 
   if (!username.value || !password.value) {
     error.value = "Please enter both username and password";
@@ -77,7 +79,15 @@ const handleLogin = async (e) => {
     });
 
     if (!response.ok) {
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
+
+      if (response.status === 403 && data.error === "EmailNotVerified") {
+        showVerifyPrompt.value = true;
+        error.value =
+          "Your account is not verified yet. Verify your email to continue.";
+        return;
+      }
+
       const errorMessage = data.message || "Login failed";
       throw new Error(errorMessage);
     }
@@ -141,6 +151,18 @@ const handleLogin = async (e) => {
       <p class="signup-link">
         Don't have an account?
         <router-link to="/signup">Sign up here</router-link>
+      </p>
+
+      <p class="signup-link">
+        Forgot your password?
+        <router-link to="/forgot-password">Reset it here</router-link>
+      </p>
+
+      <p v-if="showVerifyPrompt" class="signup-link">
+        Need a verification code?
+        <router-link :to="{ path: '/signup', query: { step: 'verify' } }"
+          >Verify your email</router-link
+        >
       </p>
     </div>
   </div>
