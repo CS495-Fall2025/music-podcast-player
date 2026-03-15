@@ -1,4 +1,4 @@
-import { mount } from "@vue/test-utils";
+import { mount, flushPromises } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 import ForgotPasswordPage from "../src/pages/ForgotPasswordPage.vue";
@@ -17,6 +17,7 @@ describe("ForgotPasswordPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    sessionStorage.clear();
     global.fetch = vi.fn();
   });
 
@@ -24,7 +25,7 @@ describe("ForgotPasswordPage", () => {
     vi.useRealTimers();
   });
 
-  it("sends forgot-password request and routes to reset page", async () => {
+  it("sends forgot-password request, stores email, and routes to code step", async () => {
     global.fetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
 
     const wrapper = mount(ForgotPasswordPage, {
@@ -37,17 +38,22 @@ describe("ForgotPasswordPage", () => {
 
     await wrapper.find("#forgot-email").setValue("user@example.com");
     await wrapper.find("form").trigger("submit");
+    await flushPromises();
 
     expect(global.fetch).toHaveBeenCalledWith(
       "http://backend.test/auth/forgot-password",
       expect.objectContaining({ method: "POST" }),
     );
 
+    expect(sessionStorage.getItem("pending_reset_email")).toBe(
+      "user@example.com",
+    );
+
     await vi.runAllTimersAsync();
 
     expect(pushMock).toHaveBeenCalledWith({
       path: "/reset-password",
-      query: { email: "user@example.com" },
+      query: { step: "code" },
     });
   });
 

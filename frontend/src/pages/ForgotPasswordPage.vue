@@ -5,6 +5,8 @@ import { useRouter } from "vue-router";
 import loadConfig from "../config";
 
 const router = useRouter();
+const pendingResetEmailKey = "pending_reset_email";
+const pendingResetCodeKey = "pending_reset_code";
 
 const email = ref("");
 const loading = ref(false);
@@ -45,10 +47,13 @@ const handleForgotPassword = async (e) => {
     info.value =
       "If your account exists, a reset code has been sent to your email.";
 
+    sessionStorage.setItem(pendingResetEmailKey, email.value);
+    sessionStorage.removeItem(pendingResetCodeKey);
+
     setTimeout(() => {
       router.push({
         path: "/reset-password",
-        query: { email: email.value },
+        query: { step: "code" },
       });
     }, 1200);
   } catch (err) {
@@ -92,7 +97,7 @@ const handleForgotPassword = async (e) => {
 
       <p class="login-link">
         Already have your code?
-        <router-link :to="{ path: '/reset-password', query: { email } }"
+        <router-link :to="{ path: '/reset-password', query: { step: 'code' } }"
           >Reset your password</router-link
         >
       </p>

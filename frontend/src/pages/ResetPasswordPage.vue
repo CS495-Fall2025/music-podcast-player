@@ -1,19 +1,32 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import loadConfig from "../config";
 
 const route = useRoute();
 const router = useRouter();
+const pendingResetEmailKey = "pending_reset_email";
+const pendingResetCodeKey = "pending_reset_code";
 
-const email = ref(route.query.email ? String(route.query.email) : "");
-const code = ref("");
+const resetEmail = ref("");
+const resetCode = ref("");
+const codeInput = ref("");
 const newPassword = ref("");
 const confirmPassword = ref("");
 const loading = ref(false);
 const error = ref("");
 const success = ref(false);
+
+const isCodeStep = computed(() => route.query.step !== "new-password");
+const isNewPasswordStep = computed(() => route.query.step === "new-password");
+
+onMounted(() => {
+  resetEmail.value = sessionStorage.getItem(pendingResetEmailKey) || "";
+  resetCode.value = sessionStorage.getItem(pendingResetCodeKey) || "";
+});
+
+const isCodeValid = computed(() => /^\d{6}$/.test(codeInput.value));
 
 const passwordRequirements = {
   length: (password) => password.length >= 12,
@@ -29,24 +42,40 @@ const isPasswordValid = computed(() => {
   );
 });
 
-const isCodeValid = computed(() => /^\d{6}$/.test(code.value));
-
-const handleResetPassword = async (e) => {
+const handleCodeSubmit = async (e) => {
   e.preventDefault();
   error.value = "";
 
-  if (
-    !email.value ||
-    !code.value ||
-    !newPassword.value ||
-    !confirmPassword.value
-  ) {
-    error.value = "Please complete all fields.";
+  if (!resetEmail.value) {
+    error.value = "No pending reset found. Start from forgot password.";
     return;
   }
 
   if (!isCodeValid.value) {
     error.value = "Reset code must be exactly 6 digits.";
+    return;
+  }
+
+  resetCode.value = codeInput.value;
+  sessionStorage.setItem(pendingResetCodeKey, codeInput.value);
+
+  router.push({
+    path: "/reset-password",
+    query: { step: "new-password" },
+  });
+};
+
+const handleResetPassword = async (e) => {
+  e.preventDefault();
+  error.value = "";
+
+  if (!resetEmail.value || !resetCode.value) {
+    error.value = "Reset session expired. Please request a new code.";
+    return;
+  }
+
+  if (!newPassword.value || !confirmPassword.value) {
+    error.value = "Please complete all fields.";
     return;
   }
 
@@ -73,8 +102,8 @@ const handleResetPassword = async (e) => {
       },
       credentials: "include",
       body: JSON.stringify({
-        email: email.value,
-        code: code.value,
+        email: resetEmail.value,
+        code: resetCode.value,
         new_password: newPassword.value,
       }),
     });
@@ -85,6 +114,8 @@ const handleResetPassword = async (e) => {
     }
 
     success.value = true;
+    sessionStorage.removeItem(pendingResetEmailKey);
+    sessionStorage.removeItem(pendingResetCodeKey);
 
     setTimeout(() => {
       router.push("/login");
@@ -100,33 +131,39 @@ const handleResetPassword = async (e) => {
 <template>
   <div class="signup-container">
     <div class="signup-card">
-      <h1>Reset Password</h1>
+      <h1>{{ isCodeStep ? "Enter Reset Code" : "Reset Password" }}</h1>
 
-      <form @submit="handleResetPassword">
+      <form v-if="isCodeStep" @submit="handleCodeSubmit">
         <div class="form-group">
-          <label for="reset-email">Email</label>
+          <label for="reset-code">Reset Code</label>
           <input
-            id="reset-email"
-            v-model="email"
-            type="email"
-            placeholder="Enter your account email"
+            id="reset-code"
+            v-model="codeInput"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            placeholder="Enter your 6-digit reset code"
             :disabled="loading"
             required
           />
         </div>
 
-        <div class="form-group">
-          <label for="reset-code">Reset Code</label>
-          <input
-            id="reset-code"
-            v-model="code"
-            type="text"
-            inputmode="numeric"
-            maxlength="6"
-            placeholder="6-digit reset code"
-            :disabled="loading"
-            required
-          />
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
+
+        <button
+          type="submit"
+          :disabled="loading || !isCodeValid"
+          class="submit-button"
+        >
+          Continue
+        </button>
+      </form>
+
+      <form v-else-if="isNewPasswordStep" @submit="handleResetPassword">
+        <div v-if="error" class="error-message">
+          {{ error }}
         </div>
 
         <div class="form-group">
@@ -177,17 +214,22 @@ const handleResetPassword = async (e) => {
 
         <button
           type="submit"
-          :disabled="loading || !isPasswordValid || !isCodeValid"
+          :disabled="loading || !isPasswordValid"
           class="submit-button"
         >
           {{ loading ? "Resetting password..." : "Reset Password" }}
         </button>
       </form>
 
-      <p class="login-link">
-        Need another code?
-        <router-link :to="{ path: '/forgot-password', query: { email } }"
-          >Send a new reset code</router-link
+      <p v-if="isCodeStep" class="login-link">
+        Didn't get a code?
+        <router-link to="/forgot-password">Send a new reset code</router-link>
+      </p>
+
+      <p v-if="isNewPasswordStep" class="login-link">
+        Need to re-enter your code?
+        <router-link :to="{ path: '/reset-password', query: { step: 'code' } }"
+          >Back to code entry</router-link
         >
       </p>
 
