@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from marshmallow import ValidationError
 from rss_music_api_service.internal_apis import db_service
 from rss_music_api_service.routes.auth import login_required
 from rss_music_api_service.auth.current_user import get_current_user_id
@@ -16,7 +17,10 @@ def create_playlist():
     user_id = int(get_current_user_id())
     payload = request.get_json(silent=True) or {}
 
-    request_data = playlist_reqs.CreatePlaylistRequest().load(payload)
+    try:
+        request_data = playlist_reqs.CreatePlaylistRequest().load(payload)
+    except ValidationError as err:
+        return {"error": "Validation error", "message": err.messages}, 400
 
     create_kwargs = {"title": request_data["title"], "user_id": user_id}
 
@@ -46,7 +50,11 @@ def get_user_playlists():
 def update_playlist(id):
     user_id = int(get_current_user_id())
     payload = request.get_json(silent=True) or {}
-    request_data = playlist_reqs.UpdatePlaylistRequest().load(payload)
+
+    try:
+        request_data = playlist_reqs.UpdatePlaylistRequest().load(payload)
+    except ValidationError as err:
+        return {"error": "Validation error", "message": err.messages}, 400
 
     update_kwargs = {
         "playlist_id": id,
