@@ -12,10 +12,9 @@ PLAYLISTS_BP = Blueprint("playlists", __name__, url_prefix="/playlists")
 @PLAYLISTS_BP.post("/create")
 @login_required
 def create_playlist():
-    user_id = get_current_user_id()
+    user_id = int(get_current_user_id())
     payload = request.get_json(silent=True) or {}
 
-    payload["created_by_user_id"] = int(user_id)
     request_data = playlist_reqs.CreatePlaylistRequest().load(payload)
 
     create_kwargs = {
@@ -36,7 +35,7 @@ def create_playlist():
 @PLAYLISTS_BP.get("/me")
 @login_required  # Ensure the requester is logged in
 def get_user_playlists():
-    user_id = get_current_user_id()
+    user_id = int(get_current_user_id())
     result = db_service.get_user_playlists(user_id)
     return {"playlists": result}, 200
 
@@ -47,9 +46,8 @@ def get_user_playlists():
 @login_required
 def update_playlist(id):
     # Load the update data (title/description)
-    user_id = get_current_user_id()
+    user_id = int(get_current_user_id())
     payload = request.get_json(silent=True) or {}
-    payload["created_by_user_id"] = int(user_id)
     request_data = playlist_reqs.UpdatePlaylistRequest().load(payload)
 
     update_kwargs = {
