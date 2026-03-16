@@ -6,7 +6,13 @@ import rss_music_db_service_schemas.users.requests as db_user_requests
 import rss_music_db_service_schemas.users.responses as db_user_responses
 
 from rss_music_db_service import errors
-from rss_music_db_service.users import create, exists, login, verification, password_reset
+from rss_music_db_service.users import (
+    create,
+    exists,
+    login,
+    verification,
+    password_reset,
+)
 from rss_music_db_service.basic_validation import validate_json
 from rss_music_db_service.logging_config import log_request, get_logger
 
@@ -305,7 +311,9 @@ async def set_password_reset_code(request: Request, response: Response):
         route="/users/set-password-reset-code",
     )
 
-    result = await validate_json(request, db_user_requests.SetPasswordResetCodeRequest())
+    result = await validate_json(
+        request, db_user_requests.SetPasswordResetCodeRequest()
+    )
 
     if isinstance(result, JSONResponse):
         response.status_code = result.status_code

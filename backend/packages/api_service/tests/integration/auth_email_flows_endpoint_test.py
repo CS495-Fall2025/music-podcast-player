@@ -5,8 +5,12 @@ from requests import PreparedRequest, Response
 from tests.integration.api_mocks import db_service_mock
 
 SEND_METHOD = "requests.Session.send"
-SEND_VERIFICATION_METHOD = "rss_music_api_service.services.email_service.send_verification_code"
-SEND_RESET_METHOD = "rss_music_api_service.services.email_service.send_password_reset_code"
+SEND_VERIFICATION_METHOD = (
+    "rss_music_api_service.services.email_service.send_verification_code"
+)
+SEND_RESET_METHOD = (
+    "rss_music_api_service.services.email_service.send_password_reset_code"
+)
 
 
 def test_verify_email_success(client) -> None:
@@ -44,9 +48,10 @@ def test_forgot_password_sends_email_when_user_exists(client) -> None:
         assert request.url.endswith("/users/set-password-reset-code")
         return db_service_mock.generate_operation_success(True)
 
-    with mock.patch(SEND_METHOD, side_effect=generate_success) as _, mock.patch(
-        SEND_RESET_METHOD
-    ) as send_reset:
+    with (
+        mock.patch(SEND_METHOD, side_effect=generate_success) as _,
+        mock.patch(SEND_RESET_METHOD) as send_reset,
+    ):
         response = client.post(
             "/auth/forgot-password",
             json={"email": "user@domain.com"},

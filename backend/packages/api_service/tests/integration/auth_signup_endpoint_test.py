@@ -8,7 +8,9 @@ from tests.integration.api_mocks import db_service_mock
 ENDPOINT_URL = "/auth/signup"
 VERIFY_ENDPOINT_URL = "/auth/signup/verify"
 SEND_METHOD = "requests.Session.send"
-SEND_VERIFICATION_METHOD = "rss_music_api_service.services.email_service.send_verification_code"
+SEND_VERIFICATION_METHOD = (
+    "rss_music_api_service.services.email_service.send_verification_code"
+)
 GENERATE_CODE_METHOD = "rss_music_api_service.routes.auth.email_codes.generate_code"
 
 
@@ -143,8 +145,9 @@ def test_signup_verify_rejects_without_pending_signup(client) -> None:
 
 
 def test_signup_verify_rejects_wrong_code(client) -> None:
-    with mock.patch(SEND_VERIFICATION_METHOD), mock.patch(
-        GENERATE_CODE_METHOD, return_value="123456"
+    with (
+        mock.patch(SEND_VERIFICATION_METHOD),
+        mock.patch(GENERATE_CODE_METHOD, return_value="123456"),
     ):
         client.post(
             ENDPOINT_URL,
@@ -169,9 +172,11 @@ def test_signup_verify_creates_user_after_valid_code(client) -> None:
         assert request.url.endswith("/users/create")
         return db_service_mock.generate_users_create_success(request)
 
-    with mock.patch(SEND_METHOD, side_effect=generate_success), mock.patch(
-        SEND_VERIFICATION_METHOD
-    ), mock.patch(GENERATE_CODE_METHOD, return_value="123456"):
+    with (
+        mock.patch(SEND_METHOD, side_effect=generate_success),
+        mock.patch(SEND_VERIFICATION_METHOD),
+        mock.patch(GENERATE_CODE_METHOD, return_value="123456"),
+    ):
         client.post(
             ENDPOINT_URL,
             json={
@@ -195,9 +200,11 @@ def test_signup_verify_duplicate_email_returns_error(client) -> None:
     def generate_duplicate_email(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_users_create_not_unique(request, "email")
 
-    with mock.patch(SEND_METHOD, side_effect=generate_duplicate_email), mock.patch(
-        SEND_VERIFICATION_METHOD
-    ), mock.patch(GENERATE_CODE_METHOD, return_value="123456"):
+    with (
+        mock.patch(SEND_METHOD, side_effect=generate_duplicate_email),
+        mock.patch(SEND_VERIFICATION_METHOD),
+        mock.patch(GENERATE_CODE_METHOD, return_value="123456"),
+    ):
         client.post(
             ENDPOINT_URL,
             json={
@@ -220,9 +227,11 @@ def test_signup_verify_reports_db_timeout(client) -> None:
     def generate_timeout(request: PreparedRequest, *args, **kwargs) -> Response:
         raise exceptions.Timeout()
 
-    with mock.patch(SEND_METHOD, side_effect=generate_timeout), mock.patch(
-        SEND_VERIFICATION_METHOD
-    ), mock.patch(GENERATE_CODE_METHOD, return_value="123456"):
+    with (
+        mock.patch(SEND_METHOD, side_effect=generate_timeout),
+        mock.patch(SEND_VERIFICATION_METHOD),
+        mock.patch(GENERATE_CODE_METHOD, return_value="123456"),
+    ):
         client.post(
             ENDPOINT_URL,
             json={

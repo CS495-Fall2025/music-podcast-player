@@ -42,7 +42,9 @@ def create_auth_generator() -> None:
 
 populate_static_secrets()
 if not os.environ.get("RSS_PLAYER_SES_FROM_EMAIL"):
-    raise RuntimeError("Missing required environment variable: RSS_PLAYER_SES_FROM_EMAIL")
+    raise RuntimeError(
+        "Missing required environment variable: RSS_PLAYER_SES_FROM_EMAIL"
+    )
 create_auth_generator()
 app = create_app()
 handler = apig_wsgi.make_lambda_handler(app)

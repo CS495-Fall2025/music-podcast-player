@@ -17,7 +17,9 @@ def test_set_email_verification_code_success(client, db_session) -> None:
         json={
             "email": "testuser@domain.com",
             "code": "123456",
-            "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=15)).isoformat(),
+            "expires_at": (
+                datetime.now(timezone.utc) + timedelta(minutes=15)
+            ).isoformat(),
         },
     )
 
