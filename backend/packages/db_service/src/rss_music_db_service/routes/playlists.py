@@ -1,9 +1,19 @@
-from rss_music_db_service_schemas.playlists.requests.delete_playlist import DeletePlaylistRequest
-from rss_music_db_service_schemas.playlists.requests.update_playlist import UpdatePlaylistRequest
-from rss_music_db_service_schemas.playlists.requests.create_playlist import CreatePlaylistRequest
+from rss_music_db_service_schemas.playlists.requests.delete_playlist import (
+    DeletePlaylistRequest,
+)
+from rss_music_db_service_schemas.playlists.requests.update_playlist import (
+    UpdatePlaylistRequest,
+)
+from rss_music_db_service_schemas.playlists.requests.create_playlist import (
+    CreatePlaylistRequest,
+)
 from rss_music_db_service_schemas.playlists.responses.playlist import PlaylistResponse
-from rss_music_db_service_schemas.playlists.responses.update_playlist import UpdatePlaylistResponse
-from rss_music_db_service_schemas.playlists.responses.create_playlist import CreatePlaylistResponse
+from rss_music_db_service_schemas.playlists.responses.update_playlist import (
+    UpdatePlaylistResponse,
+)
+from rss_music_db_service_schemas.playlists.responses.create_playlist import (
+    CreatePlaylistResponse,
+)
 
 from rss_music_db_service.errors import UserNotFoundError
 from fastapi import status, APIRouter, Request, Response
@@ -119,15 +129,10 @@ async def get_user_playlists_route(user_id: int):
     try:
         user_playlists = get_by_user.get_playlists_by_user(user_id)
     except UserNotFoundError as e:
-        return JSONResponse(
-            status_code=404,
-            content={"message": str(e)}
-        )
+        return JSONResponse(status_code=404, content={"message": str(e)})
 
         # Format response
-    response_data = PlaylistResponse(many=True).dump(
-        user_playlists
-    )
+    response_data = PlaylistResponse(many=True).dump(user_playlists)
 
     log_request(
         logger,

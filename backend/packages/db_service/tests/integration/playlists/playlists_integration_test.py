@@ -1,4 +1,3 @@
-import pytest
 from rss_music_data_model import User, Playlist
 
 
@@ -8,8 +7,9 @@ def test_create_playlist_integration(client, db_session):
     Covers the 'missing description' and 'int vs string' bugs.
     """
     # 1. Seed a user into the in-memory DB
-    test_user = User(username="johndoe",
-                     email="john@example.com", password=b"password123")
+    test_user = User(
+        username="johndoe", email="john@example.com", password=b"password123"
+    )
     db_session.add(test_user)
     db_session.commit()
     db_session.refresh(test_user)
@@ -19,7 +19,7 @@ def test_create_playlist_integration(client, db_session):
     # (or via headers if your app uses get_current_user_id)
     payload = {
         "title": "My First Playlist",
-        "created_by_user_id": test_user.id
+        "created_by_user_id": test_user.id,
         # description is omitted to verify the 'None' bug is fixed
     }
 
@@ -32,8 +32,9 @@ def test_create_playlist_integration(client, db_session):
     assert data["created_by_user_id"] == test_user.id
 
     # 4. Verify DB State: Did it actually save?
-    db_playlist = db_session.query(Playlist).filter_by(
-        title="My First Playlist").first()
+    db_playlist = (
+        db_session.query(Playlist).filter_by(title="My First Playlist").first()
+    )
     assert db_playlist is not None
     assert db_playlist.created_by_user_id == test_user.id
 
@@ -43,14 +44,14 @@ def test_get_playlists_me_integration(client, db_session):
     Tests the 'Get Playlists' flow and ensures we handle non-existent users with 404.
     """
     # 1. Create a user and a playlist
-    test_user = User(username="janedoe",
-                     email="jane@example.com", password=b"password123")
+    test_user = User(
+        username="janedoe", email="jane@example.com", password=b"password123"
+    )
     db_session.add(test_user)
     db_session.commit()
     db_session.refresh(test_user)
 
-    db_session.add(Playlist(title="Jane's Jams",
-                   created_by_user_id=test_user.id))
+    db_session.add(Playlist(title="Jane's Jams", created_by_user_id=test_user.id))
     db_session.commit()
 
     # 2. Test Success Path
@@ -72,10 +73,8 @@ def test_delete_playlist_unauthorized_integration(client, db_session):
     """
     Tests that User A cannot delete User B's playlist.
     """
-    user_a = User(username="user_a", email="a@test.com",
-                  password=b"password123")
-    user_b = User(username="user_b", email="b@test.com",
-                  password=b"password123")
+    user_a = User(username="user_a", email="a@test.com", password=b"password123")
+    user_b = User(username="user_b", email="b@test.com", password=b"password123")
     db_session.add_all([user_a, user_b])
     db_session.commit()
     db_session.refresh(user_a)
@@ -90,9 +89,7 @@ def test_delete_playlist_unauthorized_integration(client, db_session):
     # User A tries to delete it
     # We pass User A's ID in the request context/payload
     response = client.request(
-        "DELETE",
-        f"/playlists/{b_playlist.id}",
-        json={"created_by_user_id": user_a.id}
+        "DELETE", f"/playlists/{b_playlist.id}", json={"created_by_user_id": user_a.id}
     )
 
     # Assertions: Should be 404/Forbidden, NOT 200 and NOT 500
