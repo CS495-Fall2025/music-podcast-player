@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import loadConfig from "../config";
@@ -15,28 +15,11 @@ const loading = ref(false);
 const error = ref("");
 const success = ref(false);
 const info = ref("");
-
-const verificationEmail = ref("");
-
-const pendingVerificationEmailKey = "pending_verification_email";
-
 const isVerificationStep = computed(() => route.query.step === "verify");
 
 const isVerificationCodeValid = computed(() =>
   /^\d{6}$/.test(verificationCode.value),
 );
-
-onMounted(() => {
-  const queryEmail = route.query.email ? String(route.query.email) : "";
-  if (queryEmail) {
-    verificationEmail.value = queryEmail;
-    sessionStorage.setItem(pendingVerificationEmailKey, queryEmail);
-    return;
-  }
-
-  verificationEmail.value =
-    sessionStorage.getItem(pendingVerificationEmailKey) || "";
-});
 
 const passwordRequirements = {
   length: (password) => password.length >= 12,
@@ -131,8 +114,6 @@ const handleSignup = async (e) => {
     }
 
     success.value = true;
-    verificationEmail.value = email.value;
-    sessionStorage.setItem(pendingVerificationEmailKey, email.value);
 
     username.value = "";
     email.value = "";
@@ -159,12 +140,6 @@ const handleVerification = async (e) => {
   error.value = "";
   success.value = false;
   info.value = "";
-
-  if (!verificationEmail.value) {
-    error.value = "No pending signup found. Please register first.";
-    return;
-  }
-
   if (!isVerificationCodeValid.value) {
     error.value = "Verification code must be exactly 6 digits.";
     return;
@@ -175,14 +150,13 @@ const handleVerification = async (e) => {
   try {
     const config = await loadConfig();
 
-    const response = await fetch(`${config.backendUrl}/auth/verify-email`, {
+    const response = await fetch(`${config.backendUrl}/auth/signup/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
       body: JSON.stringify({
-        email: verificationEmail.value,
         code: verificationCode.value,
       }),
     });
@@ -194,7 +168,6 @@ const handleVerification = async (e) => {
 
     success.value = true;
     info.value = "Email verified successfully. Redirecting to login...";
-    sessionStorage.removeItem(pendingVerificationEmailKey);
     verificationCode.value = "";
 
     setTimeout(() => {

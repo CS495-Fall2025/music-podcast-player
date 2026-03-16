@@ -19,7 +19,6 @@ describe("SignupPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    sessionStorage.clear();
     global.fetch = vi.fn();
   });
 
@@ -47,11 +46,14 @@ describe("SignupPage", () => {
 
     expect(global.fetch).toHaveBeenCalledWith(
       "http://backend.test/auth/signup",
-      expect.objectContaining({ method: "POST" }),
-    );
-
-    expect(sessionStorage.getItem("pending_verification_email")).toBe(
-      "user@example.com",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          username: "validuser",
+          email: "user@example.com",
+          password: "ValidPassword!234",
+        }),
+      }),
     );
 
     await vi.runAllTimersAsync();
@@ -63,7 +65,6 @@ describe("SignupPage", () => {
   });
 
   it("renders code-only verification step and verifies with stored email", async () => {
-    sessionStorage.setItem("pending_verification_email", "user@example.com");
     useRouteMock.mockReturnValueOnce({ query: { step: "verify" } });
 
     global.fetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
@@ -84,11 +85,10 @@ describe("SignupPage", () => {
     await flushPromises();
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://backend.test/auth/verify-email",
+      "http://backend.test/auth/signup/verify",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
-          email: "user@example.com",
           code: "123456",
         }),
       }),
@@ -97,11 +97,9 @@ describe("SignupPage", () => {
     await vi.runAllTimersAsync();
 
     expect(pushMock).toHaveBeenCalledWith("/login");
-    expect(sessionStorage.getItem("pending_verification_email")).toBe(null);
   });
 
   it("shows validation message for invalid verification code", async () => {
-    sessionStorage.setItem("pending_verification_email", "user@example.com");
     useRouteMock.mockReturnValueOnce({ query: { step: "verify" } });
 
     const wrapper = mount(SignupPage, {
