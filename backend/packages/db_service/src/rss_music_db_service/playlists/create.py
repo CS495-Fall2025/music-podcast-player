@@ -1,6 +1,4 @@
-from backend.packages.db_service.src.rss_music_db_service.errors import (
-    UserNotFoundError,
-)
+from rss_music_db_service.errors import UserNotFoundError
 from sqlalchemy.exc import IntegrityError
 from rss_music_data_model import Playlist, make_session
 from rss_music_db_service.logging_config import log_request, get_logger
