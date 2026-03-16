@@ -29,19 +29,12 @@ def create_playlist():
 # Get user playlists
 
 
-@PLAYLISTS_BP.get("/user/<int:user_id>")
+@PLAYLISTS_BP.get("/me")
 @login_required  # Ensure the requester is logged in
-def get_user_playlists(user_id):
-    # Security: Verify the requester IS the user in the URL
-    if get_current_user_id() != user_id:
-        return {
-            "error": "Forbidden",
-            "message": "You cannot view other users' playlists.",
-        }, 403
-
+def get_user_playlists():
+    user_id = get_current_user_id()
     result = db_service.get_user_playlists(user_id)
     return {"playlists": result}, 200
-
 
 # Update playlist
 
