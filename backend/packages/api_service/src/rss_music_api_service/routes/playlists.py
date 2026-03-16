@@ -17,10 +17,7 @@ def create_playlist():
 
     request_data = playlist_reqs.CreatePlaylistRequest().load(payload)
 
-    create_kwargs = {
-        "title": request_data["title"],
-        "user_id": user_id
-    }
+    create_kwargs = {"title": request_data["title"], "user_id": user_id}
 
     if request_data.get("description") is not None:
         create_kwargs["description"] = request_data["description"]
@@ -39,6 +36,7 @@ def get_user_playlists():
     result = db_service.get_user_playlists(user_id)
     return {"playlists": result}, 200
 
+
 # Update playlist
 
 
@@ -53,7 +51,7 @@ def update_playlist(id):
     update_kwargs = {
         "playlist_id": id,
         "user_id": user_id,
-        "title": request_data.get("title")
+        "title": request_data.get("title"),
     }
 
     if request_data.get("description") is not None:
@@ -63,9 +61,10 @@ def update_playlist(id):
     updated_playlist = db_service.update_playlist(**update_kwargs)
 
     if updated_playlist is None:
-        return {"error": "Not Found",
-                "message": "Playlist not found or unauthorized"
-                }, 404
+        return {
+            "error": "Not Found",
+            "message": "Playlist not found or unauthorized",
+        }, 404
     return playlist_reqs.UpdatePlaylistResponse().dump(updated_playlist), 200
 
 
@@ -80,8 +79,9 @@ def delete_playlist(id):
     success = db_service.delete_playlist(playlist_id=id, user_id=user_id)
 
     if not success:
-        return {"error": "Not Found",
-                "message": "Playlist not found or unauthorized"
-                }, 404
+        return {
+            "error": "Not Found",
+            "message": "Playlist not found or unauthorized",
+        }, 404
 
     return {"message": "Playlist deleted successfully"}, 200

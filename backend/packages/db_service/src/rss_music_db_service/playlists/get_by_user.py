@@ -1,4 +1,6 @@
-from backend.packages.db_service.src.rss_music_db_service.errors import UserNotFoundError
+from backend.packages.db_service.src.rss_music_db_service.errors import (
+    UserNotFoundError,
+)
 from rss_music_data_model import Playlist, User, make_session
 
 
