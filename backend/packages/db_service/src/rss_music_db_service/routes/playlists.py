@@ -1,8 +1,13 @@
+from rss_music_db_service_schemas.playlists.requests.delete_playlist import DeletePlaylistRequest
+from rss_music_db_service_schemas.playlists.requests.update_playlist import UpdatePlaylistRequest
+from rss_music_db_service_schemas.playlists.requests.create_playlist import CreatePlaylistRequest
+from rss_music_db_service_schemas.playlists.responses.playlist import PlaylistResponse
+from rss_music_db_service_schemas.playlists.responses.update_playlist import UpdatePlaylistResponse
+from rss_music_db_service_schemas.playlists.responses.create_playlist import CreatePlaylistResponse
+
+from rss_music_db_service.errors import UserNotFoundError
 from fastapi import status, APIRouter, Request, Response
 from fastapi.responses import JSONResponse
-
-import rss_music_db_service_schemas.playlists.requests as db_playlist_requests
-import rss_music_db_service_schemas.playlists.responses as db_playlist_responses
 
 from rss_music_db_service.playlists import create, update, delete, get_by_user
 from rss_music_db_service.basic_validation import validate_json
@@ -23,7 +28,7 @@ async def create_playlist(request: Request, response: Response):
     )
 
     # Validate incoming JSON against Schema
-    result = await validate_json(request, db_playlist_requests.CreatePlaylistRequest())
+    result = await validate_json(request, CreatePlaylistRequest())
     if isinstance(result, JSONResponse):
         return result
 
@@ -43,7 +48,7 @@ async def create_playlist(request: Request, response: Response):
     )
 
     # Return using Response Schema
-    return db_playlist_responses.CreatePlaylistResponse().dump(new_playlist)
+    return CreatePlaylistResponse().dump(new_playlist)
 
 
 @playlists.put("/{id}")
@@ -56,7 +61,7 @@ async def update_playlist_route(id: int, request: Request, response: Response):
         route=f"/playlists/{id}",
     )
 
-    result = await validate_json(request, db_playlist_requests.UpdatePlaylistRequest())
+    result = await validate_json(request, UpdatePlaylistRequest())
     if isinstance(result, JSONResponse):
         return result
 
@@ -72,7 +77,7 @@ async def update_playlist_route(id: int, request: Request, response: Response):
             status_code=404, content={"message": "Playlist not found or unauthorized"}
         )
 
-    return db_playlist_responses.UpdatePlaylistResponse().dump(updated)
+    return UpdatePlaylistResponse().dump(updated)
 
 
 @playlists.delete("/{id}")
@@ -85,7 +90,7 @@ async def delete_playlist_route(id: int, request: Request, response: Response):
         route=f"/playlists/{id}",
     )
 
-    result = await validate_json(request, db_playlist_requests.DeletePlaylistRequest())
+    result = await validate_json(request, DeletePlaylistRequest())
     if isinstance(result, JSONResponse):
         return result
 
@@ -111,11 +116,16 @@ async def get_user_playlists_route(user_id: int):
         route=f"/playlists/user/{user_id}",
     )
 
-    # Fetch from DB logic
-    user_playlists = get_by_user.get_playlists_by_user(user_id)
+    try:
+        user_playlists = get_by_user.get_playlists_by_user(user_id)
+    except UserNotFoundError as e:
+        return JSONResponse(
+            status_code=404,
+            content={"message": str(e)}
+        )
 
-    # Format response
-    response_data = db_playlist_responses.PlaylistResponse(many=True).dump(
+        # Format response
+    response_data = PlaylistResponse(many=True).dump(
         user_playlists
     )
 
@@ -128,4 +138,4 @@ async def get_user_playlists_route(user_id: int):
         status_code=200,
     )
 
-    return response_data
+    return {"playlists": response_data}
