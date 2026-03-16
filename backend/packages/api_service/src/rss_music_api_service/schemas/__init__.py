@@ -6,6 +6,9 @@ from rss_music_api_service.schemas.responses.search_feeds_response import (
     SearchFeedsResponseSchema,
 )
 from rss_music_api_service.schemas.requests.signup_request import SignUpRequestSchema
+from rss_music_api_service.schemas.requests.verification_code_request import (
+    VerificationCodeRequestSchema,
+)
 from rss_music_api_service.schemas.requests.email_request import EmailRequestSchema
 from rss_music_api_service.schemas.requests.email_code_request import (
     EmailCodeRequestSchema,
@@ -24,6 +27,7 @@ __all__ = [
     "SearchFeedsRequestSchema",
     "LinkFeedRequestSchema",
     "SignUpRequestSchema",
+    "VerificationCodeRequestSchema",
     "EmailRequestSchema",
     "EmailCodeRequestSchema",
     "ResetPasswordRequestSchema",
