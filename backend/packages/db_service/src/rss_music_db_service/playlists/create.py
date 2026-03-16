@@ -1,3 +1,4 @@
+from backend.packages.db_service.src.rss_music_db_service.errors import UserNotFoundError
 from sqlalchemy.exc import IntegrityError
 from rss_music_data_model import Playlist, make_session
 from rss_music_db_service.logging_config import log_request, get_logger
@@ -31,4 +32,7 @@ def create_and_add_playlist(
             return playlist
         except IntegrityError as error:
             session.rollback()
-            raise error
+
+            logger.error(f"Failed to create playlist: {error}")
+            raise UserNotFoundError(
+                f"User ID {user_id} does not exist.") from error
