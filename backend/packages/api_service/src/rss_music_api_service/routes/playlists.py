@@ -18,11 +18,15 @@ def create_playlist():
     payload["created_by_user_id"] = int(user_id)
     request_data = playlist_reqs.CreatePlaylistRequest().load(payload)
 
-    result = db_service.create_playlist(
-        title=request_data["title"],
-        user_id=user_id,
-        description=request_data.get("description"),
-    )
+    create_kwargs = {
+        "title": request_data["title"],
+        "user_id": user_id
+    }
+
+    if request_data.get("description") is not None:
+        create_kwargs["description"] = request_data["description"]
+
+    result = db_service.create_playlist(**create_kwargs)
     return result, 201
 
 
@@ -48,13 +52,17 @@ def update_playlist(id):
     payload["created_by_user_id"] = int(user_id)
     request_data = playlist_reqs.UpdatePlaylistRequest().load(payload)
 
+    update_kwargs = {
+        "playlist_id": id,
+        "user_id": user_id,
+        "title": request_data.get("title")
+    }
+
+    if request_data.get("description") is not None:
+        update_kwargs["description"] = request_data["description"]
+
     # Pass the ID from the URL and the user_id for security
-    updated_playlist = db_service.update_playlist(
-        playlist_id=id,
-        user_id=user_id,
-        title=request_data.get("title"),
-        description=request_data.get("description"),
-    )
+    updated_playlist = db_service.update_playlist(**update_kwargs)
 
     if updated_playlist is None:
         return {"error": "Not Found",
