@@ -4,7 +4,7 @@ from rss_music_api_service.routes.auth import login_required
 from rss_music_api_service.auth.current_user import get_current_user_id
 from rss_music_db_service_schemas.playlists import requests as playlist_reqs
 
-PLAYLISTS_BP = Blueprint("playlists", __name__)
+PLAYLISTS_BP = Blueprint("playlists", __name__, url_prefix="/playlists")
 
 # Create playlist
 
