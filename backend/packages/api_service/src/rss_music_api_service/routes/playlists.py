@@ -3,6 +3,7 @@ from rss_music_api_service.internal_apis import db_service
 from rss_music_api_service.routes.auth import login_required
 from rss_music_api_service.auth.current_user import get_current_user_id
 from rss_music_db_service_schemas.playlists import requests as playlist_reqs
+from rss_music_db_service_schemas.playlists import responses as playlist_resps
 
 PLAYLISTS_BP = Blueprint("playlists", __name__, url_prefix="/playlists")
 
@@ -30,7 +31,7 @@ def create_playlist():
 
 
 @PLAYLISTS_BP.get("/me")
-@login_required  # Ensure the requester is logged in
+@login_required
 def get_user_playlists():
     user_id = int(get_current_user_id())
     result = db_service.get_user_playlists(user_id)
@@ -43,7 +44,6 @@ def get_user_playlists():
 @PLAYLISTS_BP.put("/<int:id>")
 @login_required
 def update_playlist(id):
-    # Load the update data (title/description)
     user_id = int(get_current_user_id())
     payload = request.get_json(silent=True) or {}
     request_data = playlist_reqs.UpdatePlaylistRequest().load(payload)
@@ -65,7 +65,7 @@ def update_playlist(id):
             "error": "Not Found",
             "message": "Playlist not found or unauthorized",
         }, 404
-    return playlist_reqs.UpdatePlaylistResponse().dump(updated_playlist), 200
+    return playlist_resps.UpdatePlaylistResponse().dump(updated_playlist), 200
 
 
 # Delete playlist
