@@ -234,8 +234,7 @@ def _create_playlist_request(
         data_to_dump["description"] = description
 
     # Use Schema to 'dump' data into a clean dictionary
-    request_data = playlist_requests.CreatePlaylistRequest().dump({
-        data_to_dump})
+    request_data = playlist_requests.CreatePlaylistRequest().dump(data_to_dump)
 
     request = requests.Request("POST", url, json=request_data)
     return request.prepare()
@@ -269,8 +268,7 @@ def update_playlist(
     playlist_id: int, user_id: int, title: str = None, description: str = None
 ) -> dict:
     # Prepare request
-    request = _create_update_playlist_request(
-        playlist_id, user_id, title, description)
+    request = _create_update_playlist_request(playlist_id, user_id, title, description)
 
     # Send request
     response = _send_request(request)

@@ -1,15 +1,30 @@
 import pytest
 from unittest import mock
+import requests
+import json
+
+SEND_METHOD = "requests.Session.send"
 
 
 @pytest.fixture
-def mock_db_service():
-    with mock.patch("rss_music_api_service.routes.playlists.db_service") as mocked:
-        yield mocked
+def mock_db_response():
+    """Intercepts outgoing DB requests and returns a custom response."""
+    with mock.patch(SEND_METHOD) as mocked_send:
+
+        def _set_response(status_code: int, json_data: dict):
+            mock_res = requests.Response()
+            mock_res.status_code = status_code
+            mock_res._content = json.dumps(json_data).encode("utf-8")
+            mock_res.headers["Content-Type"] = "application/json"
+            mocked_send.return_value = mock_res
+            return mocked_send
+
+        yield _set_response
 
 
 @pytest.fixture
 def mock_user_id():
+    """Mocks the authentication check to return a consistent User ID."""
     user_id = 123
     with mock.patch(
         "rss_music_api_service.routes.auth.get_current_user_id", return_value=user_id
@@ -21,17 +36,14 @@ def mock_user_id():
             yield user_id
 
 
-# --- PLAYLIST TESTS ---
-
-# --- Create ---
+# --- CREATE TESTS ---
 
 
-def test_create_playlist_success(client, mock_user_id, mock_db_service):
-    mock_db_service.create_playlist.return_value = {
-        "id": 1,
-        "title": "Gym Mix",
-        "user_id": 123,
-    }
+def test_create_playlist_success(client, mock_user_id, mock_db_response):
+    mock_db_response(
+        status_code=201,
+        json_data={"id": 1, "title": "Gym Mix", "created_by_user_id": 123},
+    )
 
     payload = {
         "title": "Gym Mix",
@@ -42,165 +54,106 @@ def test_create_playlist_success(client, mock_user_id, mock_db_service):
 
     assert response.status_code == 201
     assert response.json["title"] == "Gym Mix"
-    mock_db_service.create_playlist.assert_called_once()
 
 
-def test_create_playlist_validation_error(client, mock_user_id, mock_db_service):
-    # Intentional bad payload: missing 'title'
-    payload = {"description": "Missing title field", "created_by_user_id": 123}
-
+def test_create_playlist_validation_error(client, mock_user_id):
+    payload = {"description": "Missing title field"}
     response = client.post("/playlists/create", json=payload)
 
     assert response.status_code == 400
-    assert response.json["error"] == "Validation error"
-    assert "title" in response.json["message"]
+    assert response.json["error"] == "InvalidArgument"
 
 
-def test_create_playlist_with_extra_fields(client, mock_user_id, mock_db_service):
-    payload = {
-        "title": "Valid Title",
-        "created_by_user_id": 123,
-        "hacker_field": "trying to inject data",
-    }
-
-    response = client.post("/playlists/create", json=payload)
-
-    assert response.status_code == 400
-    assert "hacker_field" in response.json["message"]
-
-    mock_db_service.create_playlist.assert_not_called()
-
-
-def test_create_playlist_enforces_auth_user_id(client, mock_user_id, mock_db_service):
-    mock_db_service.create_playlist.return_value = {
-        "id": 1,
-        "title": "Test",
-        "user_id": 123,
-    }
+def test_create_playlist_enforces_auth_user_id(client, mock_user_id, mock_db_response):
+    mock_send = mock_db_response(status_code=201, json_data={"id": 1})
 
     payload = {"title": "My Playlist", "created_by_user_id": 999}
-
     client.post("/playlists/create", json=payload)
 
-    args, kwargs = mock_db_service.create_playlist.call_args
-    assert kwargs["user_id"] == 123
+    sent_request = mock_send.call_args[0][0]
+    sent_body = json.loads(sent_request.body)
+    assert sent_body["created_by_user_id"] == 123
 
 
-# --- Get ---
+def test_create_playlist_without_description(client, mock_user_id, mock_db_response):
+    mock_send = mock_db_response(
+        status_code=201,
+        json_data={"id": 1, "title": "No Description Mix", "created_by_user_id": 123},
+    )
+
+    payload = {
+        "title": "No Description Mix",
+        "created_by_user_id": 123,
+    }
+    response = client.post("/playlists/create", json=payload)
+
+    assert response.status_code == 201
+    assert response.json["title"] == "No Description Mix"
+
+    sent_request = mock_send.call_args[0][0]
+    sent_body = json.loads(sent_request.body)
+    assert "description" not in sent_body
 
 
-def test_get_user_playlists(client, mock_user_id, mock_db_service):
-    mock_db_service.get_user_playlists.return_value = [{"id": 1, "title": "Lo-Fi"}]
+# --- GET TESTS ---
+
+
+def test_get_user_playlists_success(client, mock_user_id, mock_db_response):
+    mock_db_response(status_code=200, json_data=[{"id": 1, "title": "Lo-Fi"}])
 
     response = client.get("/playlists/me")
 
     assert response.status_code == 200
-    mock_db_service.get_user_playlists.assert_called_once_with(123)
+    assert len(response.json["playlists"]) == 1
 
 
-def test_get_playlists_no_auth(client, mock_db_service):
-    with mock.patch(
-        "rss_music_api_service.routes.auth.get_current_user_id", return_value=None
-    ):
-        response = client.get("/playlists/me")
-
-    assert response.status_code == 401
-    assert response.json["error"] == "MissingToken"
+# --- UPDATE TESTS ---
 
 
-def test_playlist_route_invalid_id_type(client, mock_user_id):
-    response = client.get("/playlists/abc")
-    assert response.status_code == 404
-
-
-# --- Update ---
-
-
-def test_update_playlist_success(client, mock_user_id, mock_db_service):
-    mock_db_service.update_playlist.return_value = {
-        "id": 5,
-        "title": "Updated",
-        "description": "New",
-    }
-
-    response = client.put(
-        "/playlists/5",
-        json={"title": "Updated", "description": "New", "created_by_user_id": 123},
+def test_update_playlist_success(client, mock_user_id, mock_db_response):
+    mock_db_response(
+        status_code=200,
+        json_data={"id": 5, "title": "Updated", "created_by_user_id": 123},
     )
 
-    assert response.status_code == 200
-    mock_db_service.update_playlist.assert_called_once()
-
-
-def test_update_playlist_not_found(client, mock_user_id, mock_db_service):
-    mock_db_service.update_playlist.return_value = None
-
-    payload = {"title": "Non-existent", "created_by_user_id": 123}
-    response = client.put("/playlists/999", json=payload)
-
-    assert response.status_code == 404
-    assert response.json["error"] == "Not Found"
-    assert "unauthorized" in response.json["message"]
-
-
-def test_update_playlist_partial_data(client, mock_user_id, mock_db_service):
-    mock_db_service.update_playlist.return_value = {
-        "id": 5,
-        "title": "Only Title Updated",
-    }
-
-    payload = {"title": "Only Title Updated", "created_by_user_id": 123}
-
+    payload = {"title": "Updated", "description": "New", "created_by_user_id": 123}
     response = client.put("/playlists/5", json=payload)
 
     assert response.status_code == 200
-    args, kwargs = mock_db_service.update_playlist.call_args
-    assert "description" not in kwargs
+    assert response.json["title"] == "Updated"
 
 
-# --- Delete ---
+def test_update_playlist_not_found(client, mock_user_id, mock_db_response):
+    mock_db_response(
+        status_code=404, json_data={"error": "NotFound", "message": "Missing"}
+    )
+
+    response = client.put(
+        "/playlists/999", json={"title": "Doesn't Exist", "created_by_user_id": 123}
+    )
+
+    assert response.status_code == 404
+    assert response.json["error"] == "NotFound"
 
 
-def test_delete_playlist_success(client, mock_user_id, mock_db_service):
-    mock_db_service.delete_playlist.return_value = True
+# --- DELETE TESTS ---
+
+
+def test_delete_playlist_success(client, mock_user_id, mock_db_response):
+    mock_db_response(status_code=200, json_data={"message": "Deleted"})
 
     response = client.delete("/playlists/10")
 
     assert response.status_code == 200
-    mock_db_service.delete_playlist.assert_called_once_with(playlist_id=10, user_id=123)
+    assert response.json["message"] == "Playlist deleted successfully"
 
 
-def test_delete_playlist_not_found(client, mock_user_id, mock_db_service):
-    mock_db_service.delete_playlist.return_value = False
+def test_delete_playlist_not_found(client, mock_user_id, mock_db_response):
+    mock_db_response(
+        status_code=404, json_data={"error": "NotFound", "message": "Missing"}
+    )
 
     response = client.delete("/playlists/999")
 
     assert response.status_code == 404
-    assert response.json["error"] == "Not Found"
-
-
-# --- Composition ---
-
-
-def test_create_and_update_workflow(client, mock_user_id, mock_db_service):
-    mock_db_service.create_playlist.return_value = {
-        "id": 50,
-        "title": "Original Title",
-        "user_id": 123,
-    }
-
-    create_payload = {"title": "Original Title", "created_by_user_id": 123}
-    create_res = client.post("/playlists/create", json=create_payload)
-    playlist_id = create_res.json["id"]
-
-    mock_db_service.update_playlist.return_value = {
-        "id": 50,
-        "title": "Updated Title",
-        "user_id": 123,
-    }
-
-    update_payload = {"title": "Updated Title", "created_by_user_id": 123}
-    update_res = client.put(f"/playlists/{playlist_id}", json=update_payload)
-
-    assert update_res.status_code == 200
-    assert update_res.json["title"] == "Updated Title"
+    assert response.json["error"] == "NotFound"

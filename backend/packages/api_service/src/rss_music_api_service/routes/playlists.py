@@ -76,7 +76,10 @@ def update_playlist(id):
         updated_playlist = db_service.update_playlist(**update_kwargs)
         return playlist_resps.UpdatePlaylistResponse().dump(updated_playlist)
     except db_errors.InternalAPINotFoundError:
-        return get_error_response(RequestError.NOT_FOUND, {"message": "Playlist not found"})
+        return get_error_response(
+            RequestError.NOT_FOUND, {"message": "Playlist not found"}
+        )
+
 
 # Delete playlist
 
@@ -90,4 +93,6 @@ def delete_playlist(id):
         db_service.delete_playlist(playlist_id=id, user_id=user_id)
         return {"message": "Playlist deleted successfully"}, 200
     except db_errors.InternalAPINotFoundError:
-        return get_error_response(RequestError.NOT_FOUND, {"message": "Playlist not found"})
+        return get_error_response(
+            RequestError.NOT_FOUND, {"message": "Playlist not found"}
+        )

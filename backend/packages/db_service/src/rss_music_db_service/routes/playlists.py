@@ -22,7 +22,6 @@ from fastapi.responses import JSONResponse
 from rss_music_db_service.playlists import create, update, delete, get_by_user
 from rss_music_db_service.basic_validation import validate_json
 from rss_music_db_service.logging_config import log_request, get_logger
-from rss_music_db_service.errors import UserNotFoundError
 
 playlists = APIRouter()
 logger = get_logger(__name__)
@@ -43,17 +42,12 @@ async def create_playlist(request: Request, response: Response):
     if isinstance(result, JSONResponse):
         return result
 
-    kwargs = {
-        "title": result["title"],
-        "user_id": result["created_by_user_id"]
-    }
+    kwargs = {"title": result["title"], "user_id": result["created_by_user_id"]}
     if "description" in result and result["description"] is not None:
         kwargs["description"] = result["description"]
 
     try:
-        new_playlist = create.create_and_add_playlist(
-            **kwargs
-        )
+        new_playlist = create.create_and_add_playlist(**kwargs)
         log_request(
             logger,
             "info",
@@ -64,13 +58,10 @@ async def create_playlist(request: Request, response: Response):
         )
 
         return CreatePlaylistResponse().dump(new_playlist)
-    except UserNotFoundError as err:
+    except UserNotFoundError:
         return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={
-                "error": "NotFound",
-                "message": str(err)
-            }
+            status_code=404,
+            content={"error": "NotFound", "message": "User not found or doesn't exist"},
         )
 
 
@@ -97,7 +88,11 @@ async def update_playlist_route(id: int, request: Request, response: Response):
 
     if updated is None:
         return JSONResponse(
-            status_code=404, content={"error": "NotFound", "message": "Playlist not found or unauthorized"}
+            status_code=404,
+            content={
+                "error": "NotFound",
+                "message": "Playlist not found or unauthorized",
+            },
         )
 
     return UpdatePlaylistResponse().dump(updated)
@@ -123,7 +118,11 @@ async def delete_playlist_route(id: int, request: Request, response: Response):
 
     if not success:
         return JSONResponse(
-            status_code=404, content={"error": "NotFound", "message": "Playlist not found or unauthorized"}
+            status_code=404,
+            content={
+                "error": "NotFound",
+                "message": "Playlist not found or unauthorized",
+            },
         )
 
     return {"message": "Deleted"}
@@ -155,4 +154,7 @@ async def get_user_playlists_route(user_id: int):
         return {"playlists": response_data}
 
     except UserNotFoundError as err:
-        return JSONResponse(status_code=404, content={"error": "NotFound", "message": str(err)},)
+        return JSONResponse(
+            status_code=404,
+            content={"error": "NotFound", "message": str(err)},
+        )
