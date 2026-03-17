@@ -54,10 +54,12 @@
 
 <script setup>
 import useNavbar from "../controllers/navBar.js";
+import { ref, onMounted } from "vue";
 
 const {
   isOpen,
   dropdownOpen,
+  dropdownRef,
   handleLogin,
   handleSignup,
   handleLogout,
@@ -65,6 +67,46 @@ const {
   currentUser,
 } = useNavbar();
 const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
+const satDripModalOpen = ref(false);
+const satDripRate = ref(0); // stores sats per minute
+const satDripEnabled = ref(false);
+
+const SAT_DRIP_STORAGE_KEY = "satDripSettings";
+
+onMounted(() => {
+  // load previously saved settings when the component appears
+  const savedSettings = localStorage.getItem(SAT_DRIP_STORAGE_KEY);
+
+  if (!savedSettings) return;
+
+  try {
+    const parsedSettings = JSON.parse(savedSettings);
+    satDripRate.value = Number.isFinite(parsedSettings.satsPerMinute)
+      ? parsedSettings.satsPerMinute
+      : 0;
+    satDripEnabled.value = Boolean(parsedSettings.enabled);
+  } catch (error) {
+    console.error("Failed to load Sat Drip settings:", error);
+  }
+});
+
+function closeSatDripModal() {
+  satDripModalOpen.value = false;
+}
+
+function saveSatDripSettings() {
+  const cleanedRate = Math.max(0, Math.floor(Number(satDripRate.value) || 0));
+
+  satDripRate.value = cleanedRate;
+
+  const settings = {
+    satsPerMinute: cleanedRate,
+    enabled: satDripEnabled.value,
+  };
+
+  localStorage.setItem(SAT_DRIP_STORAGE_KEY, JSON.stringify(settings));
+  satDripModalOpen.value = false;
+}
 </script>
 
 <style src="../style.css" />
