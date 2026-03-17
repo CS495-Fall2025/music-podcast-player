@@ -18,7 +18,8 @@ def create_and_add_playlist(
         user = session.query(User).filter(User.id == user_id).first()
         if not user:
             logger.error(
-                f"Failed to create playlist: User ID {user_id} does not exist.")
+                f"Failed to create playlist: User ID {user_id} does not exist."
+            )
             raise UserNotFoundError(f"User ID {user_id} does not exist.")
 
         try:
@@ -40,5 +41,4 @@ def create_and_add_playlist(
             session.rollback()
 
             logger.error(f"Failed to create playlist: {error}")
-            raise UserNotFoundError(
-                f"User ID {user_id} does not exist.") from error
+            raise UserNotFoundError(f"User ID {user_id} does not exist.") from error
