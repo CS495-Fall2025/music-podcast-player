@@ -103,6 +103,8 @@ def _handle_error(response: requests.Response) -> None:
                 "At least one field was not unique",
                 error_data["details"]["field"],
             )
+        case ErrorType.NOT_FOUND:
+            raise errors.InternalAPINotFoundError(error_data["message"])
         case _:
             raise errors.InternalAPIReturnedError(
                 error_data["message"],
@@ -223,14 +225,17 @@ def _create_playlist_request(
     # Matches the endpoint the DB service expects
     url = urljoin(service_url, "playlists/create")
 
+    data_to_dump = {
+        "title": title,
+        "created_by_user_id": user_id,
+    }
+
+    if description is not None:
+        data_to_dump["description"] = description
+
     # Use Schema to 'dump' data into a clean dictionary
-    request_data = playlist_requests.CreatePlaylistRequest().dump(
-        {
-            "title": title,
-            "created_by_user_id": user_id,
-            "description": description,
-        }
-    )
+    request_data = playlist_requests.CreatePlaylistRequest().dump({
+        data_to_dump})
 
     request = requests.Request("POST", url, json=request_data)
     return request.prepare()
@@ -264,7 +269,8 @@ def update_playlist(
     playlist_id: int, user_id: int, title: str = None, description: str = None
 ) -> dict:
     # Prepare request
-    request = _create_update_playlist_request(playlist_id, user_id, title, description)
+    request = _create_update_playlist_request(
+        playlist_id, user_id, title, description)
 
     # Send request
     response = _send_request(request)

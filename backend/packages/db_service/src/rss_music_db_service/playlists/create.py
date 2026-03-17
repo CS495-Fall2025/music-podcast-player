@@ -10,7 +10,8 @@ def create_and_add_playlist(
     title: str, user_id: int, description: str = None
 ) -> Playlist:
     playlist = Playlist(
-        title=title, created_by_user_id=user_id, description=description
+        title=title,
+        created_by_user_id=user_id, description=description
     )
 
     with make_session() as session:
@@ -34,4 +35,5 @@ def create_and_add_playlist(
             session.rollback()
 
             logger.error(f"Failed to create playlist: {error}")
-            raise UserNotFoundError(f"User ID {user_id} does not exist.") from error
+            raise UserNotFoundError(
+                f"User ID {user_id} does not exist.") from error

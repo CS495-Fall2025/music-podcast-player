@@ -5,6 +5,4 @@ class NotUniqueError(ValueError):
 
 
 class UserNotFoundError(Exception):
-    """Raised when the provided user_id does not exist in the database"""
-
     pass

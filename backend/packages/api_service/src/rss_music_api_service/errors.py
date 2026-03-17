@@ -9,6 +9,8 @@ class RequestError(Enum):
     VALUE_NOT_UNIQUE = auto()
     INTERNAL_API_TIMEOUT = auto()
     INTERNAL_API_BAD_RESPONSE = auto()
+    NOT_FOUND = auto()
+    USER_NOT_FOUND = auto()
 
 
 _ERROR_RESPONSE_VALUES = {
@@ -51,6 +53,16 @@ _ERROR_RESPONSE_VALUES = {
             "The response from the external API we use for this request was invalid"
         ),
         "code": 502,
+    },
+    RequestError.NOT_FOUND: {
+        "error": "NotFound",
+        "message": "The requested resource could not be found",
+        "code": 404
+    },
+    RequestError.USER_NOT_FOUND: {
+        "error": "UserNotFound",
+        "message": "The requested user could not be found or does not exist",
+        "code": 404,
     },
 }
 

@@ -5,6 +5,8 @@ from rss_music_api_service.routes.auth import login_required
 from rss_music_api_service.auth.current_user import get_current_user_id
 from rss_music_db_service_schemas.playlists import requests as playlist_reqs
 from rss_music_db_service_schemas.playlists import responses as playlist_resps
+from rss_music_api_service.errors import RequestError, get_error_response
+from rss_music_api_service.internal_apis import errors as db_errors
 
 PLAYLISTS_BP = Blueprint("playlists", __name__, url_prefix="/playlists")
 
@@ -19,16 +21,21 @@ def create_playlist():
 
     try:
         request_data = playlist_reqs.CreatePlaylistRequest().load(payload)
-    except ValidationError as err:
-        return {"error": "Validation error", "message": err.messages}, 400
+    except ValidationError:
+        return get_error_response(RequestError.INVALID_ARGUMENT)
 
     create_kwargs = {"title": request_data["title"], "user_id": user_id}
 
     if request_data.get("description") is not None:
         create_kwargs["description"] = request_data["description"]
 
-    result = db_service.create_playlist(**create_kwargs)
-    return result, 201
+    try:
+        result = db_service.create_playlist(**create_kwargs)
+        return result, 201
+    except db_errors.InternalAPINotFoundError:
+        return get_error_response(RequestError.NOT_FOUND, {"message": "User not found"})
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
 
 
 # Get user playlists
@@ -53,8 +60,8 @@ def update_playlist(id):
 
     try:
         request_data = playlist_reqs.UpdatePlaylistRequest().load(payload)
-    except ValidationError as err:
-        return {"error": "Validation error", "message": err.messages}, 400
+    except ValidationError:
+        return get_error_response(RequestError.INVALID_ARGUMENT)
 
     update_kwargs = {
         "playlist_id": id,
@@ -65,16 +72,11 @@ def update_playlist(id):
     if request_data.get("description") is not None:
         update_kwargs["description"] = request_data["description"]
 
-    # Pass the ID from the URL and the user_id for security
-    updated_playlist = db_service.update_playlist(**update_kwargs)
-
-    if updated_playlist is None:
-        return {
-            "error": "Not Found",
-            "message": "Playlist not found or unauthorized",
-        }, 404
-    return playlist_resps.UpdatePlaylistResponse().dump(updated_playlist), 200
-
+    try:
+        updated_playlist = db_service.update_playlist(**update_kwargs)
+        return playlist_resps.UpdatePlaylistResponse().dump(updated_playlist)
+    except db_errors.InternalAPINotFoundError:
+        return get_error_response(RequestError.NOT_FOUND, {"message": "Playlist not found"})
 
 # Delete playlist
 
@@ -84,12 +86,8 @@ def update_playlist(id):
 def delete_playlist(id):
     user_id = int(get_current_user_id())
 
-    success = db_service.delete_playlist(playlist_id=id, user_id=user_id)
-
-    if not success:
-        return {
-            "error": "Not Found",
-            "message": "Playlist not found or unauthorized",
-        }, 404
-
-    return {"message": "Playlist deleted successfully"}, 200
+    try:
+        db_service.delete_playlist(playlist_id=id, user_id=user_id)
+        return {"message": "Playlist deleted successfully"}, 200
+    except db_errors.InternalAPINotFoundError:
+        return get_error_response(RequestError.NOT_FOUND, {"message": "Playlist not found"})
