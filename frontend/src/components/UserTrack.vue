@@ -17,10 +17,16 @@
     @click.stop="addToPlaylist"
     aria-label="Add to playlist"
     title="Add to playlist"
+    type="button"
   >
-    +
-   </button>
-  </div>
+   <img
+   class="add-to-playlist-icon"
+   src="../assets/images/plus-icon.svg"
+   alt=""
+   aria-hidden="true"
+   />
+  </button> 
+ </div> 
 </template>
 
 <style scoped>
@@ -108,24 +114,30 @@
 
 .add-to-playlist-btn{
   flex-shrink: 0;
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border: none;
   border-radius: 50%;
-  background: var(--primary-blue);
+  background: white;
   color: white;
-  font-size: 1.35rem;
-  font-weight: 700;
-  line-height: 1;
   cursor: pointer;
   display: grid;
   place-items: center;
-  transition: transform 0.15s ease,opacity 0.15 ease;
+  padding: 0;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 .add-to-playlist-btn:hover {
   transform: scale(1.08);
   opacity: 0.9;
+}
+
+.add-to-playlist-icon{
+  width: 16px;
+  height: 16px;
+  display: block;
+  object-fit: contain;
+
 }
 
 </style>
