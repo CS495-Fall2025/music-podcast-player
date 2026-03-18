@@ -85,7 +85,8 @@ body {
   height: 100dvh;
   min-height: 100vh;
 
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 
   background-color: var(--body-background);
 

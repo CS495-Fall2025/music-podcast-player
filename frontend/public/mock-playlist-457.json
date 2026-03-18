@@ -1,0 +1,81 @@
+{
+  "id": 457,
+  "title": "House",
+  "description": "Music I listen to in the HOUSEEEEE",
+  "track_count": 6,
+  "created_at": "2026-02-18T08:30:00Z",
+  "tracks": [
+    {
+      "id": 6,
+      "playlist_id": 457,
+      "track_url": "https://example.com/episode/kitchen-shuffle",
+      "position": 1,
+      "added_at": "2026-02-18T08:30:00Z",
+      "title": "Kitchen Shuffle",
+      "artist": "Monday Morning",
+      "audio": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+      "image": "/src/assets/images/default-image.jpg",
+      "description": "Something to chop vegetables to. Upbeat but not too loud."
+    },
+    {
+      "id": 7,
+      "playlist_id": 457,
+      "track_url": "https://example.com/episode/sunday-cleaning",
+      "position": 2,
+      "added_at": "2026-02-18T08:31:00Z",
+      "title": "Sunday Cleaning",
+      "artist": "Fresh Start",
+      "audio": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
+      "image": "/src/assets/images/default-image.jpg",
+      "description": "Vacuuming with energy. The whole place gets done in one listen."
+    },
+    {
+      "id": 8,
+      "playlist_id": 457,
+      "track_url": "https://example.com/episode/rainy-window",
+      "position": 3,
+      "added_at": "2026-02-18T08:32:00Z",
+      "title": "Rainy Window",
+      "artist": "Indoor Weather",
+      "audio": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+      "image": "/src/assets/images/default-image.jpg",
+      "description": "It's grey outside. You're inside with tea. This fits."
+    },
+    {
+      "id": 9,
+      "playlist_id": 457,
+      "track_url": "https://example.com/episode/blanket-fort",
+      "position": 4,
+      "added_at": "2026-02-18T08:33:00Z",
+      "title": "Blanket Fort",
+      "artist": "The Couch Collective",
+      "audio": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+      "image": "/src/assets/images/default-image.jpg",
+      "description": "Soft, slow, good for doing absolutely nothing productive."
+    },
+    {
+      "id": 10,
+      "playlist_id": 457,
+      "track_url": "https://example.com/episode/dishwasher-running",
+      "position": 5,
+      "added_at": "2026-02-18T08:34:00Z",
+      "title": "Dishwasher Running",
+      "artist": "White Noise Club",
+      "audio": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+      "image": "/src/assets/images/default-image.jpg",
+      "description": "Background hum energy. Good for reading while the kitchen handles itself."
+    },
+    {
+      "id": 11,
+      "playlist_id": 457,
+      "track_url": "https://example.com/episode/dinner-party",
+      "position": 6,
+      "added_at": "2026-02-18T08:35:00Z",
+      "title": "Dinner Party",
+      "artist": "The Gathering",
+      "audio": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3",
+      "image": "/src/assets/images/default-image.jpg",
+      "description": "The right volume for conversation. Nobody has to shout across the table."
+    }
+  ]
+}
