@@ -42,13 +42,14 @@ def mock_user_id():
 def test_create_playlist_success(client, mock_user_id, mock_db_response):
     mock_db_response(
         status_code=201,
-        json_data={"id": 1, "title": "Gym Mix", "created_by_user_id": 123},
+        json_data={"id": 1, "title": "Gym Mix",
+                   "created_by_user_id": mock_user_id},
     )
 
     payload = {
         "title": "Gym Mix",
         "description": "High energy",
-        "created_by_user_id": 123,
+        "created_by_user_id": mock_user_id,
     }
     response = client.post("/playlists/create", json=payload)
 
@@ -72,18 +73,19 @@ def test_create_playlist_enforces_auth_user_id(client, mock_user_id, mock_db_res
 
     sent_request = mock_send.call_args[0][0]
     sent_body = json.loads(sent_request.body)
-    assert sent_body["created_by_user_id"] == 123
+    assert sent_body["created_by_user_id"] == mock_user_id
 
 
 def test_create_playlist_without_description(client, mock_user_id, mock_db_response):
     mock_send = mock_db_response(
         status_code=201,
-        json_data={"id": 1, "title": "No Description Mix", "created_by_user_id": 123},
+        json_data={"id": 1, "title": "No Description Mix",
+                   "created_by_user_id": mock_user_id},
     )
 
     payload = {
         "title": "No Description Mix",
-        "created_by_user_id": 123,
+        "created_by_user_id": mock_user_id,
     }
     response = client.post("/playlists/create", json=payload)
 
@@ -113,10 +115,12 @@ def test_get_user_playlists_success(client, mock_user_id, mock_db_response):
 def test_update_playlist_success(client, mock_user_id, mock_db_response):
     mock_db_response(
         status_code=200,
-        json_data={"id": 5, "title": "Updated", "created_by_user_id": 123},
+        json_data={"id": 5, "title": "Updated",
+                   "created_by_user_id": mock_user_id},
     )
 
-    payload = {"title": "Updated", "description": "New", "created_by_user_id": 123}
+    payload = {"title": "Updated", "description": "New",
+               "created_by_user_id": mock_user_id}
     response = client.put("/playlists/5", json=payload)
 
     assert response.status_code == 200
@@ -129,7 +133,7 @@ def test_update_playlist_not_found(client, mock_user_id, mock_db_response):
     )
 
     response = client.put(
-        "/playlists/999", json={"title": "Doesn't Exist", "created_by_user_id": 123}
+        "/playlists/999", json={"title": "Doesn't Exist", "created_by_user_id": mock_user_id}
     )
 
     assert response.status_code == 404
