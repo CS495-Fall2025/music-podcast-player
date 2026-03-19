@@ -33,9 +33,11 @@ def create_playlist():
         result = db_service.create_playlist(**create_kwargs)
         return result, 201
     except db_errors.InternalAPINotFoundError:
-        return get_error_response(RequestError.NOT_FOUND, {"message": "User not found"})
+        return get_error_response(RequestError.NOT_FOUND)
     except db_errors.InternalAPIBadResponseError:
         return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.EXTERNAL_API_TIMEOUT)
 
 
 # Get user playlists
@@ -67,18 +69,18 @@ def update_playlist(id):
         "playlist_id": id,
         "user_id": user_id,
         "title": request_data.get("title"),
+        "description": request_data.get("description"),
     }
-
-    if request_data.get("description") is not None:
-        update_kwargs["description"] = request_data["description"]
 
     try:
         updated_playlist = db_service.update_playlist(**update_kwargs)
         return playlist_resps.UpdatePlaylistResponse().dump(updated_playlist)
     except db_errors.InternalAPINotFoundError:
-        return get_error_response(
-            RequestError.NOT_FOUND, {"message": "Playlist not found"}
-        )
+        return get_error_response(RequestError.NOT_FOUND)
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.EXTERNAL_API_TIMEOUT)
 
 
 # Delete playlist
@@ -94,5 +96,8 @@ def delete_playlist(id):
         return {"message": "Playlist deleted successfully"}, 200
     except db_errors.InternalAPINotFoundError:
         return get_error_response(
-            RequestError.NOT_FOUND, {"message": "Playlist not found"}
-        )
+            RequestError.NOT_FOUND)
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.EXTERNAL_API_TIMEOUT)
