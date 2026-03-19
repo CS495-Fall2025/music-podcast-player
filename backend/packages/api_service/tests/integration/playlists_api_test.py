@@ -121,8 +121,7 @@ def test_update_playlist_success(client, mock_user_id, mock_db_response):
                    "updated_at": "2026-03-18T23:05:48.654349"},
     )
 
-    payload = {"title": "Updated", "description": "New",
-               "created_by_user_id": mock_user_id}
+    payload = {"title": "Updated", "description": "New"}
     response = client.put("/playlists/5", json=payload)
 
     assert response.status_code == 200
@@ -135,12 +134,26 @@ def test_update_playlist_not_found(client, mock_user_id, mock_db_response):
     )
 
     response = client.put(
-        "/playlists/999", json={"title": "Doesn't Exist", "created_by_user_id": mock_user_id}
+        "/playlists/999", json={"title": "Doesn't Exist"}
     )
 
     assert response.status_code == 404
     assert response.json["error"] == "NotFound"
 
+
+def test_update_playlist_timeout(client, mock_user_id, mock_db_response):
+    mock_db_response(
+        status_code=504,
+        json_data={"error": "InternalAPITimeout",
+                   "message": "Database service unreachable"}
+    )
+
+    payload = {"title": "Updated", "description": "New"}
+
+    response = client.put("/playlists/5", json=payload)
+
+    assert response.status_code == 502
+    assert response.json["error"] == "InternalApiBadResponse"
 
 # --- DELETE TESTS ---
 
