@@ -62,7 +62,8 @@ def update_playlist(id):
 
     try:
         request_data = playlist_reqs.UpdatePlaylistRequest(
-            exclude=("created_by_user_id",)).load(payload)
+            exclude=("created_by_user_id",)
+        ).load(payload)
     except ValidationError:
         return get_error_response(RequestError.INVALID_ARGUMENT)
 
@@ -96,8 +97,7 @@ def delete_playlist(id):
         db_service.delete_playlist(playlist_id=id, user_id=user_id)
         return {"message": "Playlist deleted successfully"}, 200
     except db_errors.InternalAPINotFoundError:
-        return get_error_response(
-            RequestError.NOT_FOUND)
+        return get_error_response(RequestError.NOT_FOUND)
     except db_errors.InternalAPIBadResponseError:
         return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
     except db_errors.InternalAPITransportError:

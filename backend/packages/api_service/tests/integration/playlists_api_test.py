@@ -42,8 +42,7 @@ def mock_user_id():
 def test_create_playlist_success(client, mock_user_id, mock_db_response):
     mock_db_response(
         status_code=201,
-        json_data={"id": 1, "title": "Gym Mix",
-                   "created_by_user_id": mock_user_id},
+        json_data={"id": 1, "title": "Gym Mix", "created_by_user_id": mock_user_id},
     )
 
     payload = {
@@ -79,8 +78,11 @@ def test_create_playlist_enforces_auth_user_id(client, mock_user_id, mock_db_res
 def test_create_playlist_without_description(client, mock_user_id, mock_db_response):
     mock_send = mock_db_response(
         status_code=201,
-        json_data={"id": 1, "title": "No Description Mix",
-                   "created_by_user_id": mock_user_id},
+        json_data={
+            "id": 1,
+            "title": "No Description Mix",
+            "created_by_user_id": mock_user_id,
+        },
     )
 
     payload = {
@@ -115,10 +117,12 @@ def test_get_user_playlists_success(client, mock_user_id, mock_db_response):
 def test_update_playlist_success(client, mock_user_id, mock_db_response):
     mock_db_response(
         status_code=200,
-        json_data={"id": 5,
-                   "title": "Updated",
-                   "track_count": 0,
-                   "updated_at": "2026-03-18T23:05:48.654349"},
+        json_data={
+            "id": 5,
+            "title": "Updated",
+            "track_count": 0,
+            "updated_at": "2026-03-18T23:05:48.654349",
+        },
     )
 
     payload = {"title": "Updated", "description": "New"}
@@ -133,9 +137,7 @@ def test_update_playlist_not_found(client, mock_user_id, mock_db_response):
         status_code=404, json_data={"error": "NotFound", "message": "Missing"}
     )
 
-    response = client.put(
-        "/playlists/999", json={"title": "Doesn't Exist"}
-    )
+    response = client.put("/playlists/999", json={"title": "Doesn't Exist"})
 
     assert response.status_code == 404
     assert response.json["error"] == "NotFound"
@@ -144,8 +146,10 @@ def test_update_playlist_not_found(client, mock_user_id, mock_db_response):
 def test_update_playlist_timeout(client, mock_user_id, mock_db_response):
     mock_db_response(
         status_code=504,
-        json_data={"error": "InternalAPITimeout",
-                   "message": "Database service unreachable"}
+        json_data={
+            "error": "InternalAPITimeout",
+            "message": "Database service unreachable",
+        },
     )
 
     payload = {"title": "Updated", "description": "New"}
@@ -154,6 +158,7 @@ def test_update_playlist_timeout(client, mock_user_id, mock_db_response):
 
     assert response.status_code == 502
     assert response.json["error"] == "InternalApiBadResponse"
+
 
 # --- DELETE TESTS ---
 
