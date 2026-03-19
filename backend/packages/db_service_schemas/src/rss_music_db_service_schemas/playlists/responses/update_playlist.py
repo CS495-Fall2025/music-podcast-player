@@ -3,10 +3,10 @@ from marshmallow import Schema, fields
 
 class UpdatePlaylistResponse(Schema):
     # Playlist ID
-    id = fields.Int(dump_only=True)
+    id = fields.Int()
 
     title = fields.Str()
     description = fields.Str()
-    track_count = fields.Int(dump_only=True)
+    track_count = fields.Int()
 
-    updated_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime()
