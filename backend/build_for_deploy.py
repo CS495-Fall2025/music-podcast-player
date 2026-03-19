@@ -16,10 +16,18 @@ def install_arm_emulation() -> bool:
         return False
 
     print("Enabling ARM emulation.")
-    subprocess.run([
-        "docker", "run", "--privileged", "--rm", "tonistiigi/binfmt", "--install",
-        "arm64",
-    ], check=True)
+    subprocess.run(
+        [
+            "docker",
+            "run",
+            "--privileged",
+            "--rm",
+            "tonistiigi/binfmt",
+            "--install",
+            "arm64",
+        ],
+        check=True,
+    )
 
     return True
 
@@ -32,8 +40,13 @@ def clean_build_directory() -> None:
 
 def build_package(name: str, emulation: bool) -> None:
     image_build_command = [
-        "docker", "buildx", "build", "-f", str(IMAGES_DIR / f"Dockerfile.{name}"),
-        "--tag", f"rss-music-{name}"
+        "docker",
+        "buildx",
+        "build",
+        "-f",
+        str(IMAGES_DIR / f"Dockerfile.{name}"),
+        "--tag",
+        f"rss-music-{name}",
     ]
 
     if emulation:
@@ -44,15 +57,13 @@ def build_package(name: str, emulation: bool) -> None:
     print(f"Building build image for {name}")
     subprocess.run(image_build_command, check=True)
 
-    run_command = [
-        "docker", "run", "--rm", "-v", f"{BUILD_DIR}:/mnt/result"
-    ]
-    
+    run_command = ["docker", "run", "--rm", "-v", f"{BUILD_DIR}:/mnt/result"]
+
     if emulation:
         run_command += ["--platform", "linux/arm64"]
 
     run_command += [f"rss-music-{name}"]
-    
+
     print(f"Packaging {name}")
     subprocess.run(run_command, check=True)
 
