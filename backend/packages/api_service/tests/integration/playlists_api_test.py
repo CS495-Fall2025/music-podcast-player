@@ -115,8 +115,10 @@ def test_get_user_playlists_success(client, mock_user_id, mock_db_response):
 def test_update_playlist_success(client, mock_user_id, mock_db_response):
     mock_db_response(
         status_code=200,
-        json_data={"id": 5, "title": "Updated",
-                   "created_by_user_id": mock_user_id},
+        json_data={"id": 5,
+                   "title": "Updated",
+                   "track_count": 0,
+                   "updated_at": "2026-03-18T23:05:48.654349"},
     )
 
     payload = {"title": "Updated", "description": "New",

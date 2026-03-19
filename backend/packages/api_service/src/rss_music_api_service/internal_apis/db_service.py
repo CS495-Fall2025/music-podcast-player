@@ -12,6 +12,7 @@ from rss_music_db_service_schemas.users import (
 
 from rss_music_db_service_schemas.playlists import (
     requests as playlist_requests,
+    responses as playlist_responses,
 )
 
 from rss_music_api_service.internal_apis import auth, errors
@@ -268,7 +269,8 @@ def update_playlist(
     playlist_id: int, user_id: int, title: str = None, description: str = None
 ) -> dict:
     # Prepare request
-    request = _create_update_playlist_request(playlist_id, user_id, title, description)
+    request = _create_update_playlist_request(
+        playlist_id, user_id, title, description)
 
     # Send request
     response = _send_request(request)
@@ -277,8 +279,12 @@ def update_playlist(
     if not response.status_code == 200:
         _handle_error(response)
 
+    raw_data = response.json()
+
+    validated_data = playlist_responses.UpdatePlaylistResponse().load(raw_data)
+
     # Return newly updated playlist
-    return response.json()
+    return validated_data
 
 
 def _create_update_playlist_request(
