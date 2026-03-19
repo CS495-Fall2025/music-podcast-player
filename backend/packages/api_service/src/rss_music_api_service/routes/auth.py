@@ -252,6 +252,15 @@ def post_login() -> tuple:
         return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     if not email_verified:
+        log_request(
+            logger,
+            "warn",
+            "response_sent",
+            "Email not verified: login blocked",
+            user_id=user_id,
+            route="/auth/login",
+            status_code=403,
+        )
         return {
             "code": 403,
             "error": "EmailNotVerified",
