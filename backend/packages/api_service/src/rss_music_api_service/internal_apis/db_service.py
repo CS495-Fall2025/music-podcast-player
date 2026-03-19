@@ -287,9 +287,14 @@ def _create_update_playlist_request(
     service_url = current_app.config["DB_SERVICE_URL"]
     url = urljoin(service_url, f"playlists/{playlist_id}")
 
-    request_data = playlist_requests.UpdatePlaylistRequest().dump(
-        {"title": title, "description": description, "created_by_user_id": user_id}
-    )
+    request_data = {"created_by_user_id": user_id}
+
+    if title is not None:
+        request_data |= {"title": title}
+    if description is not None:
+        request_data |= {"description": description}
+
+    request_data = playlist_requests.UpdatePlaylistRequest().dump(request_data)
 
     request = requests.Request("PUT", url, json=request_data)
     return request.prepare()
