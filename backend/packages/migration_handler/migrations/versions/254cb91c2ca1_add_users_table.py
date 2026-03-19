@@ -27,17 +27,6 @@ def upgrade() -> None:
         sa.Column("username", sa.String(length=30), nullable=False),
         sa.Column("email", sa.String(length=254), nullable=False),
         sa.Column("password", sa.LargeBinary(length=48), nullable=False),
-        sa.Column("email_verified", sa.Boolean(), nullable=False),
-        sa.Column("email_verification_code", sa.String(length=6), nullable=True),
-        sa.Column(
-            "email_verification_code_expires_at",
-            sa.DateTime(timezone=True),
-            nullable=True,
-        ),
-        sa.Column("password_reset_code", sa.String(length=6), nullable=True),
-        sa.Column(
-            "password_reset_code_expires_at", sa.DateTime(timezone=True), nullable=True
-        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("email"),
         sa.UniqueConstraint("username"),
