@@ -48,7 +48,6 @@ def test_create_playlist_success(client, mock_user_id, mock_db_response):
     payload = {
         "title": "Gym Mix",
         "description": "High energy",
-        "created_by_user_id": mock_user_id,
     }
     response = client.post("/playlists/create", json=payload)
 
@@ -67,7 +66,7 @@ def test_create_playlist_validation_error(client, mock_user_id):
 def test_create_playlist_enforces_auth_user_id(client, mock_user_id, mock_db_response):
     mock_send = mock_db_response(status_code=201, json_data={"id": 1})
 
-    payload = {"title": "My Playlist", "created_by_user_id": 999}
+    payload = {"title": "My Playlist"}
     client.post("/playlists/create", json=payload)
 
     sent_request = mock_send.call_args[0][0]
@@ -87,7 +86,6 @@ def test_create_playlist_without_description(client, mock_user_id, mock_db_respo
 
     payload = {
         "title": "No Description Mix",
-        "created_by_user_id": mock_user_id,
     }
     response = client.post("/playlists/create", json=payload)
 

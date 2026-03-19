@@ -20,7 +20,9 @@ def create_playlist():
     payload = request.get_json(silent=True) or {}
 
     try:
-        request_data = playlist_reqs.CreatePlaylistRequest().load(payload)
+        request_data = playlist_reqs.CreatePlaylistRequest(
+            exclude=("created_by_user_id",)
+        ).load(payload)
     except ValidationError:
         return get_error_response(RequestError.INVALID_ARGUMENT)
 
