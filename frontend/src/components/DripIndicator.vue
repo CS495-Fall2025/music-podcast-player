@@ -2,7 +2,11 @@
 <script src="../controllers/dripIndicator.js"></script>
 
 <template>
-    <div class="dripping-indicator" :class="{ active: isDripping }" v-html="hourglassIconRaw"></div>
+  <div
+    class="dripping-indicator"
+    :class="{ active: isDripping }"
+    v-html="hourglassIconRaw"
+  ></div>
 </template>
 
 <style scoped>
@@ -26,7 +30,12 @@
 }
 
 @keyframes drip-flash {
-  10%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
+  10%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 </style>
