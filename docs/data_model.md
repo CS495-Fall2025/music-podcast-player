@@ -71,8 +71,10 @@ Here is a junction table that connects playlists and tracks, enabling a many-to-
 
 - id INTEGER PRIMARY KEY  
 - playlist_id INTEGER KEY -> playlists.id  
-- track_guid VARCHAR KEY -> tracks.guid  
-- UNIQUE (playlist_id, track_guid)  
+- track_url VARCHAR NOT NULL 
+- position INTEGER NOT NULL
+- added at TIMESTAMP NOT NULL
+- UNIQUE (playlist_id, track_url)  
 
 ---
 
