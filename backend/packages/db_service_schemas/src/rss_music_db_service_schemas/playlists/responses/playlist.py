@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields
 
-from rss_music_db_service_schemas.playlist_tracks.responses.track_response import (
+from backend.packages.db_service_schemas.src.rss_music_db_service_schemas.playlist_tracks.responses.playlist_track import (
     PlaylistTrackResponse,
 )
 

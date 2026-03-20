@@ -1,3 +1,5 @@
-from playlist_tracks.responses.track_response import PlaylistTrackResponse
+from responses.playlist_track import PlaylistTrackResponse
 
-__all__ = ["PlaylistTrackResponse"]
+from responses.delete_track import DeletePlaylistTrackResponse
+
+__all__ = ["PlaylistTrackResponse", "DeletePlaylistTrackResponse"]
