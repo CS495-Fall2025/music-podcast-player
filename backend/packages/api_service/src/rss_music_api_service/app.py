@@ -44,6 +44,10 @@ def create_app() -> Flask:
 
     apply_blueprints(app)
 
+    @app.before_request
+    def before_all_requests():
+        pass
+
     return app
 
 
