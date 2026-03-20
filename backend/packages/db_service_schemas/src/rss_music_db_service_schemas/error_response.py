@@ -12,6 +12,8 @@ class ErrorType(Enum):
     NOT_UNIQUE = "NotUnique"
     # Credentials were invalid
     INVALID_CREDENTIALS = "InvalidCredentials"
+    # Requested item was not found
+    NOT_FOUND = "NotFound"
 
 
 class ErrorResponse(Schema):
