@@ -28,7 +28,7 @@ def _make_user(username: str, email: str, password: str) -> User:
     )
 
     salt_and_hash_password = salt + hash
-    return User(username=username, email=email, password=salt_and_hash_password)
+    return User(username=username, email=email, password=salt_and_hash_password, email_verified=True)
 
 
 # Returns None if successful, database error (str) if not.
