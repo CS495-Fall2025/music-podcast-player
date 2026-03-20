@@ -74,15 +74,17 @@
       <div class="sat-drip-toggle-row">
         <label for="sat-drip-enabled">Enable Sat Dripping</label>
         <label class="sat-toggle">
-          <input id="sat-drip-enabled" v-model="satDripEnabled" type="checkbox" />
+          <input
+            id="sat-drip-enabled"
+            v-model="satDripEnabled"
+            type="checkbox"
+          />
           <span class="sat-toggle-slider"></span>
         </label>
       </div>
 
       <div class="sat-drip-actions">
-        <button class="sat-drip-save" @click="saveSatDripSettings">
-          Save
-        </button>
+        <button class="sat-drip-save" @click="saveSatDripSettings">Save</button>
       </div>
     </div>
   </div>
