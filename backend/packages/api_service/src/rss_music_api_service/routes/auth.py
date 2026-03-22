@@ -1,3 +1,4 @@
+from functools import wraps
 import flask
 from flask import Blueprint, request, session, current_app
 from marshmallow import ValidationError
@@ -7,11 +8,25 @@ from rss_music_api_service.auth.current_user import get_current_user_id
 from rss_music_api_service.errors import RequestError, get_error_response
 from rss_music_api_service.internal_apis import db_service
 from rss_music_api_service.internal_apis import errors as db_errors
-from rss_music_api_service.schemas import SignUpRequestSchema
+from rss_music_api_service.schemas import SignUpRequestSchema, LoginRequestSchema
 from rss_music_api_service.logging_config import log_request, get_logger
 
 AUTH_BP = Blueprint("auth", __name__, url_prefix="/auth")
 logger = get_logger(__name__)
+
+
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if get_current_user_id() is None:
+            return {
+                "code": 401,
+                "error": "MissingToken",
+                "message": "No token found",
+            }, 401
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 @AUTH_BP.after_request
@@ -28,7 +43,7 @@ def log_response(response):
         level,
         "response_sent",
         "Sending response",
-        user_id=get_current_user_id(),
+        user_id=get_current_user_id(check_existence=False),
         route=request.path,
         status_code=response.status_code,
     )
@@ -64,10 +79,6 @@ def post_signup() -> dict:
         )
     except db_errors.InternalAPIUniquenessError as error:
         return get_error_response(RequestError.VALUE_NOT_UNIQUE, {"field": error.field})
-    except db_errors.InternalAPIBadResponseError:
-        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
-    except db_errors.InternalAPITransportError:
-        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     return {
         "code": 201,
@@ -114,21 +125,18 @@ def post_login() -> tuple:
         route="/auth/login",
     )
 
-    try:
-        data = request.get_json(silent=True)
-
-        if data is None:
-            return get_error_response(RequestError.INVALID_FORMAT)
-
-        username = data.get("username")
-        password = data.get("password")
-        code_verifier = data.get("code_verifier")
-
-        if not username or not password or not code_verifier:
-            return get_error_response(RequestError.INVALID_ARGUMENT)
-
-    except Exception:
+    data = request.get_json(silent=True)
+    if data is None:
         return get_error_response(RequestError.INVALID_FORMAT)
+
+    try:
+        data = LoginRequestSchema().load(data)
+    except ValidationError:
+        return get_error_response(RequestError.INVALID_ARGUMENT)
+
+    username = data["username"]
+    password = data["password"]
+    code_verifier = data["code_verifier"]
 
     # Verify PKCE challenge
     stored_challenge = session.get("code_challenge")
@@ -154,10 +162,6 @@ def post_login() -> tuple:
             "error": "InvalidCredentials",
             "message": "Invalid credentials",
         }, 401
-    except db_errors.InternalAPIBadResponseError:
-        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
-    except db_errors.InternalAPITransportError:
-        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     secret_key = current_app.config.get("SECRET_KEY", "dev-secret-key")
     tokens = login.generate_tokens(user_id, username, secret_key)
@@ -253,10 +257,6 @@ def post_verify() -> tuple:
             "error": "InvalidToken",
             "message": str(e),
         }, 401
-    except db_errors.InternalAPIBadResponseError:
-        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
-    except db_errors.InternalAPITransportError:
-        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
 
 @AUTH_BP.post("/refresh")
@@ -293,10 +293,6 @@ def post_refresh() -> tuple:
         return {"code": 401, "error": "UserNotFound", "message": "User not found"}, 401
     except login.InvalidTokenError as e:
         return {"code": 401, "error": "InvalidToken", "message": str(e)}, 401
-    except db_errors.InternalAPIBadResponseError:
-        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
-    except db_errors.InternalAPITransportError:
-        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
     user_id = payload.get("sub")
     username = payload.get("name")
@@ -335,7 +331,7 @@ def post_logout() -> tuple:
         "info",
         "request_received",
         "Logout request received",
-        user_id=get_current_user_id(),
+        user_id=get_current_user_id(check_existence=False),
         route="/auth/logout",
     )
 

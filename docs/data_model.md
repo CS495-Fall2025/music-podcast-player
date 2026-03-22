@@ -56,11 +56,13 @@ Tracks represents individual audio tracks or podcast episodes within a feed.
 ## playlists
 Playlists represents user-created collections of tracks.
 
-- id INTEGER PRIMARY KEY  
-- title VARCHAR NOT NULL  
-- track_count INTEGER NOT NULL  
-- created_by_user_id INTEGER KEY -> users.id  
-- created_at TIMESTAMP NOT NULL  
+- id INTEGER PRIMARY KEY
+- title VARCHAR NOT NULL
+- description VARCHAR
+- track_count INTEGER NOT NULL DEFAULT 0
+- created_by_user_id INTEGER FOREIGN KEY -> users.id
+- created_at TIMESTAMP NOT NULL
+- updated_at TIMESTAMP NOT NULL
 
 ---
 

@@ -15,6 +15,7 @@ from rss_music_api_service import create_app
 from rss_music_api_service.auth import pkce
 
 import helpers
+from helpers import ConstantResponse
 
 ALEMBIC_CONFIG_PATH = Path(__file__).parent.parent.parent / "alembic.ini"
 
@@ -29,7 +30,8 @@ def app():
 
     app = create_app()
 
-    # Allow exceptions to propegate and fail tests.
+    # Allow unhandled exceptions to propegate and fail tests, but allow our defined 
+    # error handlers to handle their respective exceptions.
     app.config.update(
         {
             "TESTING": True,
@@ -43,25 +45,31 @@ def app():
 def client(app):
     # Block network requests and fail the test. If network requests are intended, mock
     # them explicitly in the test.
-    def fail_request(*args, **kwargs):
+    def fail_request(request, **kwargs):
+        url = urlunparse(urlparse(request.url)._replace(query="", fragment=""))
         assert False, (
-            "Program attempted to make a network request when it shouldn't have"
+            f"Unexpected network request made to {url}"
         )
 
     with mock.patch("requests.Session.send", side_effect=fail_request) as _:
         yield app.test_client()
 
 
-# To use this fixture, put urls as keys and functions handling requests as values. MUST
-# be placed after client in the test arguments.
+# To use this fixture, put urls as keys and functions handling requests or
+# ConstantResponses as values. MUST be placed after client in the test arguments. The
+# key "_requests" can be used to get an array of all the requests made since the fixture
+# started tracking.
 @pytest.fixture
 def custom_responses():
-    responses = {}
+    responses = {"_requests": []}
 
     def handle_request(request, **kwargs):
+        responses["_requests"].append(request)
         url = urlunparse(urlparse(request.url)._replace(query="", fragment=""))
         if url in responses:
-            return responses[url](request)
+            if callable(responses[url]):
+                return responses[url](request)
+            return responses[url].to_response()
 
         assert False, (
             f"Unexpected network request made to {url}"
@@ -73,6 +81,7 @@ def custom_responses():
 
 # This will NOT authenticate the client on it's own, only use this with the auth_client
 # fixture for access to the user id and username.
+@pytest.fixture
 def user():
     User = namedtuple("User", ["username", "id"])
 
@@ -81,45 +90,54 @@ def user():
 
 # This fixture depends on authentication working correctly.
 @pytest.fixture
-def auth_client(client, user):
-    def db_authenticated(request, **kwargs):
-        url = urlunparse(urlparse(request.url)._replace(query="", fragment=""))
-        if url == f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/auth/login":
-            data = {
-                "username": user.username,
-                "id": user.id,
-            }
-            data = UserLoginResponse().dump(data)
-            
-            return helpers.make_response(data, 200)
+def auth_client(client, user, custom_responses):
+    custom_responses[
+        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/users/login"
+    ] = ConstantResponse(
+        status_code=200,
+        json_data={
+            "username": user.username,
+            "id": user.id,
+        }
+    )
+    custom_responses[
+        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/users/exists"
+    ] = ConstantResponse(
+        status_code=200,
+        json_data={
+            "exists": "true",
+        }
+    )
 
-        assert False, (
-            "Error setting up authenticated user for test, unexpected request to "
-            f"{url}"
-        )
+    verifier = "test_challenge"
+    challenge = pkce.generate_code_challenge(verifier)
 
-    with mock.patch("requests.Session.send", side_effect=db_authenticated) as _:
-        verifier = "test_challenge"
-        challenge = pkce.generate_code_challenge(challenge)
+    # Send challenge
+    response = client.get("/auth/", query_string={"code_challenge": challenge})
+    assert response.status_code == 200, (
+        "Error setting up authenticated user for test, PKCE challenge request failed: "
+        f"{response.get_json()["message"]}"
+    )
 
-        # Send challenge
-        response = client.get("/auth/", params={"code_challenge": challenge})
-        assert response.status_code == 200, (
-            "Error setting up authenticated user for test, PKCE challenge request failed"
-        )
+    # Login
+    response = client.post(
+        "/auth/login",
+        json={
+            "username": user.username,
+            "password": "t3st_p@ssword",
+            "code_verifier": verifier,
+        },
+    )
+    assert response.status_code == 200, (
+        "Error setting up authenticated user for test, login request failed: "
+        f"{response.get_json()["message"]}"
+    )
 
-        # Login
-        response = client.post(
-            "/auth/login",
-            json={
-                "username": user.username,
-                "password": "test_password",
-                "code_verifier": verifier,
-            },
-        )
-        assert response.status_code == 200, (
-            "Error setting up authenticated user for test, login request failed"
-        )
+    del custom_responses[f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/users/login"]
+    # exists handler left intentionally so the API service can authenticate the user
+    # token.
+
+    yield client
 
 
 @pytest.fixture

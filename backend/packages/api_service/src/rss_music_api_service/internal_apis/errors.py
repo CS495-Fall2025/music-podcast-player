@@ -21,8 +21,9 @@ class InternalAPIReturnedError(InternalAPIError):
 
 
 class InternalAPIBadResponseError(InternalAPIReturnedError):
-    def __init__(self, message: str):
+    def __init__(self, message: str, details: list | None = None):
         super().__init__(message)
+        self.details = details
 
 
 class InternalAPIUniquenessError(InternalAPIReturnedError):
@@ -43,5 +44,10 @@ class InternalAPIInvalidResponseFormatError(InternalAPIResponseError):
 
 
 class InternalAPIInvalidResponseDataError(InternalAPIResponseError):
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class InternalAPINotFoundError(InternalAPIReturnedError):
     def __init__(self, message: str):
         super().__init__(message)

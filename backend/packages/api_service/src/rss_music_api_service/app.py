@@ -1,8 +1,11 @@
-from flask import Blueprint, Flask
+from flask import Blueprint, Flask, g, request
 from flask_cors import CORS
 import os
 
-from rss_music_api_service.logging_config import configure_logging
+from rss_music_api_service.auth.current_user import get_current_user_id
+from rss_music_api_service.errors import RequestError, get_error_response
+from rss_music_api_service.logging_config import configure_logging, log_request, get_logger
+from rss_music_api_service.internal_apis import errors as db_errors
 
 
 def wsgi_launch(environ, start_response):
@@ -48,6 +51,14 @@ def create_app() -> Flask:
     def before_all_requests():
         pass
 
+    @app.errorhandler(db_errors.InternalAPIBadResponseError)
+    def handle_internal_bad_response(_error):
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    
+    @app.errorhandler(db_errors.InternalAPITransportError)
+    def handle_internal_transport_error(_error):
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
+
     return app
 
 
@@ -55,11 +66,13 @@ def apply_blueprints(app: Flask) -> None:
     from rss_music_api_service.routes.search import SEARCH_BP
     from rss_music_api_service.routes.link import LINK_BP
     from rss_music_api_service.routes.auth import AUTH_BP
+    from rss_music_api_service.routes.playlists import PLAYLISTS_BP
 
     blueprints = [
         SEARCH_BP,
         LINK_BP,
         AUTH_BP,
+        PLAYLISTS_BP,
     ]
 
     root_bp = Blueprint("root", __name__, url_prefix=app.config["API_ROOT"])
