@@ -9,9 +9,5 @@ TABLES = [
             {"AttributeName": "user_id", "AttributeType": "S"},
         ],
         "BillingMode": BILLING,
-        "_ttl": {
-            "Enabled": True,
-            "AttributeName": "ttl"
-        },
     },
 ]
