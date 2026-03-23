@@ -1,6 +1,6 @@
 import loadConfig from "../config";
 import { feed, feedTracks } from "./localFeedStore.js";
-import loadConfig from "../config";
+
 
 export async function requestLinkedFeeds(url) {
   const config = await loadConfig();
