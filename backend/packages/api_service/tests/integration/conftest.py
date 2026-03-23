@@ -21,6 +21,7 @@ ALEMBIC_CONFIG_PATH = Path(__file__).parent.parent.parent / "alembic.ini"
 
 @pytest.fixture
 def dynamodb():
+    os.environ["RSS_PLAYER_TOKEN_TABLE_NAME"] = "RateLimitTokens"
     with moto.mock_aws():
         client = boto3.resource("dynamodb")
         ensure_dynamodb_tables(client)
@@ -49,7 +50,6 @@ def app(dynamodb):
             "podcast_index": 15,
         }
     )
-    os.environ["RSS_PLAYER_TOKEN_TABLE_NAME"] = "RateLimitTokens"
 
     app = create_app()
 

@@ -15,9 +15,9 @@ def valid_search(custom_responses) -> None:
 
 
 def test_first_unauthenticated_request_creates_global_token_bucket(
-    client, dynamodb
+    app, client, dynamodb
 ) -> None:
-    token_bucket = dynamodb.Table("RequestLimits")
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     db_response = token_bucket.get_item(Key={"user_id": "global"})
     # Verify the bucket hasn't been created yet.
@@ -30,8 +30,10 @@ def test_first_unauthenticated_request_creates_global_token_bucket(
     assert "Item" in db_response
 
 
-def test_unauthenticated_request_creates_public_token_bucket(client, dynamodb) -> None:
-    token_bucket = dynamodb.Table("RequestLimits")
+def test_unauthenticated_request_creates_public_token_bucket(
+    app, client, dynamodb
+) -> None:
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     db_response = token_bucket.get_item(Key={"user_id": "public"})
     # Verify the bucket hasn't been created yet.
@@ -44,8 +46,10 @@ def test_unauthenticated_request_creates_public_token_bucket(client, dynamodb) -
     assert "Item" in db_response
 
 
-def test_unauthenticated_request_uses_global_and_public_token(client, dynamodb) -> None:
-    token_bucket = dynamodb.Table("RequestLimits")
+def test_unauthenticated_request_uses_global_and_public_token(
+    app, client, dynamodb
+) -> None:
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     token_bucket.put_item(
         Item={
@@ -79,9 +83,9 @@ def test_unauthenticated_request_uses_global_and_public_token(client, dynamodb) 
 
 
 def test_authenticated_request_uses_global_and_user_token(
-    auth_client, user, dynamodb
+    app, auth_client, user, dynamodb
 ) -> None:
-    token_bucket = dynamodb.Table("RequestLimits")
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     token_bucket.put_item(
         Item={
@@ -128,13 +132,13 @@ def test_authenticated_request_uses_global_and_user_token(
 
 
 def test_unauthenticated_search_uses_podcast_index_tokens(
-    client, dynamodb, custom_responses
+    app, client, dynamodb, custom_responses
 ) -> None:
     custom_responses["https://api.podcastindex.org/api/1.0/search/music/byterm"] = (
         podcastindex_mock.generate_valid_response
     )
 
-    token_bucket = dynamodb.Table("RequestLimits")
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     db_response = token_bucket.put_item(
         Item={
@@ -170,13 +174,13 @@ def test_unauthenticated_search_uses_podcast_index_tokens(
 
 
 def test_authenticated_search_uses_podcast_index_tokens(
-    auth_client, user, dynamodb, custom_responses
+    app, auth_client, user, dynamodb, custom_responses
 ) -> None:
     custom_responses["https://api.podcastindex.org/api/1.0/search/music/byterm"] = (
         podcastindex_mock.generate_valid_response
     )
 
-    token_bucket = dynamodb.Table("RequestLimits")
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     db_response = token_bucket.put_item(
         Item={
@@ -211,8 +215,10 @@ def test_authenticated_search_uses_podcast_index_tokens(
     assert 4 == db_response["Item"]["podcast_index"]
 
 
-def test_unauthenticated_request_fails_without_global_tokens(client, dynamodb) -> None:
-    token_bucket = dynamodb.Table("RequestLimits")
+def test_unauthenticated_request_fails_without_global_tokens(
+    app, client, dynamodb
+) -> None:
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     token_bucket.put_item(
         Item={
@@ -246,8 +252,10 @@ def test_unauthenticated_request_fails_without_global_tokens(client, dynamodb) -
     assert 5 == db_response["Item"]["podcast_index"]
 
 
-def test_unauthenticated_request_fails_without_public_tokens(client, dynamodb) -> None:
-    token_bucket = dynamodb.Table("RequestLimits")
+def test_unauthenticated_request_fails_without_public_tokens(
+    app, client, dynamodb
+) -> None:
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     token_bucket.put_item(
         Item={
@@ -282,9 +290,9 @@ def test_unauthenticated_request_fails_without_public_tokens(client, dynamodb) -
 
 
 def test_unauthenticated_non_search_request_not_bound_by_podcastindex_tokens(
-    client, dynamodb
+    app, client, dynamodb
 ) -> None:
-    token_bucket = dynamodb.Table("RequestLimits")
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     token_bucket.put_item(
         Item={
@@ -318,13 +326,13 @@ def test_unauthenticated_non_search_request_not_bound_by_podcastindex_tokens(
 
 
 def test_unauthenticated_search_fails_without_podcast_index_tokens(
-    client, dynamodb, custom_responses
+    app, client, dynamodb, custom_responses
 ) -> None:
     custom_responses["https://api.podcastindex.org/api/1.0/search/music/byterm"] = (
         podcastindex_mock.generate_valid_response
     )
 
-    token_bucket = dynamodb.Table("RequestLimits")
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     db_response = token_bucket.put_item(
         Item={
@@ -361,13 +369,13 @@ def test_unauthenticated_search_fails_without_podcast_index_tokens(
 
 
 def test_authenticated_search_fails_without_podcast_index_tokens(
-    auth_client, user, dynamodb, custom_responses
+    app, auth_client, user, dynamodb, custom_responses
 ) -> None:
     custom_responses["https://api.podcastindex.org/api/1.0/search/music/byterm"] = (
         podcastindex_mock.generate_valid_response
     )
 
-    token_bucket = dynamodb.Table("RequestLimits")
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     db_response = token_bucket.put_item(
         Item={
@@ -406,7 +414,7 @@ def test_authenticated_search_fails_without_podcast_index_tokens(
 def test_refill_uses_expiration_of_current_time_plus_refill_seconds(
     app, client, dynamodb
 ) -> None:
-    token_bucket = dynamodb.Table("RequestLimits")
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     min_expiry = int(time.time()) + app.config["TOKEN_REFILL_SECONDS"]
     # Should create the bucket, thus refilling it automatically.
@@ -425,7 +433,7 @@ def test_refill_uses_expiration_of_current_time_plus_refill_seconds(
 
 
 def test_refill_occurs_on_or_after_expiration(app, client, dynamodb) -> None:
-    token_bucket = dynamodb.Table("RequestLimits")
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     expiry = int(time.time())
     db_response = token_bucket.put_item(
@@ -472,7 +480,7 @@ def test_unauthenticated_search_penalized_on_podcast_index_too_many_requests(
         ConstantResponse(429, {})
     )
 
-    token_bucket = dynamodb.Table("RequestLimits")
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     db_response = token_bucket.put_item(
         Item={
@@ -521,7 +529,7 @@ def test_authenticated_search_penalized_on_podcast_index_too_many_requests(
         ConstantResponse(429, {})
     )
 
-    token_bucket = dynamodb.Table("RequestLimits")
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
 
     db_response = token_bucket.put_item(
         Item={
