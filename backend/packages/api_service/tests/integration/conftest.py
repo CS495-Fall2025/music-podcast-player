@@ -1,4 +1,5 @@
 from collections import namedtuple
+import json
 import os
 from pathlib import Path
 from urllib.parse import urlparse, urlunparse
@@ -21,12 +22,28 @@ ALEMBIC_CONFIG_PATH = Path(__file__).parent.parent.parent / "alembic.ini"
 
 
 @pytest.fixture
-def app():
+def dynamodb():
+    with moto.mock_aws():
+        client = boto3.resource("dynamodb")
+        ensure_dynamodb_tables(client)
+        yield client
+
+
+@pytest.fixture
+def app(dynamodb):
     os.environ["RSS_PLAYER_ALLOWED_ORIGINS"] = "http://test.frontend.com"
     os.environ["RSS_PLAYER_PODCAST_INDEX_KEY"] = "test-index-api-key"
     os.environ["RSS_PLAYER_PODCAST_INDEX_SECRET"] = "test-index-api-secret"
     os.environ["RSS_PLAYER_SECRET_KEY"] = "test-secret-key-abcdefghijklmnopqrstuvwxyz"
     os.environ["RSS_PLAYER_DB_SERVICE_URL"] = "http://test.dbservice.com"
+
+    # Token configuration
+    os.environ["RSS_PLAYER_API_TOKENS_PER_REFILL"] = json.dumps({
+        "global": {"overall": 6000, "podcast_index": 90},
+        "public": {"overall": 5500, "podcast_index": 60},
+        "user": {"overall": 60, "podcast_index": 15},
+    })
+    os.environ["RSS_PLAYER_TOKEN_REFILL_SECONDS"] = "60"
 
     app = create_app()
 
@@ -138,11 +155,3 @@ def auth_client(client, user, custom_responses):
     # token.
 
     yield client
-
-
-@pytest.fixture
-def dynamodb():
-    with moto.mock_aws():
-        client = boto3.resource("dynamodb")
-        ensure_dynamodb_tables(client)
-        yield client

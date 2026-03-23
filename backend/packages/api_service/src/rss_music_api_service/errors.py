@@ -10,6 +10,7 @@ class RequestError(Enum):
     INTERNAL_API_TIMEOUT = auto()
     INTERNAL_API_BAD_RESPONSE = auto()
     NOT_FOUND = auto()
+    TOO_MANY_REQUESTS = auto()
 
 
 _ERROR_RESPONSE_VALUES = {
@@ -57,6 +58,11 @@ _ERROR_RESPONSE_VALUES = {
         "error": "NotFound",
         "message": "The requested resource could not be found",
         "code": 404,
+    },
+    RequestError.TOO_MANY_REQUESTS: {
+        "error": "TooManyRequests",
+        "message": "The server is recieving too many requests right now to handle this one!",
+        "code": 429,
     },
 }
 

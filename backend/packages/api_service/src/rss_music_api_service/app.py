@@ -1,7 +1,9 @@
 from flask import Blueprint, Flask, g, request
 from flask_cors import CORS
+import json
 import os
 
+from rss_music_api_service import api_usage
 from rss_music_api_service.auth.current_user import get_current_user_id
 from rss_music_api_service.errors import RequestError, get_error_response
 from rss_music_api_service.logging_config import configure_logging, log_request, get_logger
@@ -49,7 +51,9 @@ def create_app() -> Flask:
 
     @app.before_request
     def before_all_requests():
-        pass
+        success = api_usage.use_api_tokens_for_endpoint(request.url_rule.rule)
+        if not success:
+            return get_error_response(RequestError.TOO_MANY_REQUESTS)
 
     @app.errorhandler(db_errors.InternalAPIBadResponseError)
     def handle_internal_bad_response(_error):

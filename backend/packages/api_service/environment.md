@@ -33,6 +33,34 @@ more details.
 
 The URL to the database service.
 
+### Rate Limiting API Tokens Per Refill
+`RSS_PLAYER_API_TOKENS_PER_REFILL`
+
+A JSON string providing the number of tokens to refill each user type's bucket to when
+at least `RSS_PLAYER_TOKEN_REFILL_SECONDS` have passed since the last refill. Here is an
+example:
+
+```json
+{
+    "global": {"overall": 6000, "podcast_index": 90},
+    "public": {"overall": 5500, "podcast_index": 60},
+    "user": {"overall": 60, "podcast_index": 15},
+}
+```
+
+`global` tokens apply to all users, authenticated or not, and serves as the application
+limit. `public` refers to unauthenticated users, and `user` refers to each individual
+authenticated user. `overall` tokens are tokens that are counted every request made by
+a user, and `podcast_index` tokens are tokens that are only counted when the request
+involves our backend making a request to the PodcastIndex. This allows us to set 
+different rate limiting rules for use of the PodcastIndex and our API in general.
+
+### Rate Limiting Token Refill Seconds
+`RSS_PLAYER_TOKEN_REFILL_SECONDS`
+
+The number of seconds before the tokens can be refilled. They will be refilled on the
+next request involving them after the refill time has passed.
+
 ## AWS Deployment Secret Route Variables
 
 In order to protect our secrets, we store them as encrypted strings in AWS' parameter
