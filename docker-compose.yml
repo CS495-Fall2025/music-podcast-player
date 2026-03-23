@@ -34,6 +34,7 @@ services:
         {
           "podcast_index": 15
         }
+      RSS_PLAYER_TOKEN_TABLE_NAME: RateLimitTokens
       AWS_ACCESS_KEY_ID: dummy
       AWS_SECRET_ACCESS_KEY: dummy
       AWS_DEFAULT_REGION: us-east-1
@@ -70,6 +71,7 @@ services:
       dockerfile: ../docker/local_dev/Dockerfile.dynamodb-tables
     environment:
       DYNAMODB_URL: http://dynamodb:8000
+      RSS_PLAYER_TOKEN_TABLE_NAME: RateLimitTokens
       AWS_ACCESS_KEY_ID: dummy
       AWS_SECRET_ACCESS_KEY: dummy
       AWS_DEFAULT_REGION: us-east-1

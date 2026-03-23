@@ -30,8 +30,6 @@ PROTECTED_ENDPOINTS = {
     "/search/feeds": [TokenType.PODCAST_INDEX]
 }
 
-TOKEN_TABLE = "RequestLimits"
-
 
 # Returns True if successful, False if no tokens remaining.
 def use_api_tokens_for_endpoint(endpoint: str) -> bool:
@@ -81,7 +79,6 @@ def penalize_user_api_tokens(token_type: TokenType) -> None:
 def check_remaining_tokens(user_id: str) -> dict[str, int]:
     table = get_token_table()
     response = table.get_item(
-        TableName=TOKEN_TABLE,
         Key={"user_id": user_id},
     )
 
@@ -133,4 +130,4 @@ def get_token_table():
     else:
         dynamodb = boto3.resource("dynamodb")
 
-    return dynamodb.Table(TOKEN_TABLE)
+    return dynamodb.Table(current_app.config["TOKEN_TABLE_NAME"])

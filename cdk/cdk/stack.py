@@ -14,6 +14,7 @@ from aws_cdk import (
     aws_apigatewayv2_authorizers as apigw2_auth,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
+    aws_dynamodb as dynamodb,
     aws_ec2 as ec2,
     aws_iam as iam,
     aws_lambda as _lambda,
@@ -52,6 +53,8 @@ class RSSMusicPlayerStack(Stack):
         frontend_bucket = self._make_frontend_bucket()
         distribution = self._make_public_distribution(frontend_bucket)
 
+        ddb_table = self._make_dynamodb_table()
+
         # For when we split the backend.
         db_service_function = self._make_db_service_function(
             database, database_vpc, security_groups["function"]
@@ -61,6 +64,7 @@ class RSSMusicPlayerStack(Stack):
         api_service_function = self._make_api_service_function(
             distribution.domain_name,
             db_service_api,
+            ddb_table,
         )
         api_service_api = self._make_api_service_api(api_service_function)
         self._attach_api_service_to_distribution(api_service_api, distribution)
@@ -273,7 +277,7 @@ class RSSMusicPlayerStack(Stack):
         return api
 
     def _make_api_service_function(
-        self, frontend_domain, db_service_api
+        self, frontend_domain, db_service_api, ddb_table
     ) -> _lambda.Function:
         # These are REFERENCES to keys that MUST be created manually. AWS doesn't
         # support creating SecureString parameters through the CDK, and we'd need to set
@@ -312,6 +316,15 @@ class RSSMusicPlayerStack(Stack):
                 "PODCAST_INDEX_KEY_ROUTE": "/rss-music-player/podcast-index-api/key",
                 "PODCAST_INDEX_SECRET_ROUTE": "/rss-music-player/podcast-index-api/secret",
                 "SECRET_KEY_ROUTE": "/rss-music-player/jwt/key",
+                "RSS_PLAYER_API_TOKENS_PER_REFILL": json.dumps({
+                    "global": {"overall": 6000, "podcast_index": 90},
+                    "public": {"overall": 5500, "podcast_index": 60},
+                    "user": {"overall": 60, "podcast_index": 15},
+                }),
+                "RSS_PLAYER_TOKEN_REFILL_SECONDS": "60",
+                "RSS_PLAYER_TOKEN_PENALTY": json.dumps({
+                    "podcast_index": 15,
+                }),
             },
             timeout=Duration.seconds(12),
         )
@@ -325,6 +338,9 @@ class RSSMusicPlayerStack(Stack):
                 resources=[db_service_api.arn_for_execute_api()],
             )
         )
+
+        ddb_table.grant_read_write_data(function)
+        function.add_environment("RSS_PLAYER_TOKEN_TABLE_NAME", ddb_table.table_name)
 
         return function
 
@@ -392,6 +408,18 @@ class RSSMusicPlayerStack(Stack):
         )
 
         return deployment
+
+    def _make_dynamodb_table(self) -> dynamodb.Table:
+        return dynamodb.Table(
+            self,
+            "RSSMusicPlayerRateLimitTable",
+            partition_key=dynamodb.Attribute(
+                name="user_id",
+                type=dynamodb.AttributeType.STRING,
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.DESTROY,
+        )
 
     def _make_database(
         self, database_vpc: ec2.Vpc, group: ec2.SecurityGroup

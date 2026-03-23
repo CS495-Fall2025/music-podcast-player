@@ -47,6 +47,7 @@ def app(dynamodb):
     os.environ["RSS_PLAYER_TOKEN_PENALTY"] = json.dumps({
         "podcast_index": 15,
     })
+    os.environ["RSS_PLAYER_TOKEN_TABLE_NAME"] = "RateLimitTokens"
 
     app = create_app()
 

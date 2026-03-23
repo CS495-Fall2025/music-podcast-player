@@ -1,7 +1,9 @@
+import os
+
 BILLING = "PAY_PER_REQUEST"
 TABLES = [
     {
-        "TableName": "RequestLimits",
+        "TableName": os.environ["RSS_PLAYER_TOKEN_TABLE_NAME"],
         "KeySchema": [
             {"AttributeName": "user_id", "KeyType": "HASH"},
         ],
