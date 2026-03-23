@@ -71,4 +71,4 @@ jobs:
   backend-dynamodb-tables-ci:
     uses: ./.github/workflows/ci-backend.yml
     with:
-      package-path: backend/packages/dynamodb-tables
+      package-path: backend/packages/dynamodb_tables
