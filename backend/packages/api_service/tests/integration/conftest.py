@@ -44,6 +44,9 @@ def app(dynamodb):
         "user": {"overall": 60, "podcast_index": 15},
     })
     os.environ["RSS_PLAYER_TOKEN_REFILL_SECONDS"] = "60"
+    os.environ["RSS_PLAYER_TOKEN_PENALTY"] = json.dumps({
+        "podcast_index": 15,
+    })
 
     app = create_app()
 

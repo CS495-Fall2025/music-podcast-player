@@ -61,6 +61,32 @@ different rate limiting rules for use of the PodcastIndex and our API in general
 The number of seconds before the tokens can be refilled. They will be refilled on the
 next request involving them after the refill time has passed.
 
+### Rate Limiting Token Penalty
+`RSS_PLAYER_TOKEN_PENALTY`
+
+A JSON string providing the number of tokens to deduct from a user/user group that may
+be abusing part of our API. When potential abuse is detected by a user, that user's
+group (public or individual account) and the global token count will lose a specified
+number of tokens, meaning they will run out of tokens faster and their requests will be
+blocked. What constitutes potential abuse is determined by the endpoint classifications.
+Here is an example:
+
+```json
+{
+    "podcast_index": 15,
+}
+```
+
+We detect potential abuse of the PodcastIndex when a user's request results in the 
+PodcastIndex returning a 429 Too Many Requests error. In this case, if an authenticated
+user causes a 429, they won't be able to send requests for the rest of the minute. If
+an unauthenticated user causes 429s, they can only cause four before no unauthenticated
+user can use the PodcastIndex. If our overall use is resulting in 429s, our app as a 
+whole (with a 90 token limit) will stop sending requests after the sixth 429 in a
+minute. This value must be tuned carefully to prevent us from enabling users to abuse
+the PodcastIndex API while also ensuring that normal users are able to use our
+application.
+
 ## AWS Deployment Secret Route Variables
 
 In order to protect our secrets, we store them as encrypted strings in AWS' parameter

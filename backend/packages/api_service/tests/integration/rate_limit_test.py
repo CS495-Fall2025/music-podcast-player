@@ -6,6 +6,7 @@ import pytest
 from requests import exceptions, PreparedRequest, Response
 
 from tests.integration.api_mocks import podcastindex_mock
+from tests.integration.helpers import ConstantResponse
 
 
 @pytest.fixture
@@ -428,5 +429,91 @@ def test_refill_occurs_on_or_after_expiration(
             == db_response["Item"]["overall"]
     )
     assert (app.config["API_TOKENS_PER_REFILL"]["public"]["podcast_index"]
+            == db_response["Item"]["podcast_index"]
+    )
+
+
+def test_unauthenticated_search_penalized_on_podcast_index_too_many_requests(
+    app, client, dynamodb, custom_responses
+) -> None:
+    custom_responses[
+        "https://api.podcastindex.org/api/1.0/search/music/byterm"
+    ] = ConstantResponse(429, {}) 
+
+    token_bucket = dynamodb.Table("RequestLimits")
+
+    db_response = token_bucket.put_item(Item={
+        "user_id": "global",
+        "overall": 5,
+        "podcast_index": 10,
+        "expiry": sys.maxsize,
+    })
+    db_response = token_bucket.put_item(Item={
+        "user_id": "public",
+        "overall": 5,
+        "podcast_index": 25,
+        "expiry": sys.maxsize,
+    })
+
+    response = client.get(
+        "/search/feeds", query_string={"query": "query", "count": "5"}
+    )
+    assert response.status_code == 503
+    assert response.get_json()["error"] == "ExternalApiUnavaliable"
+
+    db_response = token_bucket.get_item(Key={"user_id": "global"})
+    assert "Item" in db_response
+    assert 4 == db_response["Item"]["overall"]
+    assert (max(9 - app.config["TOKEN_PENALTY"]["podcast_index"], 0)
+            == db_response["Item"]["podcast_index"]
+    )
+    
+    db_response = token_bucket.get_item(Key={"user_id": "public"})
+    assert "Item" in db_response
+    assert 4 == db_response["Item"]["overall"]
+    assert (max(24 - app.config["TOKEN_PENALTY"]["podcast_index"], 0)
+            == db_response["Item"]["podcast_index"]
+    )
+
+
+def test_authenticated_search_penalized_on_podcast_index_too_many_requests(
+    app, auth_client, user, dynamodb, custom_responses
+) -> None:
+    custom_responses[
+        "https://api.podcastindex.org/api/1.0/search/music/byterm"
+    ] = ConstantResponse(429, {}) 
+
+    token_bucket = dynamodb.Table("RequestLimits")
+
+    db_response = token_bucket.put_item(Item={
+        "user_id": "global",
+        "overall": 5,
+        "podcast_index": 20,
+        "expiry": sys.maxsize,
+    })
+    db_response = token_bucket.put_item(Item={
+        "user_id": str(user.id),
+        "overall": 5,
+        "podcast_index": 15,
+        "expiry": sys.maxsize,
+    })
+
+    response = auth_client.get(
+        "/search/feeds", query_string={"query": "query", "count": "5"}
+    )
+    assert response.status_code == 503
+    assert response.get_json()["error"] == "ExternalApiUnavaliable"
+
+    db_response = token_bucket.get_item(Key={"user_id": "global"})
+    assert "Item" in db_response
+    assert 4 == db_response["Item"]["overall"]
+    assert (max(19 - app.config["TOKEN_PENALTY"]["podcast_index"], 0)
+            == db_response["Item"]["podcast_index"]
+    )
+    
+    db_response = token_bucket.get_item(Key={"user_id": str(user.id)})
+    assert "Item" in db_response
+    assert 4 == db_response["Item"]["overall"]
+    assert (max(14 - app.config["TOKEN_PENALTY"]["podcast_index"], 0)
             == db_response["Item"]["podcast_index"]
     )

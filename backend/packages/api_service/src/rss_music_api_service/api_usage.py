@@ -58,6 +58,26 @@ def use_api_tokens_for_endpoint(endpoint: str) -> bool:
     return True
 
 
+def penalize_user_api_tokens(token_type: TokenType) -> None:
+    if token_type.value not in current_app.config["TOKEN_PENALTY"]:
+        raise ValueError(f"No penalty is defined for token type {token_type.value}")
+
+    penalty = current_app.config["TOKEN_PENALTY"][token_type.value]
+
+    user_id = get_current_user_id(check_existence=False)
+    if user_id is None:
+        user_id = UserType.PUBLIC.value
+
+    global_tokens = check_remaining_tokens(UserType.GLOBAL.value)
+    user_tokens = check_remaining_tokens(user_id)
+
+    global_tokens[token_type.value] = max(global_tokens[token_type.value] - penalty, 0) 
+    user_tokens[token_type.value] = max(user_tokens[token_type.value] - penalty, 0) 
+    
+    update_remaining_tokens(UserType.GLOBAL.value, global_tokens)
+    update_remaining_tokens(user_id, user_tokens)
+
+
 def check_remaining_tokens(user_id: str) -> dict[str, int]:
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(TOKEN_TABLE)
