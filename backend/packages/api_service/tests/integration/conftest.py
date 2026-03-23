@@ -22,6 +22,7 @@ ALEMBIC_CONFIG_PATH = Path(__file__).parent.parent.parent / "alembic.ini"
 @pytest.fixture
 def dynamodb():
     os.environ["RSS_PLAYER_TOKEN_TABLE_NAME"] = "RateLimitTokens"
+    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
     with moto.mock_aws():
         client = boto3.resource("dynamodb")
         ensure_dynamodb_tables(client)
