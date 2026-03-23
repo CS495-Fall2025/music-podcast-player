@@ -4,9 +4,9 @@ import { feed, feedTracks } from "./localFeedStore.js";
 export default {
   name: "UserFeed",
   components: { Track },
-  
+
   methods: {
-    handleAddToPlaylist(track){
+    handleAddToPlaylist(track) {
       console.log("Add to playlist clicked for track", track);
     },
   },

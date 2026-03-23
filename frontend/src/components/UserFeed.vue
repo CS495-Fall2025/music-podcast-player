@@ -10,7 +10,12 @@
       <div class="feed-artist">{{ feedArtist }}</div>
     </div>
 
-    <Track v-for="(item, index) in feedTracks" :key="index" :track="item" @add-to-playlist="handleAddToPlaylist" />
+    <Track
+      v-for="(item, index) in feedTracks"
+      :key="index"
+      :track="item"
+      @add-to-playlist="handleAddToPlaylist"
+    />
   </div>
 </template>
 

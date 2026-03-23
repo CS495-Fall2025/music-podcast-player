@@ -19,9 +19,9 @@ export default {
       currentTrack.value = this.track;
     },
 
-    addToPlaylist(){
+    addToPlaylist() {
       this.$emit("add-to-playlist", this.track);
-    }
+    },
   },
 
   computed: {
