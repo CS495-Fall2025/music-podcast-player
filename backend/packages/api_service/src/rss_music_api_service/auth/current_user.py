@@ -9,8 +9,8 @@ from rss_music_api_service.auth import login
 def get_current_user_id(check_existence: bool = True) -> str | None:
     """get user ID from JWT token if present."""
     token = request.cookies.get("access_token")
-#    if "playlists" in request.url:
-#        import pdb; pdb.set_trace()
+    #    if "playlists" in request.url:
+    #        import pdb; pdb.set_trace()
     if not token:
         return None
 

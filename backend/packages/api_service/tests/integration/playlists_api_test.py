@@ -1,7 +1,4 @@
 import os
-import pytest
-from unittest import mock
-import requests
 from requests.exceptions import Timeout
 import json
 
@@ -12,18 +9,18 @@ from helpers import ConstantResponse
 
 
 def test_create_playlist_success(auth_client, user, custom_responses):
-    custom_responses[
-        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/playlists/create"
-    ] = ConstantResponse(
-        status_code=201,
-        json_data={"id": 1, "title": "Gym Mix", "created_by_user_id": user.id},
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/create"] = (
+        ConstantResponse(
+            status_code=201,
+            json_data={"id": 1, "title": "Gym Mix", "created_by_user_id": user.id},
+        )
     )
 
     payload = {
         "title": "Gym Mix",
         "description": "High energy",
     }
-    #import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     response = auth_client.post("/playlists/create", json=payload)
 
     assert response.status_code == 201
@@ -39,11 +36,11 @@ def test_create_playlist_validation_error(auth_client):
 
 
 def test_create_playlist_enforces_auth_user_id(auth_client, user, custom_responses):
-    custom_responses[
-        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/playlists/create"
-    ] = ConstantResponse(
-        status_code=201,
-        json_data={"id": 1, "title": "Gym Mix", "created_by_user_id": user.id},
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/create"] = (
+        ConstantResponse(
+            status_code=201,
+            json_data={"id": 1, "title": "Gym Mix", "created_by_user_id": user.id},
+        )
     )
 
     payload = {"title": "My Playlist"}
@@ -55,15 +52,15 @@ def test_create_playlist_enforces_auth_user_id(auth_client, user, custom_respons
 
 
 def test_create_playlist_without_description(auth_client, user, custom_responses):
-    custom_responses[
-        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/playlists/create"
-    ] = ConstantResponse(
-        status_code=201,
-        json_data={
-            "id": 1,
-            "title": "No Description Mix",
-            "created_by_user_id": user.id,
-        },
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/create"] = (
+        ConstantResponse(
+            status_code=201,
+            json_data={
+                "id": 1,
+                "title": "No Description Mix",
+                "created_by_user_id": user.id,
+            },
+        )
     )
 
     payload = {
@@ -84,7 +81,7 @@ def test_create_playlist_without_description(auth_client, user, custom_responses
 
 def test_get_user_playlists_success(auth_client, user, custom_responses):
     custom_responses[
-        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/playlists/user/{user.id}"
+        f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/user/{user.id}"
     ] = ConstantResponse(
         status_code=200,
         json_data=[{"id": 1, "title": "Lo-Fi"}],
@@ -100,16 +97,16 @@ def test_get_user_playlists_success(auth_client, user, custom_responses):
 
 
 def test_update_playlist_success(auth_client, custom_responses):
-    custom_responses[
-        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/playlists/5"
-    ] = ConstantResponse(
-        status_code=200,
-        json_data={
-            "id": 5,
-            "title": "Updated",
-            "track_count": 0,
-            "updated_at": "2026-03-18T23:05:48.654349",
-        },
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/5"] = (
+        ConstantResponse(
+            status_code=200,
+            json_data={
+                "id": 5,
+                "title": "Updated",
+                "track_count": 0,
+                "updated_at": "2026-03-18T23:05:48.654349",
+            },
+        )
     )
 
     payload = {"title": "Updated", "description": "New"}
@@ -120,11 +117,11 @@ def test_update_playlist_success(auth_client, custom_responses):
 
 
 def test_update_playlist_not_found(auth_client, custom_responses):
-    custom_responses[
-        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/playlists/999"
-    ] = ConstantResponse(
-        status_code=404,
-        json_data={"error": "NotFound", "message": "Missing"},
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/999"] = (
+        ConstantResponse(
+            status_code=404,
+            json_data={"error": "NotFound", "message": "Missing"},
+        )
     )
 
     response = auth_client.put("/playlists/999", json={"title": "Doesn't Exist"})
@@ -137,9 +134,7 @@ def test_update_playlist_timeout(auth_client, custom_responses):
     def timeout(_request):
         raise Timeout()
 
-    custom_responses[
-        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/playlists/5"
-    ] = timeout
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/5"] = timeout
 
     payload = {"title": "Updated", "description": "New"}
 
@@ -153,11 +148,11 @@ def test_update_playlist_timeout(auth_client, custom_responses):
 
 
 def test_delete_playlist_success(auth_client, custom_responses):
-    custom_responses[
-        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/playlists/10"
-    ] = ConstantResponse(
-        status_code=200,
-        json_data={"message": "Deleted"},
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/10"] = (
+        ConstantResponse(
+            status_code=200,
+            json_data={"message": "Deleted"},
+        )
     )
 
     response = auth_client.delete("/playlists/10")
@@ -167,11 +162,11 @@ def test_delete_playlist_success(auth_client, custom_responses):
 
 
 def test_delete_playlist_not_found(auth_client, custom_responses):
-    custom_responses[
-        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/playlists/999"
-    ] = ConstantResponse(
-        status_code=404,
-        json_data={"error": "NotFound", "message": "Missing"},
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/999"] = (
+        ConstantResponse(
+            status_code=404,
+            json_data={"error": "NotFound", "message": "Missing"},
+        )
     )
 
     response = auth_client.delete("/playlists/999")

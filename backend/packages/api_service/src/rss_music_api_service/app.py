@@ -1,12 +1,10 @@
-from flask import Blueprint, Flask, g, request
+from flask import Blueprint, Flask, request
 from flask_cors import CORS
-import json
 import os
 
 from rss_music_api_service import api_usage
-from rss_music_api_service.auth.current_user import get_current_user_id
 from rss_music_api_service.errors import RequestError, get_error_response
-from rss_music_api_service.logging_config import configure_logging, log_request, get_logger
+from rss_music_api_service.logging_config import configure_logging
 from rss_music_api_service.internal_apis import errors as db_errors
 
 
@@ -58,7 +56,7 @@ def create_app() -> Flask:
     @app.errorhandler(db_errors.InternalAPIBadResponseError)
     def handle_internal_bad_response(_error):
         return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
-    
+
     @app.errorhandler(db_errors.InternalAPITransportError)
     def handle_internal_transport_error(_error):
         return get_error_response(RequestError.INTERNAL_API_TIMEOUT)

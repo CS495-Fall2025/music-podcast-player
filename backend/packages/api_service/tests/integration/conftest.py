@@ -9,13 +9,11 @@ import moto
 import pytest
 from unittest import mock
 
-from rss_music_db_service_schemas.users.responses import UserLoginResponse
 from rss_music_dynamodb_tables import ensure_dynamodb_tables
 
 from rss_music_api_service import create_app
 from rss_music_api_service.auth import pkce
 
-import helpers
 from helpers import ConstantResponse
 
 ALEMBIC_CONFIG_PATH = Path(__file__).parent.parent.parent / "alembic.ini"
@@ -38,20 +36,24 @@ def app(dynamodb):
     os.environ["RSS_PLAYER_DB_SERVICE_URL"] = "http://test.dbservice.com"
 
     # Token configuration
-    os.environ["RSS_PLAYER_API_TOKENS_PER_REFILL"] = json.dumps({
-        "global": {"overall": 6000, "podcast_index": 90},
-        "public": {"overall": 5500, "podcast_index": 60},
-        "user": {"overall": 60, "podcast_index": 15},
-    })
+    os.environ["RSS_PLAYER_API_TOKENS_PER_REFILL"] = json.dumps(
+        {
+            "global": {"overall": 6000, "podcast_index": 90},
+            "public": {"overall": 5500, "podcast_index": 60},
+            "user": {"overall": 60, "podcast_index": 15},
+        }
+    )
     os.environ["RSS_PLAYER_TOKEN_REFILL_SECONDS"] = "60"
-    os.environ["RSS_PLAYER_TOKEN_PENALTY"] = json.dumps({
-        "podcast_index": 15,
-    })
+    os.environ["RSS_PLAYER_TOKEN_PENALTY"] = json.dumps(
+        {
+            "podcast_index": 15,
+        }
+    )
     os.environ["RSS_PLAYER_TOKEN_TABLE_NAME"] = "RateLimitTokens"
 
     app = create_app()
 
-    # Allow unhandled exceptions to propegate and fail tests, but allow our defined 
+    # Allow unhandled exceptions to propegate and fail tests, but allow our defined
     # error handlers to handle their respective exceptions.
     app.config.update(
         {
@@ -68,9 +70,7 @@ def client(app):
     # them explicitly in the test.
     def fail_request(request, **kwargs):
         url = urlunparse(urlparse(request.url)._replace(query="", fragment=""))
-        assert False, (
-            f"Unexpected network request made to {url}"
-        )
+        assert False, f"Unexpected network request made to {url}"
 
     with mock.patch("requests.Session.send", side_effect=fail_request) as _:
         yield app.test_client()
@@ -92,9 +92,7 @@ def custom_responses():
                 return responses[url](request)
             return responses[url].to_response()
 
-        assert False, (
-            f"Unexpected network request made to {url}"
-        )
+        assert False, f"Unexpected network request made to {url}"
 
     with mock.patch("requests.Session.send", side_effect=handle_request) as _:
         yield responses
@@ -112,22 +110,22 @@ def user():
 # This fixture depends on authentication working correctly.
 @pytest.fixture
 def auth_client(client, user, custom_responses):
-    custom_responses[
-        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/users/login"
-    ] = ConstantResponse(
-        status_code=200,
-        json_data={
-            "username": user.username,
-            "id": user.id,
-        }
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/users/login"] = (
+        ConstantResponse(
+            status_code=200,
+            json_data={
+                "username": user.username,
+                "id": user.id,
+            },
+        )
     )
-    custom_responses[
-        f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/users/exists"
-    ] = ConstantResponse(
-        status_code=200,
-        json_data={
-            "exists": "true",
-        }
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/users/exists"] = (
+        ConstantResponse(
+            status_code=200,
+            json_data={
+                "exists": "true",
+            },
+        )
     )
 
     verifier = "test_challenge"
@@ -137,7 +135,7 @@ def auth_client(client, user, custom_responses):
     response = client.get("/auth/", query_string={"code_challenge": challenge})
     assert response.status_code == 200, (
         "Error setting up authenticated user for test, PKCE challenge request failed: "
-        f"{response.get_json()["message"]}"
+        f"{response.get_json()['message']}"
     )
 
     # Login
@@ -151,10 +149,10 @@ def auth_client(client, user, custom_responses):
     )
     assert response.status_code == 200, (
         "Error setting up authenticated user for test, login request failed: "
-        f"{response.get_json()["message"]}"
+        f"{response.get_json()['message']}"
     )
 
-    del custom_responses[f"{os.environ["RSS_PLAYER_DB_SERVICE_URL"]}/users/login"]
+    del custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/users/login"]
     # exists handler left intentionally so the API service can authenticate the user
     # token.
 

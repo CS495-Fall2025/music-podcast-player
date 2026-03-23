@@ -12,7 +12,4 @@ class LoginRequestSchema(Schema):
         required=True,
         validate=password,
     )
-    code_verifier = fields.Str(
-        required=True,
-        validate=validate.Length(min=1, max=256)
-    )
+    code_verifier = fields.Str(required=True, validate=validate.Length(min=1, max=256))

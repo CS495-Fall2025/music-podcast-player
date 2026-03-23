@@ -66,7 +66,6 @@ def get_search_feeds() -> dict:
         }
         return get_error_response(RequestError.INVALID_ARGUMENT)
 
-
     feeds = PodcastIndexAPI.search_music_feeds(
         validated_request["query"],
         validated_request["count"],

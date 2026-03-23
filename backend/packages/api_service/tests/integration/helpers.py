@@ -2,6 +2,7 @@ import json
 
 from requests import Response
 
+
 class ConstantResponse:
     def __init__(self, status_code: int, json_data: dict | None):
         self.status_code = status_code

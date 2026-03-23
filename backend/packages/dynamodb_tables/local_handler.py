@@ -6,10 +6,7 @@ from rss_music_dynamodb_tables import ensure_dynamodb_tables
 
 def main() -> None:
     ensure_dynamodb_tables(
-        boto3.resource(
-            "dynamodb",
-            endpoint_url=os.environ["DYNAMODB_URL"]
-        )
+        boto3.resource("dynamodb", endpoint_url=os.environ["DYNAMODB_URL"])
     )
 
 

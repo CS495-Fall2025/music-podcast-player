@@ -26,9 +26,7 @@ class UserType(Enum):
 
 # Endpoints that consume tokens from other TokenTypes, beyond OVERALL. These endpoints
 # have their own usage limits.
-PROTECTED_ENDPOINTS = {
-    "/search/feeds": [TokenType.PODCAST_INDEX]
-}
+PROTECTED_ENDPOINTS = {"/search/feeds": [TokenType.PODCAST_INDEX]}
 
 
 # Returns True if successful, False if no tokens remaining.
@@ -69,9 +67,9 @@ def penalize_user_api_tokens(token_type: TokenType) -> None:
     global_tokens = check_remaining_tokens(UserType.GLOBAL.value)
     user_tokens = check_remaining_tokens(user_id)
 
-    global_tokens[token_type.value] = max(global_tokens[token_type.value] - penalty, 0) 
-    user_tokens[token_type.value] = max(user_tokens[token_type.value] - penalty, 0) 
-    
+    global_tokens[token_type.value] = max(global_tokens[token_type.value] - penalty, 0)
+    user_tokens[token_type.value] = max(user_tokens[token_type.value] - penalty, 0)
+
     update_remaining_tokens(UserType.GLOBAL.value, global_tokens)
     update_remaining_tokens(user_id, user_tokens)
 
@@ -86,7 +84,7 @@ def check_remaining_tokens(user_id: str) -> dict[str, int]:
         token_entry = refill_tokens(user_id)
     else:
         token_entry = response["Item"]
-    
+
     return token_entry
 
 
