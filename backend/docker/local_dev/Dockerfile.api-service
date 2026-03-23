@@ -8,6 +8,7 @@ RUN pip install uv
 # Bring in needed local packages.
 COPY common_validators common_validators
 COPY db_service_schemas db_service_schemas
+COPY dynamodb_tables dynamodb_tables
 
 # Install rss_music_api_service dependencies
 WORKDIR /app/api_service

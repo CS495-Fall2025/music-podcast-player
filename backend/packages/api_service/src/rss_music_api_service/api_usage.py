@@ -79,8 +79,7 @@ def penalize_user_api_tokens(token_type: TokenType) -> None:
 
 
 def check_remaining_tokens(user_id: str) -> dict[str, int]:
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(TOKEN_TABLE)
+    table = get_token_table()
     response = table.get_item(
         TableName=TOKEN_TABLE,
         Key={"user_id": user_id},
@@ -117,8 +116,7 @@ def get_token_refill_values(user_type: UserType) -> dict[str, int]:
 
 
 def update_remaining_tokens(user_id: str, token_values: dict) -> None:
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(TOKEN_TABLE)
+    table = get_token_table()
 
     if "user_id" in token_values:
         del token_values["user_id"]
@@ -126,3 +124,13 @@ def update_remaining_tokens(user_id: str, token_values: dict) -> None:
     table.put_item(
         Item={"user_id": user_id} | token_values,
     )
+
+
+def get_token_table():
+    url_override = current_app.config.get("DYNAMODB_URL")
+    if url_override:
+        dynamodb = boto3.resource("dynamodb", endpoint_url=url_override)
+    else:
+        dynamodb = boto3.resource("dynamodb")
+
+    return dynamodb.Table(TOKEN_TABLE)
