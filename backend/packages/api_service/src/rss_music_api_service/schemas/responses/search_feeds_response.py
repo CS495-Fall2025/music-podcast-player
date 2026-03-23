@@ -1,6 +1,6 @@
 from enum import Enum, IntEnum
 
-from marshmallow import Schema, fields, validate
+from marshmallow import EXCLUDE, Schema, ValidationError, fields, validate, post_load
 
 
 class PodcastIndexFeedType(IntEnum):
@@ -21,6 +21,13 @@ class Medium(Enum):
     COURSE = "course"
 
 
+# Reusable validation functions
+def validate_url_or_empty(value: str, **kwargs) -> None:
+    if value == "":
+        return
+    validate.URL()(value)
+
+
 # From https://podcastindex-org.github.io/docs-api/#get-/podcasts/byfeedurl
 # Not described in the response for searching music feeds, but shows up anyways.
 class FeedFundingSchema(Schema):
@@ -33,9 +40,9 @@ class PodcastIndexFeedSchema(Schema):
     id = fields.Int(required=True, validate=validate.Range(min=0))
     podcastGuid = fields.UUID(required=True)
     title = fields.Str(required=True, validate=validate.Length(min=1, max=255))
-    url = fields.URL(required=True)
-    originalUrl = fields.URL(required=True)
-    link = fields.URL(required=True)
+    url = fields.Str(required=True, validate=validate_url_or_empty)
+    originalUrl = fields.Str(required=True, validate=validate_url_or_empty)
+    link = fields.String(required=True, validate=validate_url_or_empty)
     description = fields.Str(required=True, validate=validate.Length(min=0, max=4000))
     author = fields.Str(required=True, validate=validate.Length(min=0, max=255))
     ownerName = fields.Str(required=True, validate=validate.Length(min=0, max=255))
@@ -83,7 +90,30 @@ class PodcastIndexFeedSchema(Schema):
 
 class SearchFeedsResponseSchema(Schema):
     status = fields.Bool(required=True)
-    feeds = fields.List(fields.Nested(PodcastIndexFeedSchema), required=True)
+    feeds = fields.List(fields.Raw(), required=True)
     count = fields.Int(required=True, validate=validate.Range(min=0))
     query = fields.Str(required=True, validate=validate.Length(min=1, max=255))
     description = fields.Str(required=True, validate=validate.Length(min=1, max=255))
+
+    class Meta:
+        # Don't error over extra data in a schema, but remove it.
+        unknown = EXCLUDE
+
+    # Any feeds that fail validation are exluded, but don't cause a ValidationError.
+    @post_load
+    def validate_feeds(self, data, **kwargs):
+        valid_feeds = []
+        invalid_feeds = {}
+        for index, feed in enumerate(data["feeds"]):
+            try:
+                valid_feed = PodcastIndexFeedSchema().load(feed)
+                valid_feeds.append(valid_feed)
+            except ValidationError as error:
+                invalid_feeds[index] = error.messages
+
+        data["feeds"] = valid_feeds
+
+        # Currently, these are just ignored, but we could log them later.
+        data["rejected_feeds"] = invalid_feeds
+
+        return data

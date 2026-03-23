@@ -14,6 +14,7 @@ const {
   duration,
   repeat,
   isShuffle,
+  isReverse,
   currentTrack,
   feedTracks,
   playIcon,
@@ -21,9 +22,11 @@ const {
   skipIcon,
   rewindIcon,
   shuffleIcon,
+  reverseIcon,
   repeatIcon,
   transcriptIcon,
   togglePlay,
+  toggleReverse,
   skipToNextTrack,
   skipToPreviousTrack,
   toggleShuffle,
@@ -89,6 +92,15 @@ const transcriptOpen = ref(false);
         :disabled="!ready || !feedTracks.length"
       >
         <img :src="shuffleIcon" alt="Shuffle" class="play-icon" />
+      </button>
+      <button
+        class="media-button reverse-button"
+        :class="{ 'is-disabled': !isReverse }"
+        @click="toggleReverse"
+        vmodel="ready"
+        :disabled="!ready || !feedTracks.length"
+      >
+        <img :src="reverseIcon" alt="Reverse" class="play-icon" />
       </button>
       <button
         class="media-button skip-back-button"
