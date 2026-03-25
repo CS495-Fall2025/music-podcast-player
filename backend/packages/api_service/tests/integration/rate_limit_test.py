@@ -1,6 +1,9 @@
 import time
 import sys
+import unittest.mock
 
+from botocore.client import BaseClient
+from botocore.exceptions import ClientError
 import pytest
 
 from tests.integration.api_mocks import podcastindex_mock
@@ -12,6 +15,37 @@ def valid_search(custom_responses) -> None:
     custom_responses["https://api.podcastindex.org/api/1.0/search/music/byterm"] = (
         podcastindex_mock.generate_valid_response
     )
+
+
+@pytest.fixture
+def dynamodb_mock():
+    def make_dynamodb_mock(fail_count: int):
+        remaining = fail_count
+        real_api_call = BaseClient._make_api_call
+
+        def make_api_call(self, operation, *args, **kwargs):
+            nonlocal remaining
+
+            if not operation == "PutItem" or remaining == 0:
+                return real_api_call(self, operation, *args, **kwargs)
+            
+            remaining -= 1
+            raise ClientError(
+                error_response={
+                    "Error": {
+                        "Code": "ConditionalCheckFailedException",
+                        "Message": "Mocked failure"
+                    }
+                },
+                operation_name=operation,
+            )
+
+        return unittest.mock.patch(
+            "botocore.client.BaseClient._make_api_call",
+            make_api_call,
+        )
+
+    return make_dynamodb_mock
 
 
 def test_first_unauthenticated_request_creates_global_token_bucket(
@@ -569,3 +603,25 @@ def test_authenticated_search_penalized_on_podcast_index_too_many_requests(
         max(14 - app.config["TOKEN_PENALTY"]["podcast_index"], 0)
         == db_response["Item"]["podcast_index"]
     )
+
+
+def test_request_retries_dynamodb_after_condition_fails(
+    app, client, dynamodb, dynamodb_mock
+) -> None:
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
+
+    # Only one failure, retry will succeed.
+    with dynamodb_mock(1):
+        response = client.post("/auth/verify")
+        assert response.status_code == 401
+
+
+def test_too_many_requests_after_retries_fails(
+    app, client, dynamodb, dynamodb_mock
+) -> None:
+    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
+
+    # Three failures, should fall back to sending a 429.
+    with dynamodb_mock(3):
+        response = client.post("/auth/verify")
+        assert response.status_code == 429

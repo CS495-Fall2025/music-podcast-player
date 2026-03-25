@@ -1,7 +1,9 @@
 from enum import Enum
+import random
 import time
 
 import boto3
+from botocore.exceptions import ClientError
 from flask import current_app
 
 from rss_music_api_service.auth.current_user import get_current_user_id
@@ -28,9 +30,34 @@ class UserType(Enum):
 # have their own usage limits.
 PROTECTED_ENDPOINTS = {"/search/feeds": [TokenType.PODCAST_INDEX]}
 
+# Base delay before the first retry to update the tokens.
+RETRY_BASE_DELAY = 0.025
+
+# Number of attempts to try updating the token count before returning a rate limit
+# error (as a failsafe).
+MAX_ATTEMPTS = 3
+
 
 # Returns True if successful, False if no tokens remaining.
 def use_api_tokens_for_endpoint(endpoint: str) -> bool:
+    for attempt in range(MAX_ATTEMPTS):
+        try:
+            return attempt_use_api_tokens_for_endpoint(endpoint)
+        except ClientError as error:
+            if not error.response["Error"]["Code"] == "ConditionalCheckFailedException":
+                raise
+
+            if attempt == MAX_ATTEMPTS - 1:
+                return False
+
+            time.sleep(pick_retry_time(attempt))
+
+
+def pick_retry_time(attempt: int) -> float:
+    return RETRY_BASE_DELAY * random.uniform(0.5, 1.5) * (2.0 ** attempt)
+
+
+def attempt_use_api_tokens_for_endpoint(endpoint: str) -> bool:
     token_types = PROTECTED_ENDPOINTS.get(endpoint, []).copy()
     token_types.append(TokenType.OVERALL)
 
@@ -38,8 +65,11 @@ def use_api_tokens_for_endpoint(endpoint: str) -> bool:
     if user_id is None:
         user_id = UserType.PUBLIC.value
 
-    global_tokens = check_remaining_tokens(UserType.GLOBAL.value)
-    user_tokens = check_remaining_tokens(user_id)
+    old_global_tokens = check_remaining_tokens(UserType.GLOBAL.value)
+    old_user_tokens = check_remaining_tokens(user_id)
+
+    global_tokens = old_global_tokens.copy()
+    user_tokens = old_user_tokens.copy()
 
     for token_type in token_types:
         global_tokens[token_type.value] -= 1
@@ -48,8 +78,8 @@ def use_api_tokens_for_endpoint(endpoint: str) -> bool:
         if global_tokens[token_type.value] < 0 or user_tokens[token_type.value] < 0:
             return False
 
-    update_remaining_tokens(UserType.GLOBAL.value, global_tokens)
-    update_remaining_tokens(user_id, user_tokens)
+    update_remaining_tokens(UserType.GLOBAL.value, global_tokens, old_global_tokens)
+    update_remaining_tokens(user_id, user_tokens,  old_user_tokens)
 
     return True
 
@@ -64,24 +94,36 @@ def penalize_user_api_tokens(token_type: TokenType) -> None:
     if user_id is None:
         user_id = UserType.PUBLIC.value
 
-    global_tokens = check_remaining_tokens(UserType.GLOBAL.value)
-    user_tokens = check_remaining_tokens(user_id)
+    old_global_tokens = check_remaining_tokens(UserType.GLOBAL.value)
+    old_user_tokens = check_remaining_tokens(user_id)
+
+    global_tokens = old_global_tokens.copy()
+    user_tokens = old_user_tokens.copy()
 
     global_tokens[token_type.value] = max(global_tokens[token_type.value] - penalty, 0)
     user_tokens[token_type.value] = max(user_tokens[token_type.value] - penalty, 0)
 
-    update_remaining_tokens(UserType.GLOBAL.value, global_tokens)
-    update_remaining_tokens(user_id, user_tokens)
+    update_remaining_tokens(UserType.GLOBAL.value, global_tokens, old_global_tokens)
+    update_remaining_tokens(user_id, user_tokens,  old_user_tokens)
 
 
 def check_remaining_tokens(user_id: str) -> dict[str, int]:
+    tokens = check_remaining_tokens_no_refill(user_id)
+
+    if tokens is None or tokens["expiry"] <= int(time.time()):
+        return refill_tokens(user_id)
+
+    return tokens
+
+
+def check_remaining_tokens_no_refill(user_id: str) -> dict[str, int] | None:
     table = get_token_table()
     response = table.get_item(
         Key={"user_id": user_id},
     )
 
-    if "Item" not in response or response["Item"]["expiry"] <= int(time.time()):
-        token_entry = refill_tokens(user_id)
+    if "Item" not in response:
+        return None
     else:
         token_entry = response["Item"]
 
@@ -101,7 +143,12 @@ def refill_tokens(user_id: str) -> dict[str, int]:
         "expiry": int(time.time()) + current_app.config["TOKEN_REFILL_SECONDS"],
         "user_id": user_id,
     }
-    update_remaining_tokens(user_id, token_entry)
+
+    old_tokens = check_remaining_tokens_no_refill(user_id)
+    if old_tokens is None:
+        old_tokens = {}
+
+    update_remaining_tokens(user_id, token_entry, old_tokens)
 
     return token_entry
 
@@ -110,14 +157,41 @@ def get_token_refill_values(user_type: UserType) -> dict[str, int]:
     return current_app.config["API_TOKENS_PER_REFILL"][user_type.value].copy()
 
 
-def update_remaining_tokens(user_id: str, token_values: dict) -> None:
+def update_remaining_tokens(user_id: str, token_values: dict, old_values: dict) -> None:
     table = get_token_table()
 
     if "user_id" in token_values:
         del token_values["user_id"]
+    
+    if "user_id" in old_values:
+        del old_values["user_id"]
 
+    conditions = []
+    attrib_names = {}
+    attrib_values = {}
+    for index, (key, value) in enumerate(old_values.items()):
+        conditions.append(f"#{index} = :old_{index}")
+        attrib_names[f"#{index}"] = key
+        attrib_values[f":old_{index}"] = value
+
+    final_condition = "attribute_not_exists(overall)"
+    if conditions:
+        final_condition += " OR " + " AND ".join(conditions)
+
+    expr_kwargs = {}
+    if conditions:
+        expr_kwargs = {
+            "ExpressionAttributeNames": attrib_names,
+            "ExpressionAttributeValues": attrib_values,
+        }
+
+    # This will fail with a ClientError if the condition (that the tokens are what they
+    # were when we read them) is not true at the time of attempting the write. The check
+    # and write together are atomic.
     table.put_item(
         Item={"user_id": user_id} | token_values,
+        ConditionExpression=final_condition,
+        **expr_kwargs,
     )
 
 
