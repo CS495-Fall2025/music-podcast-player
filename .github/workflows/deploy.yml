@@ -1,17 +1,18 @@
-name: Development Continuous Deployment Checks
-description: Shows how the changes in a PR would affect the current deployment.
+name: Deployment
 
 on:
-  pull_request:
-    branches:
-      - dev
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
 
 jobs:
   build:
     uses: ./.github/workflows/cd-builds.yml
-  check-dev-stack-diff:
+  deploy-stack:
     runs-on: ubuntu-latest
-    environment: development
+    environment: ${{ inputs.environment }}
     permissions:
       contents: read
       id-token: write
@@ -24,7 +25,7 @@ jobs:
     env:
       FRONTEND_BUILD_PATH: "${{ github.workspace }}/builds/dist"
       BACKEND_BUILD_PATH: "${{ github.workspace }}/builds"
-      DEPLOY_ENVIRONMENT: Development
+      DEPLOY_ENVIRONMENT: "${{ inputs.environment }}"
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v5
@@ -47,8 +48,9 @@ jobs:
       - run: npm install -g aws-cdk
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r requirements.txt
+      - run: python edit_cdk_json.py
       - uses: aws-actions/configure-aws-credentials@v5
         with:
-          role-to-assume: ${{ vars.AWS_FETCH_ROLE }}
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE }}
           aws-region: ${{ vars.AWS_REGION }}
-      - run: cdk diff
+      - run: cdk deploy --require-approval never
