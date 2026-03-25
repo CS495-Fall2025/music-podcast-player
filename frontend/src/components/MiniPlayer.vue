@@ -1,8 +1,13 @@
 <style src="../style.css"></style>
 
 <script setup>
+import { ref } from "vue";
 import BoostModal from "./BoostModal.vue";
 import { useMiniPlayer } from "../controllers/miniplayer.js";
+import {
+  satDripEnabled,
+  satDripRate,
+} from "../controllers/localFeedStore.js";
 
 const {
   isPlaying,
@@ -33,6 +38,26 @@ const {
   onEnded,
   formatTime,
 } = useMiniPlayer();
+
+const DRIP_SUMMARY_INTERVAL_MINUTES = 30;
+const DRIP_SUMMARY_INTERVAL_MS = DRIP_SUMMARY_INTERVAL_MINUTES * 60 * 1000;
+const DRIP_TICK_MS = 1000;
+const POPUP_DURATION_MS = 4000;
+
+const contributionPopupVisible = ref(false);
+const contributionPopupMessage = ref("");
+
+let dripTimerId = null;
+let popupTimeoutId = null;
+let activeDripMs = 0;
+let satsAccumulated = 0;
+
+function clearDripTimer() {
+  if (dripTimerId !== null) {
+    clearInterval(dripTimerId);
+    dripTimerId = null;
+  }
+}
 </script>
 
 <template>

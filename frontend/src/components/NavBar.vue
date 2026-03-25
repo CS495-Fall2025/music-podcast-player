@@ -93,6 +93,10 @@
 <script setup>
 import useNavbar from "../controllers/navBar.js";
 import { ref } from "vue";
+import {
+  satDripRate,
+  satDripEnabled,
+} from "../controllers/localFeedStore.js";
 
 const {
   isOpen,
