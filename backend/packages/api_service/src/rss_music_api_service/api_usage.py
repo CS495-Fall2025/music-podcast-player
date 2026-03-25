@@ -54,7 +54,7 @@ def use_api_tokens_for_endpoint(endpoint: str) -> bool:
 
 
 def pick_retry_time(attempt: int) -> float:
-    return RETRY_BASE_DELAY * random.uniform(0.5, 1.5) * (2.0 ** attempt)
+    return RETRY_BASE_DELAY * random.uniform(0.5, 1.5) * (2.0**attempt)
 
 
 def attempt_use_api_tokens_for_endpoint(endpoint: str) -> bool:
@@ -79,7 +79,7 @@ def attempt_use_api_tokens_for_endpoint(endpoint: str) -> bool:
             return False
 
     update_remaining_tokens(UserType.GLOBAL.value, global_tokens, old_global_tokens)
-    update_remaining_tokens(user_id, user_tokens,  old_user_tokens)
+    update_remaining_tokens(user_id, user_tokens, old_user_tokens)
 
     return True
 
@@ -104,7 +104,7 @@ def penalize_user_api_tokens(token_type: TokenType) -> None:
     user_tokens[token_type.value] = max(user_tokens[token_type.value] - penalty, 0)
 
     update_remaining_tokens(UserType.GLOBAL.value, global_tokens, old_global_tokens)
-    update_remaining_tokens(user_id, user_tokens,  old_user_tokens)
+    update_remaining_tokens(user_id, user_tokens, old_user_tokens)
 
 
 def check_remaining_tokens(user_id: str) -> dict[str, int]:
@@ -162,7 +162,7 @@ def update_remaining_tokens(user_id: str, token_values: dict, old_values: dict) 
 
     if "user_id" in token_values:
         del token_values["user_id"]
-    
+
     if "user_id" in old_values:
         del old_values["user_id"]
 

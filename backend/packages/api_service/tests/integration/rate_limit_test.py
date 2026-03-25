@@ -28,13 +28,13 @@ def dynamodb_mock():
 
             if not operation == "PutItem" or remaining == 0:
                 return real_api_call(self, operation, *args, **kwargs)
-            
+
             remaining -= 1
             raise ClientError(
                 error_response={
                     "Error": {
                         "Code": "ConditionalCheckFailedException",
-                        "Message": "Mocked failure"
+                        "Message": "Mocked failure",
                     }
                 },
                 operation_name=operation,
@@ -608,8 +608,6 @@ def test_authenticated_search_penalized_on_podcast_index_too_many_requests(
 def test_request_retries_dynamodb_after_condition_fails(
     app, client, dynamodb, dynamodb_mock
 ) -> None:
-    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
-
     # Only one failure, retry will succeed.
     with dynamodb_mock(1):
         response = client.post("/auth/verify")
@@ -619,8 +617,6 @@ def test_request_retries_dynamodb_after_condition_fails(
 def test_too_many_requests_after_retries_fails(
     app, client, dynamodb, dynamodb_mock
 ) -> None:
-    token_bucket = dynamodb.Table(app.config["TOKEN_TABLE_NAME"])
-
     # Three failures, should fall back to sending a 429.
     with dynamodb_mock(3):
         response = client.post("/auth/verify")
