@@ -24,7 +24,7 @@ jobs:
     env:
       FRONTEND_BUILD_PATH: "${{ github.workspace }}/builds/dist"
       BACKEND_BUILD_PATH: "${{ github.workspace }}/builds"
-      DEPLOY_ENVIRONMENT: Development
+      DEPLOY_ENVIRONMENT: development
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v5
