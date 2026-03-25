@@ -12,12 +12,15 @@ from aws_cdk import (
     aws_apigatewayv2 as apigw2,
     aws_apigatewayv2_integrations as apigw2_int,
     aws_apigatewayv2_authorizers as apigw2_auth,
+    aws_certificatemanager as cm,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
     aws_ec2 as ec2,
     aws_iam as iam,
     aws_lambda as _lambda,
     aws_rds as rds,
+    aws_route53 as r53,
+    aws_route53_targets as r53_targets,
     aws_ssm as ssm,
     aws_s3 as s3,
     aws_s3_deployment as s3_deploy,
@@ -27,12 +30,20 @@ from aws_cdk import (
 )
 from constructs import Construct
 
+from cdk.stages import CURRENT_STAGE, Stage
+
 BACKEND_PATH = Path(__file__).parent.parent.parent / "backend"
 FRONTEND_PATH = Path(__file__).parent.parent.parent / "frontend"
 BACKEND_BUILD = Path(os.environ.get("BACKEND_BUILD_PATH", BACKEND_PATH / "builds"))
 FRONTEND_BUILD = os.environ.get("FRONTEND_BUILD_PATH", FRONTEND_PATH / "dist")
 
 API_SERVICE_PREFIX = "/api/v1"
+
+# Production variables
+DOMAIN_NAME = "musicpodcastplayer.com"
+RECORD_NAME = "www"
+FULL_DOMAIN_NAME = f"{RECORD_NAME}.{DOMAIN_NAME}"
+R53_ZONE_ID = "Z03967792358UTKV7JWJU"
 
 
 class RSSMusicPlayerStack(Stack):
@@ -65,10 +76,14 @@ class RSSMusicPlayerStack(Stack):
         api_service_api = self._make_api_service_api(api_service_function)
         self._attach_api_service_to_distribution(api_service_api, distribution)
 
+        api_domain = distribution.distribution_domain_name
+        if CURRENT_STAGE == Stage.PRODUCTION:
+            api_domain = FULL_DOMAIN_NAME
+
         self._deploy_frontend(
             frontend_bucket,
             distribution,
-            f"https://{distribution.distribution_domain_name}{API_SERVICE_PREFIX}",
+            f"https://{api_domain}{API_SERVICE_PREFIX}",
         )
         log_group, unauthorized_metric, large_file_size_metric, search_endpoint_metric, feed_endpoint_metric = self.make_lambda_log_group(api_service_function)
 
@@ -79,7 +94,7 @@ class RSSMusicPlayerStack(Stack):
             large_file_size_metric=large_file_size_metric,
             search_endpoint_metric=search_endpoint_metric,
             feed_endpoint_metric=feed_endpoint_metric
-            )
+        )
         
         
 
@@ -134,13 +149,48 @@ class RSSMusicPlayerStack(Stack):
             ),
         ]
 
+        additional_kwargs = {}
+        if CURRENT_STAGE == Stage.PRODUCTION:
+            zone = r53.HostedZone.from_hosted_zone_attributes(
+                self,
+                "RSSMusicPlayerHostedZone",
+                hosted_zone_id=R53_ZONE_ID,
+                zone_name=DOMAIN_NAME,
+            )
+
+            certificate = cm.DnsValidatedCertificate(
+                self,
+                "RSSMusicPlayerCertificate",
+                domain_name=FULL_DOMAIN_NAME,
+                hosted_zone=zone,
+                # Only supported region.
+                region="us-east-1",
+            )
+
+            additional_kwargs = {
+                "domain_names": [FULL_DOMAIN_NAME],
+                "certificate": certificate,
+            }
+
         distribution = cloudfront.Distribution(
             self,
             "RSSMusicPlayerFrontendDistribution",
             default_behavior=behavior,
             default_root_object="index.html",
             error_responses=spa_responses,
+            **additional_kwargs,
         )
+
+        if CURRENT_STAGE == Stage.PRODUCTION:
+            r53.ARecord(
+                self,
+                "RSSMusicPlayerARecord",
+                zone=zone,
+                record_name=RECORD_NAME,
+                target=r53.RecordTarget.from_alias(
+                    r53_targets.CloudFrontTarget(distribution),
+                ),
+            )
 
         CfnOutput(
             self,
@@ -296,6 +346,10 @@ class RSSMusicPlayerStack(Stack):
             ),
         ]
 
+        allowed_domain = frontend_domain
+        if CURRENT_STAGE == Stage.PRODUCTION:
+            allowed_domain = FULL_DOMAIN_NAME
+
         function = _lambda.Function(
             self,
             "RSSMusicPlayerApiServiceFunction",
@@ -305,7 +359,7 @@ class RSSMusicPlayerStack(Stack):
             memory_size=512,
             architecture=_lambda.Architecture.ARM_64,
             environment={
-                "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{frontend_domain}",
+                "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{allowed_domain}",
                 "RSS_PLAYER_ENVIRONMENT": "production",
                 "RSS_PLAYER_DB_SERVICE_URL": db_service_api.url,
                 "RSS_PLAYER_API_ROOT": API_SERVICE_PREFIX,
