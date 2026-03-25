@@ -8,6 +8,7 @@ class Stage(Enum):
 
 
 CURRENT_STAGE = (
-    Stage.PRODUCTION if os.getenv("DEPLOY_ENVIRONMENT", "Production") == "Production"
+    Stage.PRODUCTION
+    if os.getenv("DEPLOY_ENVIRONMENT", "production") == "production"
     else Stage.DEVELOPMENT
 )
