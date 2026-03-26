@@ -312,6 +312,7 @@ class RSSMusicPlayerStack(Stack):
                 "PODCAST_INDEX_KEY_ROUTE": "/rss-music-player/podcast-index-api/key",
                 "PODCAST_INDEX_SECRET_ROUTE": "/rss-music-player/podcast-index-api/secret",
                 "SECRET_KEY_ROUTE": "/rss-music-player/jwt/key",
+                "RSS_PLAYER_SES_FROM_EMAIL": "no-reply@musicpodcastplayer.com",
             },
             timeout=Duration.seconds(12),
         )
@@ -323,6 +324,13 @@ class RSSMusicPlayerStack(Stack):
             iam.PolicyStatement(
                 actions=["execute-api:Invoke"],
                 resources=[db_service_api.arn_for_execute_api()],
+            )
+        )
+
+        function.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["ses:SendEmail"],
+                resources=["*"],
             )
         )
 

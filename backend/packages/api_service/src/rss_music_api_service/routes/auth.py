@@ -1,18 +1,27 @@
 from functools import wraps
 import flask
+from datetime import datetime, timezone
 from flask import Blueprint, request, session, current_app
 from marshmallow import ValidationError
 
-from rss_music_api_service.auth import signup, login, pkce
+from rss_music_api_service.auth import signup, login, pkce, email_codes
 from rss_music_api_service.auth.current_user import get_current_user_id
 from rss_music_api_service.errors import RequestError, get_error_response
 from rss_music_api_service.internal_apis import db_service
 from rss_music_api_service.internal_apis import errors as db_errors
-from rss_music_api_service.schemas import SignUpRequestSchema
+from rss_music_api_service.schemas import (
+    SignUpRequestSchema,
+    VerificationCodeRequestSchema,
+    EmailCodeRequestSchema,
+    EmailRequestSchema,
+    ResetPasswordRequestSchema,
+)
 from rss_music_api_service.logging_config import log_request, get_logger
+from rss_music_api_service.services import email_service
 
 AUTH_BP = Blueprint("auth", __name__, url_prefix="/auth")
 logger = get_logger(__name__)
+PENDING_SIGNUP_KEY = "pending_signup"
 
 
 def login_required(func):
@@ -71,11 +80,90 @@ def post_signup() -> dict:
     except ValidationError:
         return get_error_response(RequestError.INVALID_ARGUMENT)
 
+    verification_code = email_codes.generate_code()
+    expires_at = email_codes.generate_expiration()
+
+    session[PENDING_SIGNUP_KEY] = {
+        "username": valid_request["username"],
+        "email": valid_request["email"],
+        "password": valid_request["password"],
+        "code": verification_code,
+        "expires_at": expires_at.isoformat(),
+    }
+
+    try:
+        email_service.send_verification_code(valid_request["email"], verification_code)
+    except email_service.EmailDeliveryError:
+        return {
+            "code": 502,
+            "error": "EmailDeliveryFailed",
+            "message": "Could not send verification email",
+        }, 502
+
+    return {
+        "code": 201,
+        "verification_required": True,
+    }, 201
+
+
+@AUTH_BP.post("/signup/verify")
+def post_signup_verify() -> tuple:
+    try:
+        data = request.get_json(silent=True)
+
+        if data is None:
+            return get_error_response(RequestError.INVALID_FORMAT)
+
+        valid_request = VerificationCodeRequestSchema().load(data)
+    except ValidationError:
+        return get_error_response(RequestError.INVALID_ARGUMENT)
+
+    pending_signup = session.get(PENDING_SIGNUP_KEY)
+
+    if pending_signup is None:
+        return {
+            "code": 400,
+            "error": "InvalidSession",
+            "message": "No pending signup found. Start signup again.",
+        }, 400
+
+    if pending_signup.get("code") != valid_request["code"]:
+        return {
+            "code": 400,
+            "error": "InvalidVerificationCode",
+            "message": "Invalid or expired verification code",
+        }, 400
+
+    expires_at_raw = pending_signup.get("expires_at")
+
+    if not expires_at_raw:
+        return {
+            "code": 400,
+            "error": "InvalidVerificationCode",
+            "message": "Invalid or expired verification code",
+        }, 400
+
+    try:
+        expires_at = datetime.fromisoformat(expires_at_raw)
+    except ValueError:
+        return {
+            "code": 400,
+            "error": "InvalidVerificationCode",
+            "message": "Invalid or expired verification code",
+        }, 400
+
+    if expires_at < datetime.now(timezone.utc):
+        return {
+            "code": 400,
+            "error": "InvalidVerificationCode",
+            "message": "Invalid or expired verification code",
+        }, 400
+
     try:
         signup.create_and_add_user(
-            valid_request["username"],
-            valid_request["email"],
-            valid_request["password"],
+            pending_signup["username"],
+            pending_signup["email"],
+            pending_signup["password"],
         )
     except db_errors.InternalAPIUniquenessError as error:
         return get_error_response(RequestError.VALUE_NOT_UNIQUE, {"field": error.field})
@@ -84,8 +172,12 @@ def post_signup() -> dict:
     except db_errors.InternalAPITransportError:
         return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
+    session.pop(PENDING_SIGNUP_KEY, None)
+
     return {
         "code": 201,
+        "verified": True,
+        "account_created": True,
     }, 201
 
 
@@ -162,7 +254,7 @@ def post_login() -> tuple:
         }, 401
 
     try:
-        user_id, username = login.authenticate_user(username, password)
+        user_id, username, email_verified = login.authenticate_user(username, password)
     except login.InvalidCredentialsError:
         return {
             "code": 401,
@@ -173,6 +265,22 @@ def post_login() -> tuple:
         return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
     except db_errors.InternalAPITransportError:
         return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
+
+    if not email_verified:
+        log_request(
+            logger,
+            "warn",
+            "response_sent",
+            "Email not verified: login blocked",
+            user_id=user_id,
+            route="/auth/login",
+            status_code=403,
+        )
+        return {
+            "code": 403,
+            "error": "EmailNotVerified",
+            "message": "Email verification is required before signing in",
+        }, 403
 
     secret_key = current_app.config.get("SECRET_KEY", "dev-secret-key")
     tokens = login.generate_tokens(user_id, username, secret_key)
@@ -359,3 +467,140 @@ def post_logout() -> tuple:
     response.set_cookie("refresh_token", "", httponly=True, max_age=0)
 
     return response
+
+
+@AUTH_BP.post("/verify-email")
+def post_verify_email() -> tuple:
+    try:
+        data = request.get_json(silent=True)
+
+        if data is None:
+            return get_error_response(RequestError.INVALID_FORMAT)
+
+        valid_request = EmailCodeRequestSchema().load(data)
+    except ValidationError:
+        return get_error_response(RequestError.INVALID_ARGUMENT)
+
+    try:
+        success = db_service.verify_email(
+            valid_request["email"],
+            valid_request["code"],
+        )
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPITransportError:
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
+
+    if not success:
+        return {
+            "code": 400,
+            "error": "InvalidVerificationCode",
+            "message": "Invalid or expired verification code",
+        }, 400
+
+    return {"code": 200, "verified": True}, 200
+
+
+@AUTH_BP.post("/resend-verification")
+def post_resend_verification() -> tuple:
+    try:
+        data = request.get_json(silent=True)
+
+        if data is None:
+            return get_error_response(RequestError.INVALID_FORMAT)
+
+        valid_request = EmailRequestSchema().load(data)
+    except ValidationError:
+        return get_error_response(RequestError.INVALID_ARGUMENT)
+
+    code = email_codes.generate_code()
+    expires_at = email_codes.generate_expiration()
+
+    try:
+        user_exists = db_service.set_email_verification_code(
+            valid_request["email"], code, expires_at.isoformat()
+        )
+
+        if user_exists:
+            email_service.send_verification_code(valid_request["email"], code)
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPITransportError:
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
+    except email_service.EmailDeliveryError:
+        return {
+            "code": 502,
+            "error": "EmailDeliveryFailed",
+            "message": "Could not send verification email",
+        }, 502
+
+    return {"code": 200, "success": True}, 200
+
+
+@AUTH_BP.post("/forgot-password")
+def post_forgot_password() -> tuple:
+    try:
+        data = request.get_json(silent=True)
+
+        if data is None:
+            return get_error_response(RequestError.INVALID_FORMAT)
+
+        valid_request = EmailRequestSchema().load(data)
+    except ValidationError:
+        return get_error_response(RequestError.INVALID_ARGUMENT)
+
+    code = email_codes.generate_code()
+    expires_at = email_codes.generate_expiration()
+
+    try:
+        user_exists = db_service.set_password_reset_code(
+            valid_request["email"], code, expires_at.isoformat()
+        )
+
+        if user_exists:
+            email_service.send_password_reset_code(valid_request["email"], code)
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPITransportError:
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
+    except email_service.EmailDeliveryError:
+        return {
+            "code": 502,
+            "error": "EmailDeliveryFailed",
+            "message": "Could not send reset email",
+        }, 502
+
+    return {"code": 200, "success": True}, 200
+
+
+@AUTH_BP.post("/reset-password")
+def post_reset_password() -> tuple:
+    try:
+        data = request.get_json(silent=True)
+
+        if data is None:
+            return get_error_response(RequestError.INVALID_FORMAT)
+
+        valid_request = ResetPasswordRequestSchema().load(data)
+    except ValidationError:
+        return get_error_response(RequestError.INVALID_ARGUMENT)
+
+    try:
+        password_was_reset = db_service.reset_password(
+            valid_request["email"],
+            valid_request["code"],
+            valid_request["new_password"],
+        )
+    except db_errors.InternalAPIBadResponseError:
+        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
+    except db_errors.InternalAPITransportError:
+        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
+
+    if not password_was_reset:
+        return {
+            "code": 400,
+            "error": "InvalidResetCode",
+            "message": "Invalid or expired reset code",
+        }, 400
+
+    return {"code": 200, "success": True}, 200

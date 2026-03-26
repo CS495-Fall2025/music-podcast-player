@@ -33,6 +33,12 @@ more details.
 
 The URL to the database service.
 
+### SES Sender Address
+`RSS_PLAYER_SES_FROM_EMAIL`
+
+Verified sender email address used by AWS SES to deliver signup verification and
+password reset codes. Is configured in `cdk/cdk/stack.py` for AWS deployment.
+
 ## AWS Deployment Secret Route Variables
 
 In order to protect our secrets, we store them as encrypted strings in AWS' parameter
