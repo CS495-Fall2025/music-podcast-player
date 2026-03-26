@@ -224,6 +224,29 @@ def test_successful_login_returns_cookies(client, test_user, pkce_challenge) -> 
     assert "Max-Age=604800" in cookies["refresh_token"]
 
 
+def test_unverified_email_cannot_login(client, test_user, pkce_challenge) -> None:
+    def generate_unverified_login(
+        request: PreparedRequest, *args, **kwargs
+    ) -> Response:
+        return db_service_mock.generate_users_login_success(
+            request, test_user["user_id"], email_verified=False
+        )
+
+    with mock.patch(SEND_METHOD, side_effect=generate_unverified_login) as _:
+        response = client.post(
+            ENDPOINT_URL,
+            json={
+                "username": test_user["username"],
+                "password": test_user["password"],
+                "code_verifier": pkce_challenge["verifier"],
+            },
+        )
+
+    assert response.status_code == 403
+    data = response.get_json()
+    assert data["error"] == "EmailNotVerified"
+
+
 def test_successful_login_clears_pkce_from_session(
     client, test_user, pkce_challenge
 ) -> None:

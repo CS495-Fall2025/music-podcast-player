@@ -33,6 +33,12 @@ more details.
 
 The URL to the database service.
 
+### SES Sender Address
+`RSS_PLAYER_SES_FROM_EMAIL`
+
+Verified sender email address used by AWS SES to deliver signup verification and
+password reset codes. Is configured in `cdk/cdk/stack.py` for AWS deployment.
+
 ### Rate Limiting API Tokens Per Refill
 `RSS_PLAYER_API_TOKENS_PER_REFILL`
 

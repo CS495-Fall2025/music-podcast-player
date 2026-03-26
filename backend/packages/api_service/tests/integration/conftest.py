@@ -117,6 +117,7 @@ def auth_client(client, user, custom_responses):
             json_data={
                 "username": user.username,
                 "id": user.id,
+                "email_verified": True,
             },
         )
     )

@@ -26,7 +26,7 @@ class UserNotFoundError(Exception):
     pass
 
 
-def authenticate_user(username: str, password: str) -> tuple[int, str]:
+def authenticate_user(username: str, password: str) -> tuple[int, str, bool]:
     result = db_service.try_user_login(username, password)
 
     if result is None:

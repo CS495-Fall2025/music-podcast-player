@@ -325,6 +325,7 @@ class RSSMusicPlayerStack(Stack):
                 "RSS_PLAYER_TOKEN_PENALTY": json.dumps({
                     "podcast_index": 15,
                 }),
+                "RSS_PLAYER_SES_FROM_EMAIL": "no-reply@musicpodcastplayer.com",
             },
             timeout=Duration.seconds(12),
         )
@@ -341,6 +342,12 @@ class RSSMusicPlayerStack(Stack):
 
         ddb_table.grant_read_write_data(function)
         function.add_environment("RSS_PLAYER_TOKEN_TABLE_NAME", ddb_table.table_name)
+        function.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["ses:SendEmail"],
+                resources=["*"],
+            )
+        )
 
         return function
 
