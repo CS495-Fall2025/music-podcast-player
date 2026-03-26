@@ -1,12 +1,12 @@
-name: Development Deployment
+name: Production Deployment
 
 on:
   push:
     branches:
-      - dev
+      - prod
 
 jobs:
   deploy-dev-stack:
     uses: ./.github/workflows/deploy.yml
     with:
-      environment: development
+      environment: production

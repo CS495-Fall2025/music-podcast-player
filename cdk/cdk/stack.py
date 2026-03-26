@@ -12,6 +12,7 @@ from aws_cdk import (
     aws_apigatewayv2 as apigw2,
     aws_apigatewayv2_integrations as apigw2_int,
     aws_apigatewayv2_authorizers as apigw2_auth,
+    aws_certificatemanager as cm,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
     aws_dynamodb as dynamodb,
@@ -19,6 +20,8 @@ from aws_cdk import (
     aws_iam as iam,
     aws_lambda as _lambda,
     aws_rds as rds,
+    aws_route53 as r53,
+    aws_route53_targets as r53_targets,
     aws_ssm as ssm,
     aws_s3 as s3,
     aws_s3_deployment as s3_deploy,
@@ -28,12 +31,20 @@ from aws_cdk import (
 )
 from constructs import Construct
 
+from cdk.stages import CURRENT_STAGE, Stage
+
 BACKEND_PATH = Path(__file__).parent.parent.parent / "backend"
 FRONTEND_PATH = Path(__file__).parent.parent.parent / "frontend"
 BACKEND_BUILD = Path(os.environ.get("BACKEND_BUILD_PATH", BACKEND_PATH / "builds"))
 FRONTEND_BUILD = os.environ.get("FRONTEND_BUILD_PATH", FRONTEND_PATH / "dist")
 
 API_SERVICE_PREFIX = "/api/v1"
+
+# Production variables
+DOMAIN_NAME = "musicpodcastplayer.com"
+RECORD_NAME = "www"
+FULL_DOMAIN_NAME = f"{RECORD_NAME}.{DOMAIN_NAME}"
+R53_ZONE_ID = "Z03967792358UTKV7JWJU"
 
 
 class RSSMusicPlayerStack(Stack):
@@ -69,12 +80,22 @@ class RSSMusicPlayerStack(Stack):
         api_service_api = self._make_api_service_api(api_service_function)
         self._attach_api_service_to_distribution(api_service_api, distribution)
 
+        api_domain = distribution.distribution_domain_name
+        if CURRENT_STAGE == Stage.PRODUCTION:
+            api_domain = FULL_DOMAIN_NAME
+
         self._deploy_frontend(
             frontend_bucket,
             distribution,
-            f"https://{distribution.distribution_domain_name}{API_SERVICE_PREFIX}",
+            f"https://{api_domain}{API_SERVICE_PREFIX}",
         )
-        log_group, unauthorized_metric, large_file_size_metric, search_endpoint_metric, feed_endpoint_metric = self.make_lambda_log_group(api_service_function)
+        (
+            log_group,
+            unauthorized_metric,
+            large_file_size_metric,
+            search_endpoint_metric,
+            feed_endpoint_metric,
+        ) = self.make_lambda_log_group(api_service_function)
 
         self.make_cloudwatch_dashboard(
             api_service_function=api_service_function,
@@ -82,17 +103,13 @@ class RSSMusicPlayerStack(Stack):
             unauthorized_metric=unauthorized_metric,
             large_file_size_metric=large_file_size_metric,
             search_endpoint_metric=search_endpoint_metric,
-            feed_endpoint_metric=feed_endpoint_metric
-            )
-        
-        
+            feed_endpoint_metric=feed_endpoint_metric,
+        )
 
     def _make_frontend_bucket(self) -> s3.Bucket:
         bucket = s3.Bucket(
             self,
             "RSSMusicPlayerFrontendBucket",
-            # Okay because we will rebuild the frontend on redeploy. Consider RETAIN for
-            # production.
             removal_policy=RemovalPolicy.DESTROY,
             auto_delete_objects=True,
         )
@@ -138,12 +155,36 @@ class RSSMusicPlayerStack(Stack):
             ),
         ]
 
+        additional_kwargs = {}
+        if CURRENT_STAGE == Stage.PRODUCTION:
+            zone = r53.HostedZone.from_hosted_zone_attributes(
+                self,
+                "RSSMusicPlayerHostedZone",
+                hosted_zone_id=R53_ZONE_ID,
+                zone_name=DOMAIN_NAME,
+            )
+
+            certificate = cm.DnsValidatedCertificate(
+                self,
+                "RSSMusicPlayerCertificate",
+                domain_name=FULL_DOMAIN_NAME,
+                hosted_zone=zone,
+                # Only supported region.
+                region="us-east-1",
+            )
+
+            additional_kwargs = {
+                "domain_names": [FULL_DOMAIN_NAME],
+                "certificate": certificate,
+            }
+
         distribution = cloudfront.Distribution(
             self,
             "RSSMusicPlayerFrontendDistribution",
             default_behavior=behavior,
             default_root_object="index.html",
             error_responses=spa_responses,
+            **additional_kwargs,
         )
 
         CfnOutput(
@@ -152,6 +193,24 @@ class RSSMusicPlayerStack(Stack):
             value=f"https://{distribution.domain_name}",
             description="The URL of the frontend",
         )
+
+        if CURRENT_STAGE == Stage.PRODUCTION:
+            r53.ARecord(
+                self,
+                "RSSMusicPlayerARecord",
+                zone=zone,
+                record_name=RECORD_NAME,
+                target=r53.RecordTarget.from_alias(
+                    r53_targets.CloudFrontTarget(distribution),
+                ),
+            )
+
+            CfnOutput(
+                self,
+                "RSSMusicPlayerOfficialURL",
+                value=f"https://{FULL_DOMAIN_NAME}",
+                description="The official website URL",
+            )
 
         return distribution
 
@@ -253,21 +312,6 @@ class RSSMusicPlayerStack(Stack):
             ),
         )
 
-        # api = apigw2.HttpApi(
-        #    self,
-        #    "RSSMusicPlayerDatabaseServiceApi",
-        #    handler=function,
-        #    endpoint_configuration=apigw.EndpointConfiguration(
-        #        types=[
-        #            apigw.EndpointType.REGIONAL,
-        #        ],
-        #    ),
-        #    default_method_options=apigw.MethodOptions(
-        #        authorization_type=apigw.AuthorizationType.IAM,
-        #    ),
-        #    proxy=True,
-        # )
-
         CfnOutput(
             self,
             "RSSMusicPlayerDatabaseServiceURL",
@@ -300,6 +344,10 @@ class RSSMusicPlayerStack(Stack):
             ),
         ]
 
+        allowed_domain = frontend_domain
+        if CURRENT_STAGE == Stage.PRODUCTION:
+            allowed_domain = FULL_DOMAIN_NAME
+
         function = _lambda.Function(
             self,
             "RSSMusicPlayerApiServiceFunction",
@@ -309,7 +357,7 @@ class RSSMusicPlayerStack(Stack):
             memory_size=512,
             architecture=_lambda.Architecture.ARM_64,
             environment={
-                "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{frontend_domain}",
+                "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{allowed_domain}",
                 "RSS_PLAYER_ENVIRONMENT": "production",
                 "RSS_PLAYER_DB_SERVICE_URL": db_service_api.url,
                 "RSS_PLAYER_API_ROOT": API_SERVICE_PREFIX,
@@ -398,7 +446,7 @@ class RSSMusicPlayerStack(Stack):
         config = {
             "backendUrl": api_url,
         }
- 
+
         deployment = s3_deploy.BucketDeployment(
             self,
             "RSSMusicPlayerFrontendDeployment",
@@ -431,6 +479,11 @@ class RSSMusicPlayerStack(Stack):
     def _make_database(
         self, database_vpc: ec2.Vpc, group: ec2.SecurityGroup
     ) -> rds.DatabaseInstance:
+        removal_policy = RemovalPolicy.DESTROY
+        if CURRENT_STAGE == Stage.PRODUCTION:
+            # Save a backup before deleting instance.
+            removal_policy = RemovalPolicy.SNAPSHOT
+
         database = rds.DatabaseInstance(
             self,
             "RSSMusicPlayerDatabase",
@@ -455,7 +508,7 @@ class RSSMusicPlayerStack(Stack):
             ),
             database_name="rssmusicplayer",
             backup_retention=Duration.days(1),
-            removal_policy=RemovalPolicy.DESTROY,
+            removal_policy=removal_policy,
         )
 
         database.connections.allow_default_port_from_any_ipv4(
@@ -532,7 +585,7 @@ class RSSMusicPlayerStack(Stack):
         )
 
         return groups
-    
+
     def make_lambda_log_group(self, function: _lambda.Function) -> logs.LogGroup:
         log_group = logs.LogGroup(
             self,
@@ -543,40 +596,57 @@ class RSSMusicPlayerStack(Stack):
 
         unauthorized_metric = log_group.add_metric_filter(
             "UnauthorizedFilter",
-             metric_name="AuthFailureCount",
+            metric_name="AuthFailureCount",
             metric_namespace="RSSMusicPlayer",
-            filter_pattern=logs.FilterPattern.all_terms('{ $.statusCode = 401 }'),
-            metric_value="1"
+            filter_pattern=logs.FilterPattern.all_terms("{ $.statusCode = 401 }"),
+            metric_value="1",
         ).metric()
 
         large_file_size_metric = log_group.add_metric_filter(
             "LargeFileSizeFilter",
             metric_name="LargeFileSizeCount",
             metric_namespace="RSSMusicPlayer",
-            filter_pattern=logs.FilterPattern.all_terms('{ $.statusCode = 503 }'),
-            metric_value="1"
+            filter_pattern=logs.FilterPattern.all_terms("{ $.statusCode = 503 }"),
+            metric_value="1",
         ).metric()
 
         search_endpoint_metric = log_group.add_metric_filter(
             "SearchEndpointFilter",
             metric_name="SearchEndpointCount",
             metric_namespace="RSSMusicPlayer",
-            filter_pattern=logs.FilterPattern.string_value("$.requestDetails", "=", "*/search*"),  
-            metric_value="1"
+            filter_pattern=logs.FilterPattern.string_value(
+                "$.requestDetails", "=", "*/search*"
+            ),
+            metric_value="1",
         ).metric()
 
         feed_endpoint_metric = log_group.add_metric_filter(
             "FeedEndpointFilter",
             metric_name="FeedEndpointCount",
             metric_namespace="RSSMusicPlayer",
-            filter_pattern=logs.FilterPattern.string_value("$.requestDetails", "=", "*/link/feed*"),  
-            metric_value="1"
-        ).metric()  
+            filter_pattern=logs.FilterPattern.string_value(
+                "$.requestDetails", "=", "*/link/feed*"
+            ),
+            metric_value="1",
+        ).metric()
 
-        return log_group, unauthorized_metric, large_file_size_metric, search_endpoint_metric, feed_endpoint_metric
-    
+        return (
+            log_group,
+            unauthorized_metric,
+            large_file_size_metric,
+            search_endpoint_metric,
+            feed_endpoint_metric,
+        )
 
-    def make_cloudwatch_dashboard(self, api_service_function, log_group, unauthorized_metric, large_file_size_metric, search_endpoint_metric, feed_endpoint_metric):
+    def make_cloudwatch_dashboard(
+        self,
+        api_service_function,
+        log_group,
+        unauthorized_metric,
+        large_file_size_metric,
+        search_endpoint_metric,
+        feed_endpoint_metric,
+    ):
         dashboard = cloudwatch.Dashboard(
             self,
             "RSSMusicPlayerDashboard",
@@ -625,15 +695,13 @@ class RSSMusicPlayerStack(Stack):
         _200_metric = cloudwatch.Metric(
             namespace="AWS/ApiGateway",
             metric_name="2XXSuccess",
-            dimensions_map={"ApiName":"RSSMusicPlayerBackendRestApi"},
+            dimensions_map={"ApiName": "RSSMusicPlayerBackendRestApi"},
             statistic="Sum",
             period=Duration.minutes(1),
         )
 
         success_error_widget = cloudwatch.GraphWidget(
-            title="Success vs Errors",
-            left=[_200_metric],
-            right=[_4xx_metric]
+            title="Success vs Errors", left=[_200_metric], right=[_4xx_metric]
         )
 
         lambda_widget = cloudwatch.GraphWidget(
@@ -650,58 +718,36 @@ class RSSMusicPlayerStack(Stack):
         latency_gauge = cloudwatch.GaugeWidget(
             title="Average API Latency",
             metrics=[latency],
-            left_y_axis=cloudwatch.YAxisProps(
-                min=0,
-                max=5000  # Set this to your upper threshold (e.g., 5 seconds)
-            ),
+            left_y_axis=cloudwatch.YAxisProps(min=0, max=5000),
             width=6,
-            height=6
+            height=6,
         )
 
         unauthorized_metric_widget = cloudwatch.GraphWidget(
-            title="Auth Failures (401)",
-            left=[unauthorized_metric],
-            width=12
+            title="Auth Failures (401)", left=[unauthorized_metric], width=12
         )
 
         file_size_widget = cloudwatch.GraphWidget(
-            title="Large File Failures (503)",
-            left=[large_file_size_metric],
-            width=12
+            title="Large File Failures (503)", left=[large_file_size_metric], width=12
         )
 
         search_endpoint_metric_widget = cloudwatch.GraphWidget(
-            title="Search Endpoint Hits",
-            left=[search_endpoint_metric],
-            width=12
+            title="Search Endpoint Hits", left=[search_endpoint_metric], width=12
         )
 
         feed_endpoint_metric_widget = cloudwatch.GraphWidget(
-            title="Feed Endpoint Hits",
-            left=[feed_endpoint_metric],
-            width=12
+            title="Feed Endpoint Hits", left=[feed_endpoint_metric], width=12
         )
 
         dashboard.add_widgets(
             cloudwatch.Row(
-                success_error_widget,
-                lambda_widget,
-                podcast_index_widget,
-                latency_gauge
+                success_error_widget, lambda_widget, podcast_index_widget, latency_gauge
             )
         )
         dashboard.add_widgets(
-            cloudwatch.Row(
-                unauthorized_metric_widget,
-                file_size_widget
-            )
+            cloudwatch.Row(unauthorized_metric_widget, file_size_widget)
         )
 
         dashboard.add_widgets(
-            cloudwatch.Row(
-                search_endpoint_metric_widget,
-                feed_endpoint_metric_widget
-            )
+            cloudwatch.Row(search_endpoint_metric_widget, feed_endpoint_metric_widget)
         )
-
-
