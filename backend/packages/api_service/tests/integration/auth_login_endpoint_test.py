@@ -257,6 +257,9 @@ def test_successful_login_clears_pkce_from_session(
             request, test_user["user_id"]
         )
 
+    with client.session_transaction() as session:
+        assert "code_challenge" in session
+
     with mock.patch(SEND_METHOD, side_effect=generate_successful_login) as _:
         response = client.post(
             ENDPOINT_URL,
@@ -266,22 +269,10 @@ def test_successful_login_clears_pkce_from_session(
                 "code_verifier": pkce_challenge["verifier"],
             },
         )
+        assert response.status_code == 200
 
-    assert response.status_code == 200
-
-    response2 = client.post(
-        ENDPOINT_URL,
-        json={
-            "username": test_user["username"],
-            "password": test_user["password"],
-            "code_verifier": pkce_challenge["verifier"],
-        },
-    )
-
-    assert response2.status_code == 400
-    data = response2.get_json()
-    assert data["error"] == "InvalidSession"
-    assert "PKCE" in data["message"]
+    with client.session_transaction() as session:
+        assert "code_challenge" not in session
 
 
 def test_login_returns_bad_request(client, test_user, pkce_challenge) -> None:

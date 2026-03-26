@@ -14,6 +14,9 @@ class TokenType(Enum):
 class InvalidCredentialsError(Exception):
     pass
 
+    # verify_existence will check the DB service to confirm the user exists. If denabled,
+    # this may return an exception should the DB service have an issue.
+
 
 class InvalidTokenError(Exception):
     pass
@@ -92,7 +95,10 @@ def generate_tokens(user_id: int, username: str, secret_key: str) -> dict:
 
 
 def verify_jwt(
-    token: str, secret_key: str, expected_type: TokenType = TokenType.ACCESS
+    token: str,
+    secret_key: str,
+    expected_type: TokenType = TokenType.ACCESS,
+    check_existence: bool = True,
 ) -> dict:
     """
     Verify a JWT token and check if the user still exists in the database.
@@ -123,7 +129,7 @@ def verify_jwt(
     if not user_id:
         raise InvalidTokenError("Invalid token: missing user ID")
 
-    if not db_service.check_user_exists(user_id):
+    if check_existence and not db_service.check_user_exists(user_id):
         raise UserNotFoundError("User no longer exists")
 
     return payload

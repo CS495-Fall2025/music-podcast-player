@@ -30,6 +30,11 @@ class ExternalAPIBadAuthenticationError(ExternalAPIReturnedError):
         super().__init__(message)
 
 
+class ExternalAPITooManyRequestsError(ExternalAPIReturnedError):
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
 # Errors encountered while parsing a successful response from an external API
 class ExternalAPIResponseError(ExternalAPIError):
     def __init__(self, message: str):

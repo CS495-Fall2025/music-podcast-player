@@ -64,7 +64,7 @@ def try_user_login(username: str, password: str) -> tuple[int, str, bool] | None
     return (
         response_data["id"],
         response_data["username"],
-        response_data.get("email_verified", True),
+        response_data["email_verified"],
     )
 
 
@@ -133,9 +133,10 @@ def _create_user_request(
 def _handle_error(response: requests.Response) -> None:
     try:
         error_data = ErrorResponse().load(response.json())
-    except exceptions.ValidationError:
+    except exceptions.ValidationError as error:
         raise errors.InternalAPIBadResponseError(
-            "Recieved unexpected data from database service"
+            "Recieved unexpected data from database service",
+            error.messages,
         )
 
     match error_data["error"]:
