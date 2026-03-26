@@ -1,18 +1,10 @@
 import hashlib
 import json
+from typing import Callable
 import uuid
 
 from requests import PreparedRequest, Response
 from urllib.parse import urlparse, parse_qs
-
-
-# def inspect_url(request: PreparedRequest) -> None:
-#    parsed_url = urlparse(request.url)
-#    url = urlunparse(parsed_url._replace(query=""))
-
-#    assert "https://api.podcastindex.org/api/1.0/search/music/byterm" == url, (
-#        "Request was made to to the wrong url"
-#    )
 
 
 def generate_valid_response(request: PreparedRequest) -> Response:
@@ -24,12 +16,71 @@ def generate_valid_response(request: PreparedRequest) -> Response:
     return generate_limited_response(request, max)
 
 
+def generate_custom_response(
+    request: PreparedRequest, field_modifier: Callable[[dict], dict]
+) -> Response:
+    parsed_url = urlparse(request.url)
+    queries = parse_qs(parsed_url.query)
+
+    max = int(queries["max"][0]) if "max" in queries else 1000
+    query = queries["q"][0]
+
+    data = _generate_limited_response_json(query, max)
+    field_modifier(data)
+
+    sdata = json.dumps(data)
+
+    response = Response()
+    response.status_code = 200
+    response._content = sdata.encode("UTF-8")
+    response.headers = {"Content-Type": "application/json"}
+
+    return response
+
+
 def generate_limited_response(request: PreparedRequest, amount: int) -> Response:
     parsed_url = urlparse(request.url)
     queries = parse_qs(parsed_url.query)
 
     query = queries["q"][0]
 
+    data = _generate_limited_response_json(query, amount)
+
+    sdata = json.dumps(data)
+
+    response = Response()
+    response.status_code = 200
+    response._content = sdata.encode("UTF-8")
+    response.headers = {"Content-Type": "application/json"}
+
+    return response
+
+
+def generate_bad_request_response(request: PreparedRequest) -> Response:
+    data = {
+        "status": "false",
+        "description": "Error because of bad request",
+    }
+
+    sdata = json.dumps(data)
+
+    response = Response()
+    response.status_code = 400
+    response._content = sdata.encode("UTF-8")
+    response.headers = {"Content-Type": "application/json"}
+
+    return response
+
+
+def generate_bad_authentication_response(request: PreparedRequest) -> Response:
+    response = Response()
+    response.status_code = 400
+    response._content = b"Not authenticated"
+
+    return response
+
+
+def _generate_limited_response_json(query: str, amount: int) -> dict:
     feeds = []
 
     for i in range(amount):
@@ -84,35 +135,4 @@ def generate_limited_response(request: PreparedRequest, amount: int) -> Response
         "description": f"Feeds matching query {query}",
     }
 
-    sdata = json.dumps(data)
-
-    response = Response()
-    response.status_code = 200
-    response._content = sdata.encode("UTF-8")
-    response.headers = {"Content-Type": "application/json"}
-
-    return response
-
-
-def generate_bad_request_response(request: PreparedRequest) -> Response:
-    data = {
-        "status": "false",
-        "description": "Error because of bad request",
-    }
-
-    sdata = json.dumps(data)
-
-    response = Response()
-    response.status_code = 400
-    response._content = sdata.encode("UTF-8")
-    response.headers = {"Content-Type": "application/json"}
-
-    return response
-
-
-def generate_bad_authentication_response(request: PreparedRequest) -> Response:
-    response = Response()
-    response.status_code = 400
-    response._content = b"Not authenticated"
-
-    return response
+    return data

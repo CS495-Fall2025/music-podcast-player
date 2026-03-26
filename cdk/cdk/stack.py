@@ -22,6 +22,8 @@ from aws_cdk import (
     aws_s3 as s3,
     aws_s3_deployment as s3_deploy,
     custom_resources as cr,
+    aws_cloudwatch as cloudwatch,
+    aws_logs as logs,
 )
 from constructs import Construct
 
@@ -68,6 +70,18 @@ class RSSMusicPlayerStack(Stack):
             distribution,
             f"https://{distribution.distribution_domain_name}{API_SERVICE_PREFIX}",
         )
+        log_group, unauthorized_metric, large_file_size_metric, search_endpoint_metric, feed_endpoint_metric = self.make_lambda_log_group(api_service_function)
+
+        self.make_cloudwatch_dashboard(
+            api_service_function=api_service_function,
+            log_group=log_group,
+            unauthorized_metric=unauthorized_metric,
+            large_file_size_metric=large_file_size_metric,
+            search_endpoint_metric=search_endpoint_metric,
+            feed_endpoint_metric=feed_endpoint_metric
+            )
+        
+        
 
     def _make_frontend_bucket(self) -> s3.Bucket:
         bucket = s3.Bucket(
@@ -369,7 +383,7 @@ class RSSMusicPlayerStack(Stack):
         config = {
             "backendUrl": api_url,
         }
-
+ 
         deployment = s3_deploy.BucketDeployment(
             self,
             "RSSMusicPlayerFrontendDeployment",
@@ -491,3 +505,176 @@ class RSSMusicPlayerStack(Stack):
         )
 
         return groups
+    
+    def make_lambda_log_group(self, function: _lambda.Function) -> logs.LogGroup:
+        log_group = logs.LogGroup(
+            self,
+            f"{function.node.id}LogGroup",
+            retention=logs.RetentionDays.ONE_WEEK,
+            removal_policy=RemovalPolicy.DESTROY,
+        )
+
+        unauthorized_metric = log_group.add_metric_filter(
+            "UnauthorizedFilter",
+             metric_name="AuthFailureCount",
+            metric_namespace="RSSMusicPlayer",
+            filter_pattern=logs.FilterPattern.all_terms('{ $.statusCode = 401 }'),
+            metric_value="1"
+        ).metric()
+
+        large_file_size_metric = log_group.add_metric_filter(
+            "LargeFileSizeFilter",
+            metric_name="LargeFileSizeCount",
+            metric_namespace="RSSMusicPlayer",
+            filter_pattern=logs.FilterPattern.all_terms('{ $.statusCode = 503 }'),
+            metric_value="1"
+        ).metric()
+
+        search_endpoint_metric = log_group.add_metric_filter(
+            "SearchEndpointFilter",
+            metric_name="SearchEndpointCount",
+            metric_namespace="RSSMusicPlayer",
+            filter_pattern=logs.FilterPattern.string_value("$.requestDetails", "=", "*/search*"),  
+            metric_value="1"
+        ).metric()
+
+        feed_endpoint_metric = log_group.add_metric_filter(
+            "FeedEndpointFilter",
+            metric_name="FeedEndpointCount",
+            metric_namespace="RSSMusicPlayer",
+            filter_pattern=logs.FilterPattern.string_value("$.requestDetails", "=", "*/link/feed*"),  
+            metric_value="1"
+        ).metric()  
+
+        return log_group, unauthorized_metric, large_file_size_metric, search_endpoint_metric, feed_endpoint_metric
+    
+
+    def make_cloudwatch_dashboard(self, api_service_function, log_group, unauthorized_metric, large_file_size_metric, search_endpoint_metric, feed_endpoint_metric):
+        dashboard = cloudwatch.Dashboard(
+            self,
+            "RSSMusicPlayerDashboard",
+            dashboard_name="RSSMusicPlayerDashboard",
+            default_interval=Duration.minutes(5),
+        )
+
+        error_metric = cloudwatch.Metric(
+            namespace="AWS/Lambda",
+            metric_name="Errors",
+            dimensions_map={"FunctionName": api_service_function.function_name},
+            statistic="Sum",
+            period=Duration.minutes(1),
+        )
+
+        _4xx_metric = cloudwatch.Metric(
+            namespace="AWS/ApiGateway",
+            metric_name="4XXError",
+            dimensions_map={"ApiName": "RSSMusicPlayerBackendRestApi"},
+            statistic="Sum",
+            period=Duration.minutes(1),
+        )
+
+        latency = cloudwatch.Metric(
+            namespace="AWS/ApiGateway",
+            metric_name="Latency",
+            dimensions_map={"ApiName": "RSSMusicPlayerBackendRestApi"},
+            statistic="Average",
+            period=Duration.minutes(1),
+        )
+
+        podcast_index_queries = cloudwatch.Metric(
+            namespace="RSSMusicPlayer",
+            metric_name="PodcastIndexQueries",
+            statistic="Sum",
+            period=Duration.minutes(1),
+        )
+
+        podcast_index_errors = cloudwatch.Metric(
+            namespace="RSSMusicPlayer",
+            metric_name="PodcastIndexErrors",
+            statistic="Sum",
+            period=Duration.minutes(1),
+        )
+
+        _200_metric = cloudwatch.Metric(
+            namespace="AWS/ApiGateway",
+            metric_name="2XXSuccess",
+            dimensions_map={"ApiName":"RSSMusicPlayerBackendRestApi"},
+            statistic="Sum",
+            period=Duration.minutes(1),
+        )
+
+        success_error_widget = cloudwatch.GraphWidget(
+            title="Success vs Errors",
+            left=[_200_metric],
+            right=[_4xx_metric]
+        )
+
+        lambda_widget = cloudwatch.GraphWidget(
+            title="Lambda Errors",
+            left=[error_metric],
+        )
+
+        podcast_index_widget = cloudwatch.GraphWidget(
+            title="Podcast Index API Usage",
+            left=[podcast_index_queries],
+            right=[podcast_index_errors],
+        )
+
+        latency_gauge = cloudwatch.GaugeWidget(
+            title="Average API Latency",
+            metrics=[latency],
+            left_y_axis=cloudwatch.YAxisProps(
+                min=0,
+                max=5000  # Set this to your upper threshold (e.g., 5 seconds)
+            ),
+            width=6,
+            height=6
+        )
+
+        unauthorized_metric_widget = cloudwatch.GraphWidget(
+            title="Auth Failures (401)",
+            left=[unauthorized_metric],
+            width=12
+        )
+
+        file_size_widget = cloudwatch.GraphWidget(
+            title="Large File Failures (503)",
+            left=[large_file_size_metric],
+            width=12
+        )
+
+        search_endpoint_metric_widget = cloudwatch.GraphWidget(
+            title="Search Endpoint Hits",
+            left=[search_endpoint_metric],
+            width=12
+        )
+
+        feed_endpoint_metric_widget = cloudwatch.GraphWidget(
+            title="Feed Endpoint Hits",
+            left=[feed_endpoint_metric],
+            width=12
+        )
+
+        dashboard.add_widgets(
+            cloudwatch.Row(
+                success_error_widget,
+                lambda_widget,
+                podcast_index_widget,
+                latency_gauge
+            )
+        )
+        dashboard.add_widgets(
+            cloudwatch.Row(
+                unauthorized_metric_widget,
+                file_size_widget
+            )
+        )
+
+        dashboard.add_widgets(
+            cloudwatch.Row(
+                search_endpoint_metric_widget,
+                feed_endpoint_metric_widget
+            )
+        )
+
+

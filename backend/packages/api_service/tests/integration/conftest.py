@@ -40,3 +40,23 @@ def client(app):
 
     with mock.patch("requests.Session.send", side_effect=fail_request) as _:
         yield app.test_client()
+
+
+@pytest.fixture
+def mock_db_service():
+    """Patches the db_service module used in the routes."""
+    with mock.patch("rss_music_api_service.routes.playlists.db_service") as mocked:
+        yield mocked
+
+
+@pytest.fixture
+def mock_user_id():
+    user_id = 123
+    with mock.patch(
+        "rss_music_api_service.routes.playlists.get_current_user_id",
+        return_value=user_id,
+    ):
+        with mock.patch(
+            "rss_music_api_service.routes.auth.login_required", lambda x: x
+        ):
+            yield user_id

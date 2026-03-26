@@ -51,11 +51,13 @@ def apply_blueprints(app: Flask) -> None:
     from rss_music_api_service.routes.search import SEARCH_BP
     from rss_music_api_service.routes.link import LINK_BP
     from rss_music_api_service.routes.auth import AUTH_BP
+    from rss_music_api_service.routes.playlists import PLAYLISTS_BP
 
     blueprints = [
         SEARCH_BP,
         LINK_BP,
         AUTH_BP,
+        PLAYLISTS_BP,
     ]
 
     root_bp = Blueprint("root", __name__, url_prefix=app.config["API_ROOT"])

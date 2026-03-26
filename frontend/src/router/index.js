@@ -8,6 +8,7 @@ import SignupPage from "../pages/SignupPage.vue";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage.vue";
 import ResetPasswordPage from "../pages/ResetPasswordPage.vue";
 import { isAuthenticated } from "../auth/authService";
+import UserProfilePage from "../pages/UserPage.vue";
 
 const routes = [
   { path: "/", component: InputFeedPage },
@@ -59,6 +60,12 @@ const routes = [
   {
     path: "/auth/callback",
     component: AuthCallback,
+  },
+
+  {
+    path: "/user",
+    component: UserProfilePage,
+    meta: { requiresAuth: true },
   },
 
   ...(import.meta.env.VITE_INCLUDE_DEV_FEATURES !== "yes" ? [] : []),

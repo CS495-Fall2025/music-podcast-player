@@ -1,3 +1,4 @@
+from functools import wraps
 import flask
 from datetime import datetime, timezone
 from flask import Blueprint, request, session, current_app
@@ -21,6 +22,20 @@ from rss_music_api_service.services import email_service
 AUTH_BP = Blueprint("auth", __name__, url_prefix="/auth")
 logger = get_logger(__name__)
 PENDING_SIGNUP_KEY = "pending_signup"
+
+
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if get_current_user_id() is None:
+            return {
+                "code": 401,
+                "error": "MissingToken",
+                "message": "No token foudn",
+            }, 401
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 @AUTH_BP.after_request
