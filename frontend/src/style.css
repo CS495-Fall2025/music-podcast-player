@@ -75,6 +75,15 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+#app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+}
+
 body {
   display: flex;
   flex-direction: column;
@@ -82,16 +91,14 @@ body {
 
   margin: 0;
 
-  min-height: 100dvh;
+  height: 100dvh;
 
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   -webkit-overflow-scrolling: touch;
 
   background-color: var(--body-background);
 
   padding: 0;
-  padding-bottom: var(--player-height, 150px);
 }
 
 /* ========================================

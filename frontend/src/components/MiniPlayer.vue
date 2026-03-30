@@ -136,10 +136,12 @@ const {
 
 <style scoped>
 .player-box {
-  background-color: var(--player-background);
+  position: absolute; 
 
+  background-color: var(--player-background);
   padding: clamp(8px, 1.5vh, 16px);
   padding-bottom: calc(clamp(8px, 1.5vh, 16px) + env(safe-area-inset-bottom));
+  
   right: 0;
   bottom: 0;
   left: 0;

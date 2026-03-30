@@ -12,6 +12,8 @@ import UserFeed from "../components/UserFeed.vue";
 
 <style scoped>
 .page-layout {
+  position: relative; 
+
   display: flex;
   flex-direction: column;
   flex: 1;
