@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from rss_music_data_model import initialize_engine
 from rss_music_db_service.routes import users
+from rss_music_db_service.routes import playlists
 from rss_music_db_service.logging_config import configure_logging
 
 
@@ -14,5 +15,6 @@ def create_app() -> FastAPI:
 
     app = FastAPI()
     app.include_router(users, prefix="/users")
+    app.include_router(playlists, prefix="/playlists")
 
     return app
