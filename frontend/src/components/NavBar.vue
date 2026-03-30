@@ -24,6 +24,7 @@
     </div>
 
     <div class="nav-right">
+      <DripIndicator />
       <div v-if="isAuthenticated" class="user-greeting">
         Hello, {{ currentUser?.username }}!
       </div>
@@ -92,6 +93,7 @@
 
 <script setup>
 import useNavbar from "../controllers/navBar.js";
+import DripIndicator from "./DripIndicator.vue";
 import { ref } from "vue";
 
 const {
