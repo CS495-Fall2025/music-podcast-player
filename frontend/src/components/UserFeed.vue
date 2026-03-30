@@ -29,7 +29,9 @@
   gap: 0.5rem;
 
   /* padding-bottom: var(--player-height, 150px); */
-  padding-bottom: calc(var(--player-height) + env(safe-area-inset-bottom) + 130px);
+  padding-bottom: calc(
+    var(--player-height) + env(safe-area-inset-bottom) + 130px
+  );
 }
 
 .feed-info {
