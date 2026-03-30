@@ -95,7 +95,12 @@ const {
         vmodel="ready"
         :disabled="!ready || !feedTracks.length"
       >
-        <img :src="reverseIcon" alt="Reverse" class="play-icon" />
+        <img
+          :src="reverseIcon"
+          alt="Reverse"
+          class="play-icon"
+          :style="'transform: rotate(90deg);'"
+        />
       </button>
       <button
         class="media-button skip-back-button"
