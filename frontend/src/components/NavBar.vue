@@ -13,7 +13,7 @@
 
       <div :class="['nav-links', { 'is-open': isOpen }]">
         <router-link to="/" class="nav-link">Home</router-link>
-        <router-link to="/" class="nav-link">About</router-link>
+        <router-link to="/about" class="nav-link">About</router-link>
         <router-link to="/" class="nav-link">Contact</router-link>
         <router-link to="/search" class="nav-link">Search Feeds</router-link>
         <router-link to="/" class="nav-link">Input Feed</router-link>
