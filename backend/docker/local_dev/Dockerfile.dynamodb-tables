@@ -1,0 +1,16 @@
+FROM python:3.13-alpine
+
+WORKDIR /app
+
+# Install uv for better dependency management
+RUN pip3 install uv
+
+COPY dynamodb_tables/pyproject.toml pyproject.toml
+RUN uv sync --no-install-project
+
+# Install rss_music_dynamodb_tables
+COPY dynamodb_tables .
+RUN uv sync
+
+# Run local handler when container starts
+CMD ["uv", "run", "local_handler.py"]
