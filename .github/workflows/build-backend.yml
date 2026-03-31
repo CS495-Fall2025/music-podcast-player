@@ -28,3 +28,4 @@ jobs:
         with:
           name: backend-build-${{ inputs.package-name }}
           path: ${{ github.workspace }}/build/${{ inputs.package-name }}-build.zip
+          retention-days: 1
