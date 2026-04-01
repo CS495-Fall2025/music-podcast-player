@@ -1,11 +1,7 @@
 name: Development Deployment
 
-#on:
-#  push:
-#    branches:
-#      - dev
 on:
-  pull_request:
+  push:
     branches:
       - dev
 
