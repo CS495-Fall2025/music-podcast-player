@@ -6,7 +6,13 @@ import rss_music_db_service_schemas.users.requests as db_user_requests
 import rss_music_db_service_schemas.users.responses as db_user_responses
 
 from rss_music_db_service import errors
-from rss_music_db_service.users import create, exists, login
+from rss_music_db_service.users import (
+    create,
+    exists,
+    login,
+    verification,
+    password_reset,
+)
 from rss_music_db_service.basic_validation import validate_json
 from rss_music_db_service.logging_config import log_request, get_logger
 
@@ -192,6 +198,7 @@ async def user_login(request: Request, response: Response):
     response_data = {
         "username": user.username,
         "id": user.id,
+        "email_verified": user.email_verified,
     }
 
     log_request(
@@ -204,3 +211,181 @@ async def user_login(request: Request, response: Response):
     )
 
     return db_user_responses.UserLoginResponse().dump(response_data)
+
+
+@users.post("/set-email-verification-code")
+async def set_email_verification_code(request: Request, response: Response):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Set email verification code request received",
+        route="/users/set-email-verification-code",
+    )
+
+    result = await validate_json(
+        request, db_user_requests.SetEmailVerificationCodeRequest()
+    )
+
+    if isinstance(result, JSONResponse):
+        response.status_code = result.status_code
+        level = "warn" if result.status_code < 500 else "error"
+        log_request(
+            logger,
+            level,
+            "response_sent",
+            "Response sent",
+            route="/users/set-email-verification-code",
+            status_code=result.status_code,
+        )
+        return result
+
+    updated = verification.set_email_verification_code(
+        result["email"],
+        result["code"],
+        result["expires_at"],
+    )
+
+    response_data = {"success": updated}
+
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route="/users/set-email-verification-code",
+        status_code=200,
+    )
+
+    return db_user_responses.OperationSuccessResponse().dump(response_data)
+
+
+@users.post("/verify-email")
+async def verify_email(request: Request, response: Response):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Verify email request received",
+        route="/users/verify-email",
+    )
+
+    result = await validate_json(request, db_user_requests.VerifyEmailRequest())
+
+    if isinstance(result, JSONResponse):
+        response.status_code = result.status_code
+        level = "warn" if result.status_code < 500 else "error"
+        log_request(
+            logger,
+            level,
+            "response_sent",
+            "Response sent",
+            route="/users/verify-email",
+            status_code=result.status_code,
+        )
+        return result
+
+    verified = verification.verify_email(result["email"], result["code"])
+
+    response_data = {"success": verified}
+
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route="/users/verify-email",
+        status_code=200,
+    )
+
+    return db_user_responses.OperationSuccessResponse().dump(response_data)
+
+
+@users.post("/set-password-reset-code")
+async def set_password_reset_code(request: Request, response: Response):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Set password reset code request received",
+        route="/users/set-password-reset-code",
+    )
+
+    result = await validate_json(
+        request, db_user_requests.SetPasswordResetCodeRequest()
+    )
+
+    if isinstance(result, JSONResponse):
+        response.status_code = result.status_code
+        level = "warn" if result.status_code < 500 else "error"
+        log_request(
+            logger,
+            level,
+            "response_sent",
+            "Response sent",
+            route="/users/set-password-reset-code",
+            status_code=result.status_code,
+        )
+        return result
+
+    updated = password_reset.set_password_reset_code(
+        result["email"],
+        result["code"],
+        result["expires_at"],
+    )
+
+    response_data = {"success": updated}
+
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route="/users/set-password-reset-code",
+        status_code=200,
+    )
+
+    return db_user_responses.OperationSuccessResponse().dump(response_data)
+
+
+@users.post("/reset-password")
+async def reset_user_password(request: Request, response: Response):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Reset password request received",
+        route="/users/reset-password",
+    )
+
+    result = await validate_json(request, db_user_requests.ResetPasswordRequest())
+
+    if isinstance(result, JSONResponse):
+        response.status_code = result.status_code
+        level = "warn" if result.status_code < 500 else "error"
+        log_request(
+            logger,
+            level,
+            "response_sent",
+            "Response sent",
+            route="/users/reset-password",
+            status_code=result.status_code,
+        )
+        return result
+
+    password_was_reset = password_reset.reset_password(
+        result["email"], result["code"], result["new_password"]
+    )
+
+    response_data = {"success": password_was_reset}
+
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route="/users/reset-password",
+        status_code=200,
+    )
+
+    return db_user_responses.OperationSuccessResponse().dump(response_data)

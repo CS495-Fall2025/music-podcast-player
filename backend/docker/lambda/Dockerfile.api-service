@@ -16,6 +16,7 @@ COPY ./packages/api_service/pyproject.toml pyproject.toml
 # Install backend dependencies (will be cached)
 COPY ./packages/common_validators ../common_validators
 COPY ./packages/db_service_schemas ../db_service_schemas
+COPY ./packages/dynamodb_tables ../dynamodb_tables
 RUN uv sync --no-install-project --group lambda
 
 # Install backend package (dependencies cached)

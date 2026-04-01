@@ -5,6 +5,8 @@ import ViewFeedPage from "../pages/ViewFeedPage.vue";
 import AuthCallback from "../pages/AuthCallback.vue";
 import LoginPage from "../pages/LoginPage.vue";
 import SignupPage from "../pages/SignupPage.vue";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage.vue";
+import ResetPasswordPage from "../pages/ResetPasswordPage.vue";
 import { isAuthenticated } from "../auth/authService";
 import UserProfilePage from "../pages/UserPage.vue";
 
@@ -32,6 +34,26 @@ const routes = [
   {
     path: "/signup",
     component: SignupPage,
+    meta: { requiresAuth: false },
+  },
+
+  {
+    path: "/verify-email",
+    redirect: {
+      path: "/signup",
+      query: { step: "verify" },
+    },
+  },
+
+  {
+    path: "/forgot-password",
+    component: ForgotPasswordPage,
+    meta: { requiresAuth: false },
+  },
+
+  {
+    path: "/reset-password",
+    component: ResetPasswordPage,
     meta: { requiresAuth: false },
   },
 

@@ -1,17 +1,25 @@
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 import loadConfig from "../config";
 
 const router = useRouter();
+const route = useRoute();
 const username = ref("");
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
+const verificationCode = ref("");
 const loading = ref(false);
 const error = ref("");
 const success = ref(false);
+const info = ref("");
+const isVerificationStep = computed(() => route.query.step === "verify");
+
+const isVerificationCodeValid = computed(() =>
+  /^\d{6}$/.test(verificationCode.value),
+);
 
 const passwordRequirements = {
   length: (password) => password.length >= 12,
@@ -30,6 +38,7 @@ const handleSignup = async (e) => {
   e.preventDefault();
   error.value = "";
   success.value = false;
+  info.value = "";
 
   // client-side validation
   if (
@@ -105,18 +114,67 @@ const handleSignup = async (e) => {
     }
 
     success.value = true;
+
     username.value = "";
     email.value = "";
     password.value = "";
     confirmPassword.value = "";
 
-    // redirect to login after successful sign-up
+    // Move the user directly into verification step on this same page.
     setTimeout(() => {
-      router.push("/login");
+      router.push({
+        path: "/signup",
+        query: { step: "verify" },
+      });
     }, 2000);
   } catch (err) {
     console.error("Signup error:", err);
     error.value = "Network error. Please try again.";
+  } finally {
+    loading.value = false;
+  }
+};
+
+const handleVerification = async (e) => {
+  e.preventDefault();
+  error.value = "";
+  success.value = false;
+  info.value = "";
+  if (!isVerificationCodeValid.value) {
+    error.value = "Verification code must be exactly 6 digits.";
+    return;
+  }
+
+  loading.value = true;
+
+  try {
+    const config = await loadConfig();
+
+    const response = await fetch(`${config.backendUrl}/auth/signup/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        code: verificationCode.value,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || "Invalid or expired verification code");
+    }
+
+    success.value = true;
+    info.value = "Email verified successfully. Redirecting to login...";
+    verificationCode.value = "";
+
+    setTimeout(() => {
+      router.push("/login");
+    }, 1500);
+  } catch (err) {
+    error.value = err.message || "Verification failed. Please try again.";
   } finally {
     loading.value = false;
   }
@@ -126,9 +184,9 @@ const handleSignup = async (e) => {
 <template>
   <div class="signup-container">
     <div class="signup-card">
-      <h1>Create Account</h1>
+      <h1>{{ isVerificationStep ? "Verify Email" : "Create Account" }}</h1>
 
-      <form @submit="handleSignup">
+      <form v-if="!isVerificationStep" @submit="handleSignup">
         <div class="form-group">
           <label for="username">Username</label>
           <input
@@ -211,7 +269,7 @@ const handleSignup = async (e) => {
         </div>
 
         <div v-if="success" class="success-message">
-          Account created successfully! Redirecting to login...
+          Account created successfully! Redirecting to verification...
         </div>
 
         <button
@@ -223,9 +281,46 @@ const handleSignup = async (e) => {
         </button>
       </form>
 
-      <p class="login-link">
+      <form v-else @submit="handleVerification">
+        <div class="form-group">
+          <label for="verification-code">Verification Code</label>
+          <input
+            id="verification-code"
+            v-model="verificationCode"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            placeholder="Enter your 6-digit code"
+            :disabled="loading"
+            required
+          />
+        </div>
+
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
+
+        <div v-if="info" class="success-message">
+          {{ info }}
+        </div>
+
+        <button
+          type="submit"
+          :disabled="loading || !isVerificationCodeValid"
+          class="submit-button"
+        >
+          {{ loading ? "Verifying..." : "Verify" }}
+        </button>
+      </form>
+
+      <p v-if="!isVerificationStep" class="login-link">
         Already have an account?
         <router-link to="/login">Login here</router-link>
+      </p>
+
+      <p v-else class="login-link">
+        Need to create an account first?
+        <router-link to="/signup">Back to sign up</router-link>
       </p>
     </div>
   </div>
