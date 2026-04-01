@@ -82,11 +82,11 @@ body {
 
   margin: 0;
 
-  height: 100dvh;
-  min-height: 100vh;
+  min-height: 100dvh;
 
   overflow-x: hidden;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 
   background-color: var(--body-background);
 

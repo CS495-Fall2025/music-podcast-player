@@ -9,3 +9,4 @@ class UserLoginResponse(Schema):
         validate=common_validate.username,
     )
     id = fields.Int(required=True, validate=validate.Range(min=0))
+    email_verified = fields.Bool(required=True)

@@ -102,6 +102,10 @@ class PodcastIndexAPI:
                     raise errors.ExternalAPIBadAuthenticationError(
                         "Recieved 401 bad authentication from the PodcastIndex API"
                     )
+                case 429:
+                    raise errors.ExternalAPITooManyRequestsError(
+                        "Recieved 429 too many requests from the PodcastIndex API"
+                    )
                 case _:
                     raise errors.ExternalAPIReturnedError(
                         f"Recieved code {response.status_code} from the PodcastIndex API"
