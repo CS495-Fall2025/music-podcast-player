@@ -236,7 +236,9 @@ class RSSMusicPlayerStack(Stack):
                 "DATABASE_URL_PARTIAL": "postgresql://{user}:{password}@"
                 f"{database.db_instance_endpoint_address}:"
                 f"{database.db_instance_endpoint_port}",
-                "DATABASE_SECRET_ARN": database.secret.secret_arn,
+                # Will be rotated after deployment to minimize risk of exposure from 
+                # storing in an environment variable and the cloudformation.
+                "DATABASE_CREDENTIAL": database.secret.secret_value.unsafe_unwrap(),
             },
             vpc=database_vpc,
             security_groups=[group],
