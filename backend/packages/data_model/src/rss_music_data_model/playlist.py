@@ -1,9 +1,10 @@
 from datetime import datetime
 from sqlalchemy import String, ForeignKey, Integer, DateTime
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from rss_music_data_model.base import Base
+from rss_music_data_model.playlist_track import PlaylistTrack
 
 TITLE_MAX_LENGTH = 100
 DESCRIPTION_MAX_LENGTH = 255
@@ -29,4 +30,11 @@ class Playlist(Base):
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
+    )
+
+    tracks: Mapped[list["PlaylistTrack"]] = relationship(
+        "PlaylistTrack",
+        backref="playlist",
+        order_by="PlaylistTrack.position",
+        cascade="all, delete-orphan",
     )
