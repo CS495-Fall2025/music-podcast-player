@@ -8,6 +8,7 @@
     <div class="track-info">
       <div class="track-title">{{ trackTitle }}</div>
       <div class="track-artist">{{ trackArtist }}</div>
+      <div class="track-number">Track {{ trackNumber }}</div>
     </div>
     <div class="track-description" v-html="trackDescription"></div>
   </div>
@@ -61,6 +62,14 @@
 .track-artist {
   font-size: 0.8rem;
   opacity: 0.75;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.track-number {
+  font-size: 0.75rem;
+  opacity: 0.65;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
