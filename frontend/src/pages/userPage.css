@@ -1,14 +1,19 @@
 .page-layout {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   width: 100%;
+  overflow: hidden;
 }
 
 .profile-container {
-  min-height: 100vh;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
   padding: clamp(1.25rem, 3vw, 2.5rem);
+  padding-bottom: calc(var(--player-height) + env(safe-area-inset-bottom) + 130px);
   background:
     radial-gradient(circle at top left, rgba(255, 183, 128, 0.24), transparent 28%),
     radial-gradient(circle at right center, rgba(35, 100, 170, 0.34), transparent 32%),
