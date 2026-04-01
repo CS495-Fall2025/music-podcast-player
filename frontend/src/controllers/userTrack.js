@@ -30,6 +30,10 @@ export default {
         }
       );
     },
+    // Returns True if this is the currently playing track, false if not.
+    isActive() {
+      return currentTrack.value === this.track;
+    },
     // Returns the track's image, if there's no image, returns placeholder.
     trackImage() {
       return this.trackObj.image || "/src/assets/images/default-image.jpg";
