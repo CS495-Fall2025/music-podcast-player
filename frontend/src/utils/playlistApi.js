@@ -25,3 +25,71 @@ export async function fetchPlaylistDetail(playlistId) {
 
   return response.json();
 }
+
+export async function removeTrackFromPlaylist(playlistId, trackUrl) {
+  const config = await loadConfig();
+  const response = await fetch(
+    `${config.backendUrl}/playlists/${playlistId}/tracks/remove`,
+    {
+      method: "DELETE",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ track_url: trackUrl }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Unable to remove track.");
+  }
+
+  return response.json();
+}
+
+export async function reorderTrackInPlaylist(
+  playlistId,
+  trackUrl,
+  newPosition,
+) {
+  const config = await loadConfig();
+  const response = await fetch(
+    `${config.backendUrl}/playlists/${playlistId}/tracks/reorder`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ track_url: trackUrl, new_position: newPosition }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Unable to reorder track.");
+  }
+
+  return response.json();
+}
+
+export async function fetchPublicUserPlaylists(username) {
+  const config = await loadConfig();
+  const response = await fetch(
+    `${config.backendUrl}/playlists/user/${username}`,
+  );
+
+  if (!response.ok) {
+    throw new Error("User not found.");
+  }
+
+  return response.json();
+}
+
+export async function fetchPublicPlaylistDetail(playlistId) {
+  const config = await loadConfig();
+  const response = await fetch(
+    `${config.backendUrl}/playlists/public/${playlistId}`,
+  );
+
+  if (!response.ok) {
+    throw new Error("Unable to load playlist tracks.");
+  }
+
+  return response.json();
+}
