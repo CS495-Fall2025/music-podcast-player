@@ -365,7 +365,7 @@ def get_user_playlists(user_id: int) -> list[dict]:
     if not response.status_code == 200:
         _handle_error(response)
 
-    return response.json()
+    return response.json()["playlists"]
 
 
 def _create_get_user_playlists_request(user_id: int) -> requests.PreparedRequest:

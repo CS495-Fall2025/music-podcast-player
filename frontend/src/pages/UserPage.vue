@@ -49,7 +49,7 @@ async function loadPlaylists() {
 
   try {
     const response = await fetchUserPlaylists();
-    playlistTotal.value = response.total;
+    playlistTotal.value = response.playlists.length;
     totalTracks.value = response.playlists.reduce((sum, p) => sum + p.track_count, 0);
     playlists.value = mapPlaylistResponse(response);
   } catch (error) {
@@ -103,6 +103,7 @@ function closePlaylist() {
 </script>
 
 <template>
+  <div class="page-layout">
   <div v-if="currentUser" class="profile-container">
     <div class="profile-card">
       <section class="profile-hero">
@@ -197,11 +198,13 @@ function closePlaylist() {
       </section>
     </div>
 
-    <MiniPlayer />
   </div>
 
   <div v-else class="loading-state">
     <p>Loading profile...</p>
+  </div>
+
+  <MiniPlayer />
   </div>
 </template>
 

@@ -1,6 +1,9 @@
+import loadConfig from "../config";
+
 export async function fetchUserPlaylists() {
-  const response = await fetch("/mock-playlists.json", {
-    cache: "no-store",
+  const config = await loadConfig();
+  const response = await fetch(`${config.backendUrl}/playlists/me`, {
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -11,8 +14,9 @@ export async function fetchUserPlaylists() {
 }
 
 export async function fetchPlaylistDetail(playlistId) {
-  const response = await fetch(`/mock-playlist-${playlistId}.json`, {
-    cache: "no-store",
+  const config = await loadConfig();
+  const response = await fetch(`${config.backendUrl}/playlists/${playlistId}`, {
+    credentials: "include",
   });
 
   if (!response.ok) {
