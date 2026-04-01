@@ -34,10 +34,11 @@
 .track.active {
   background-color: var(--hover-blue);
   color: var(--dark-blue);
-  transform: scale(1.025);
+  transform: scale(1.015);
 }
 
 .track.active {
+  background-color: var(--active-blue);
   border-left: 4px solid var(--dark-blue);
 }
 
