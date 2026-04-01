@@ -231,7 +231,11 @@ async def add_track_route(id: int, request: Request, response: Response):
     except TrackAlreadyExistsError as err:
         return JSONResponse(
             status_code=409,
-            content={"error": "NotUnique", "message": str(err), "details": {"field": "track_url"}},
+            content={
+                "error": "NotUnique",
+                "message": str(err),
+                "details": {"field": "track_url"},
+            },
         )
 
 

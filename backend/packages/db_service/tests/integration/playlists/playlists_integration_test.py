@@ -142,7 +142,10 @@ def test_add_track_success(client, db_session):
 
     response = client.post(
         f"/playlists/{playlist.id}/tracks/add",
-        json={"track_url": "http://example.com/feed.rss", "created_by_user_id": user.id},
+        json={
+            "track_url": "http://example.com/feed.rss",
+            "created_by_user_id": user.id,
+        },
     )
 
     assert response.status_code == 201
@@ -173,7 +176,10 @@ def test_add_track_unauthorized(client, db_session):
 
     response = client.post(
         f"/playlists/{playlist.id}/tracks/add",
-        json={"track_url": "http://example.com/feed.rss", "created_by_user_id": user.id + 999},
+        json={
+            "track_url": "http://example.com/feed.rss",
+            "created_by_user_id": user.id + 999,
+        },
     )
 
     assert response.status_code == 404
@@ -182,7 +188,10 @@ def test_add_track_unauthorized(client, db_session):
 def test_add_track_duplicate_returns_conflict(client, db_session):
     user, playlist = _make_user_and_playlist(db_session)
 
-    payload = {"track_url": "http://example.com/feed.rss", "created_by_user_id": user.id}
+    payload = {
+        "track_url": "http://example.com/feed.rss",
+        "created_by_user_id": user.id,
+    }
     client.post(f"/playlists/{playlist.id}/tracks/add", json=payload)
     response = client.post(f"/playlists/{playlist.id}/tracks/add", json=payload)
 
@@ -194,13 +203,19 @@ def test_remove_track_success(client, db_session):
 
     client.post(
         f"/playlists/{playlist.id}/tracks/add",
-        json={"track_url": "http://example.com/feed.rss", "created_by_user_id": user.id},
+        json={
+            "track_url": "http://example.com/feed.rss",
+            "created_by_user_id": user.id,
+        },
     )
 
     response = client.request(
         "DELETE",
         f"/playlists/{playlist.id}/tracks/remove",
-        json={"track_url": "http://example.com/feed.rss", "created_by_user_id": user.id},
+        json={
+            "track_url": "http://example.com/feed.rss",
+            "created_by_user_id": user.id,
+        },
     )
 
     assert response.status_code == 200
@@ -216,7 +231,10 @@ def test_remove_track_not_found(client, db_session):
     response = client.request(
         "DELETE",
         f"/playlists/{playlist.id}/tracks/remove",
-        json={"track_url": "http://example.com/missing.rss", "created_by_user_id": user.id},
+        json={
+            "track_url": "http://example.com/missing.rss",
+            "created_by_user_id": user.id,
+        },
     )
 
     assert response.status_code == 404
@@ -228,7 +246,10 @@ def test_get_playlist_by_id_success(client, db_session):
 
     client.post(
         f"/playlists/{playlist.id}/tracks/add",
-        json={"track_url": "http://example.com/feed.rss", "created_by_user_id": user.id},
+        json={
+            "track_url": "http://example.com/feed.rss",
+            "created_by_user_id": user.id,
+        },
     )
 
     response = client.get(f"/playlists/{playlist.id}")
@@ -252,7 +273,11 @@ def test_get_playlist_by_id_not_found(client, db_session):
 def test_reorder_track_success(client, db_session):
     user, playlist = _make_user_and_playlist(db_session)
 
-    for url in ["http://example.com/a.rss", "http://example.com/b.rss", "http://example.com/c.rss"]:
+    for url in [
+        "http://example.com/a.rss",
+        "http://example.com/b.rss",
+        "http://example.com/c.rss",
+    ]:
         client.post(
             f"/playlists/{playlist.id}/tracks/add",
             json={"track_url": url, "created_by_user_id": user.id},
@@ -261,15 +286,27 @@ def test_reorder_track_success(client, db_session):
     # Move track at position 1 to position 3
     response = client.patch(
         f"/playlists/{playlist.id}/tracks/reorder",
-        json={"track_url": "http://example.com/a.rss", "new_position": 3, "created_by_user_id": user.id},
+        json={
+            "track_url": "http://example.com/a.rss",
+            "new_position": 3,
+            "created_by_user_id": user.id,
+        },
     )
 
     assert response.status_code == 200
     assert response.json()["position"] == 3
 
     # Confirm the other tracks shifted up
-    b = db_session.query(PlaylistTrack).filter_by(playlist_id=playlist.id, track_url="http://example.com/b.rss").first()
-    c = db_session.query(PlaylistTrack).filter_by(playlist_id=playlist.id, track_url="http://example.com/c.rss").first()
+    b = (
+        db_session.query(PlaylistTrack)
+        .filter_by(playlist_id=playlist.id, track_url="http://example.com/b.rss")
+        .first()
+    )
+    c = (
+        db_session.query(PlaylistTrack)
+        .filter_by(playlist_id=playlist.id, track_url="http://example.com/c.rss")
+        .first()
+    )
     assert b.position == 1
     assert c.position == 2
 
@@ -279,7 +316,11 @@ def test_reorder_track_not_found(client, db_session):
 
     response = client.patch(
         f"/playlists/{playlist.id}/tracks/reorder",
-        json={"track_url": "http://example.com/missing.rss", "new_position": 1, "created_by_user_id": user.id},
+        json={
+            "track_url": "http://example.com/missing.rss",
+            "new_position": 1,
+            "created_by_user_id": user.id,
+        },
     )
 
     assert response.status_code == 404

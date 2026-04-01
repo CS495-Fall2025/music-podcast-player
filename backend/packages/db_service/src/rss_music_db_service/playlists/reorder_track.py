@@ -5,7 +5,9 @@ from rss_music_db_service.logging_config import log_request, get_logger
 logger = get_logger(__name__)
 
 
-def reorder_track(playlist_id: int, user_id: int, track_url: str, new_position: int) -> dict:
+def reorder_track(
+    playlist_id: int, user_id: int, track_url: str, new_position: int
+) -> dict:
     """Move a track to new_position, shifting other tracks to fill the gap."""
     with make_session() as session:
         playlist = (
@@ -14,7 +16,9 @@ def reorder_track(playlist_id: int, user_id: int, track_url: str, new_position: 
             .first()
         )
         if not playlist:
-            raise PlaylistNotFoundError(f"Playlist {playlist_id} not found or unauthorized")
+            raise PlaylistNotFoundError(
+                f"Playlist {playlist_id} not found or unauthorized"
+            )
 
         track = (
             session.query(PlaylistTrack)
@@ -24,12 +28,20 @@ def reorder_track(playlist_id: int, user_id: int, track_url: str, new_position: 
         if not track:
             raise PlaylistNotFoundError(f"Track not found in playlist {playlist_id}")
 
-        track_count = session.query(PlaylistTrack).filter_by(playlist_id=playlist_id).count()
+        track_count = (
+            session.query(PlaylistTrack).filter_by(playlist_id=playlist_id).count()
+        )
         new_position = max(1, min(new_position, track_count))
 
         old_position = track.position
         if old_position == new_position:
-            return {"id": track.id, "playlist_id": track.playlist_id, "track_url": track.track_url, "position": track.position, "added_at": track.added_at}
+            return {
+                "id": track.id,
+                "playlist_id": track.playlist_id,
+                "track_url": track.track_url,
+                "position": track.position,
+                "added_at": track.added_at,
+            }
 
         if old_position < new_position:
             # Moving down: shift tracks between old+1 and new_position up by 1
