@@ -13,10 +13,18 @@ def test_get_playlist_by_id_success(mock_make_session) -> None:
     mock_make_session.return_value.__enter__.return_value = mock_session
 
     added_at = datetime(2026, 1, 1)
-    fake_track = PlaylistTrack(id=1, playlist_id=5, track_url="http://example.com/feed.rss", position=1)
+    fake_track = PlaylistTrack(
+        id=1, playlist_id=5, track_url="http://example.com/feed.rss", position=1
+    )
     fake_track.added_at = added_at
 
-    fake_playlist = Playlist(id=5, title="My Playlist", description="desc", track_count=1, created_by_user_id=99)
+    fake_playlist = Playlist(
+        id=5,
+        title="My Playlist",
+        description="desc",
+        track_count=1,
+        created_by_user_id=99,
+    )
     fake_playlist.created_at = datetime(2026, 1, 1)
     fake_playlist.tracks = [fake_track]
 
