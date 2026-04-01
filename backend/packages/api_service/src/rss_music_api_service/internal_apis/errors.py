@@ -51,3 +51,8 @@ class InternalAPIInvalidResponseDataError(InternalAPIResponseError):
 class InternalAPINotFoundError(InternalAPIReturnedError):
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class InternalAPIForbiddenError(InternalAPIReturnedError):
+    def __init__(self, message: str):
+        super().__init__(message)

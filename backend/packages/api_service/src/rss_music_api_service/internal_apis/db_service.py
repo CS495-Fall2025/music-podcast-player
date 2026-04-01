@@ -439,6 +439,49 @@ def _create_delete_playlist_request(playlist_id, user_id) -> requests.PreparedRe
     return request.prepare()
 
 
+def get_user_privacy(user_id: int) -> bool:
+    service_url = current_app.config["DB_SERVICE_URL"]
+    url = urljoin(service_url, f"users/{user_id}/privacy")
+    request = requests.Request("GET", url).prepare()
+    response = _send_request(request)
+    if not response.status_code == 200:
+        _handle_error(response)
+    return response.json()["profile_public"]
+
+
+def set_user_privacy(user_id: int, profile_public: bool) -> None:
+    service_url = current_app.config["DB_SERVICE_URL"]
+    url = urljoin(service_url, f"users/{user_id}/privacy")
+    request = requests.Request(
+        "PATCH", url, json={"profile_public": profile_public}
+    ).prepare()
+    response = _send_request(request)
+    if not response.status_code == 200:
+        _handle_error(response)
+
+
+def get_playlists_by_username(username: str) -> list[dict]:
+    request = _create_get_playlists_by_username_request(username)
+    response = _send_request(request)
+
+    if response.status_code == 403:
+        raise errors.InternalAPIForbiddenError("This profile is private")
+
+    if not response.status_code == 200:
+        _handle_error(response)
+
+    return response.json()["playlists"]
+
+
+def _create_get_playlists_by_username_request(
+    username: str,
+) -> requests.PreparedRequest:
+    service_url = current_app.config["DB_SERVICE_URL"]
+    url = urljoin(service_url, f"playlists/user/by-username/{username}")
+    request = requests.Request("GET", url)
+    return request.prepare()
+
+
 def get_playlist(playlist_id: int) -> dict:
     request = _create_get_playlist_request(playlist_id)
     response = _send_request(request)
@@ -479,9 +522,7 @@ def _create_add_track_request(
     return request.prepare()
 
 
-def remove_track_from_playlist(
-    playlist_id: int, user_id: int, track_url: str
-) -> dict:
+def remove_track_from_playlist(playlist_id: int, user_id: int, track_url: str) -> dict:
     request = _create_remove_track_request(playlist_id, user_id, track_url)
     response = _send_request(request)
 
@@ -507,7 +548,9 @@ def _create_remove_track_request(
 def reorder_playlist_track(
     playlist_id: int, user_id: int, track_url: str, new_position: int
 ) -> dict:
-    request = _create_reorder_track_request(playlist_id, user_id, track_url, new_position)
+    request = _create_reorder_track_request(
+        playlist_id, user_id, track_url, new_position
+    )
     response = _send_request(request)
 
     if not response.status_code == 200:
@@ -523,7 +566,11 @@ def _create_reorder_track_request(
     url = urljoin(service_url, f"playlists/{playlist_id}/tracks/reorder")
 
     request_data = track_requests.ReorderTrackRequest().dump(
-        {"track_url": track_url, "new_position": new_position, "created_by_user_id": user_id}
+        {
+            "track_url": track_url,
+            "new_position": new_position,
+            "created_by_user_id": user_id,
+        }
     )
     request = requests.Request("PATCH", url, json=request_data)
     return request.prepare()
