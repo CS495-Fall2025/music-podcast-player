@@ -515,7 +515,7 @@ class RSSMusicPlayerStack(Stack):
             description="Necessary to allow backend to connect"
         )
 
-        # database.add_rotation_single_user(automatically_after=Duration.days(30))
+        database.add_rotation_single_user(automatically_after=Duration.days(30))
 
         CfnOutput(
             self,
@@ -524,6 +524,12 @@ class RSSMusicPlayerStack(Stack):
                 f"{database.db_instance_endpoint_address}:"
                 f"{database.db_instance_endpoint_port}"
             ),
+        )
+
+        CfnOutput(
+            self,
+            "RSSMusicPlayerDatabaseSecretArn",
+            value=database.secret.secret_arn,
         )
 
         return database
