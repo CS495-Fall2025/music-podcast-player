@@ -14,6 +14,9 @@ from rss_music_db_service_schemas.playlists import (
     requests as playlist_requests,
     responses as playlist_responses,
 )
+from rss_music_db_service_schemas.playlist_tracks import (
+    requests as track_requests,
+)
 
 from rss_music_api_service.internal_apis import auth, errors
 from rss_music_api_service.logging_config import log_request, get_logger
@@ -433,4 +436,94 @@ def _create_delete_playlist_request(playlist_id, user_id) -> requests.PreparedRe
 
     request_data = {"created_by_user_id": user_id}
     request = requests.Request("DELETE", url, json=request_data)
+    return request.prepare()
+
+
+def get_playlist(playlist_id: int) -> dict:
+    request = _create_get_playlist_request(playlist_id)
+    response = _send_request(request)
+
+    if not response.status_code == 200:
+        _handle_error(response)
+
+    return response.json()
+
+
+def _create_get_playlist_request(playlist_id: int) -> requests.PreparedRequest:
+    service_url = current_app.config["DB_SERVICE_URL"]
+    url = urljoin(service_url, f"playlists/{playlist_id}")
+    request = requests.Request("GET", url)
+    return request.prepare()
+
+
+def add_track_to_playlist(playlist_id: int, user_id: int, track_url: str) -> dict:
+    request = _create_add_track_request(playlist_id, user_id, track_url)
+    response = _send_request(request)
+
+    if not response.status_code == 201:
+        _handle_error(response)
+
+    return response.json()
+
+
+def _create_add_track_request(
+    playlist_id: int, user_id: int, track_url: str
+) -> requests.PreparedRequest:
+    service_url = current_app.config["DB_SERVICE_URL"]
+    url = urljoin(service_url, f"playlists/{playlist_id}/tracks/add")
+
+    request_data = track_requests.AddTrackToPlaylistRequest().dump(
+        {"track_url": track_url, "created_by_user_id": user_id}
+    )
+    request = requests.Request("POST", url, json=request_data)
+    return request.prepare()
+
+
+def remove_track_from_playlist(
+    playlist_id: int, user_id: int, track_url: str
+) -> dict:
+    request = _create_remove_track_request(playlist_id, user_id, track_url)
+    response = _send_request(request)
+
+    if not response.status_code == 200:
+        _handle_error(response)
+
+    return response.json()
+
+
+def _create_remove_track_request(
+    playlist_id: int, user_id: int, track_url: str
+) -> requests.PreparedRequest:
+    service_url = current_app.config["DB_SERVICE_URL"]
+    url = urljoin(service_url, f"playlists/{playlist_id}/tracks/remove")
+
+    request_data = track_requests.RemoveTrackFromPlaylistRequest().dump(
+        {"track_url": track_url, "created_by_user_id": user_id}
+    )
+    request = requests.Request("DELETE", url, json=request_data)
+    return request.prepare()
+
+
+def reorder_playlist_track(
+    playlist_id: int, user_id: int, track_url: str, new_position: int
+) -> dict:
+    request = _create_reorder_track_request(playlist_id, user_id, track_url, new_position)
+    response = _send_request(request)
+
+    if not response.status_code == 200:
+        _handle_error(response)
+
+    return response.json()
+
+
+def _create_reorder_track_request(
+    playlist_id: int, user_id: int, track_url: str, new_position: int
+) -> requests.PreparedRequest:
+    service_url = current_app.config["DB_SERVICE_URL"]
+    url = urljoin(service_url, f"playlists/{playlist_id}/tracks/reorder")
+
+    request_data = track_requests.ReorderTrackRequest().dump(
+        {"track_url": track_url, "new_position": new_position, "created_by_user_id": user_id}
+    )
+    request = requests.Request("PATCH", url, json=request_data)
     return request.prepare()
