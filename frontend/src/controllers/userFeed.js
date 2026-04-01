@@ -24,13 +24,15 @@ export default {
     feedImage() {
       return this.feed.image || "/src/assets/images/default-image.jpg";
     },
-    // Returns the feed's title, if there's no title, returns placeholder.
+    // Returns the feed's title, if there's no title, returns empty.
     feedTitle() {
-      return this.feed.title || "Untitled Feed";
+      if (this.feed.title === "Unknown") return "";
+      return this.feed.title;
     },
-    // Returns the feed's artist, if there's no artist, returns placeholder.
+    // Returns the feed's artist, if there's no artist, returns empty.
     feedArtist() {
-      return this.feed.artist || "Feed artist not found";
+      if (this.feed.artist === "Unknown") return "";
+      return this.feed.artist;
     },
   },
 };
