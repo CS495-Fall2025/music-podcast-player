@@ -23,9 +23,7 @@ def add_track_to_playlist(
             )
 
         next_position = (
-            session.query(PlaylistTrack)
-            .filter_by(playlist_id=playlist_id)
-            .count()
+            session.query(PlaylistTrack).filter_by(playlist_id=playlist_id).count()
         ) + 1
 
         track = PlaylistTrack(

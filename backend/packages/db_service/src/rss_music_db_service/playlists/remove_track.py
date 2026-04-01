@@ -5,9 +5,7 @@ from rss_music_db_service.logging_config import log_request, get_logger
 logger = get_logger(__name__)
 
 
-def remove_track_from_playlist(
-    playlist_id: int, user_id: int, track_url: str
-) -> int:
+def remove_track_from_playlist(playlist_id: int, user_id: int, track_url: str) -> int:
     """Remove a track from a playlist. Returns the removed track's id."""
     with make_session() as session:
         playlist = (
@@ -28,9 +26,7 @@ def remove_track_from_playlist(
         )
 
         if not track:
-            raise PlaylistNotFoundError(
-                f"Track not found in playlist {playlist_id}"
-            )
+            raise PlaylistNotFoundError(f"Track not found in playlist {playlist_id}")
 
         removed_id = track.id
         removed_position = track.position
