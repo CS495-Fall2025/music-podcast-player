@@ -8,7 +8,7 @@
     <div class="track-info">
       <div class="track-title">{{ trackTitle }}</div>
       <div class="track-artist">{{ trackArtist }}</div>
-      <div class="track-number">Track {{ trackNumber }}</div>
+      <div class="track-number">{{ trackNumber }}</div>
     </div>
     <div class="track-description" v-html="trackDescription"></div>
   </div>

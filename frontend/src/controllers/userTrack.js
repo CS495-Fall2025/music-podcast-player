@@ -9,10 +9,6 @@ export default {
       type: Object,
       required: true,
     },
-    index: {
-      type: Number,
-      required: true,
-    },
   },
 
   methods: {
@@ -54,7 +50,9 @@ export default {
       return sanitizeText(this.trackObj.description);
     },
     trackNumber() {
-      return this.index + 1;
+      if (this.trackObj.trackNumber)
+        return "Track " + this.trackObj.trackNumber;
+      return "";
     },
   },
 };
