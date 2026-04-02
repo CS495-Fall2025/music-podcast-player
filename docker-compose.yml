@@ -50,7 +50,7 @@ services:
     ports:
       - "5001:5001"
     environment:
-      DATABASE_URL: postgresql://postgres:dev-db-password@database:5432
+      DATABASE_URL: postgresql://rssmusicplayerapp:dev-db-service-password@database:5432/postgres
     depends_on:
       migrations:
         condition: service_completed_successfully

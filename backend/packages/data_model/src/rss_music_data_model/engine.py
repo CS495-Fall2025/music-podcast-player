@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, Engine
+from sqlalchemy.engine import URL
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
@@ -20,7 +21,7 @@ def make_session() -> Session:
     return Session(engine)
 
 
-def initialize_engine(connection: str) -> None:
+def initialize_engine(connection: str | URL) -> None:
     global _db_engine
 
     # This is the setup for automated testing to avoid needing an actual DB. (Uses

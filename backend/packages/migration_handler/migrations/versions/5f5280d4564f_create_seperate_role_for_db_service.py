@@ -10,7 +10,6 @@ from typing import Sequence, Union
 import os
 
 from alembic import op
-import sqlalchemy as sa
 
 ROLE_NAME = "rssmusicplayerapp"
 
@@ -33,6 +32,7 @@ def upgrade() -> None:
         )
     else:
         op.execute(f"CREATE ROLE {ROLE_NAME} WITH LOGIN;")
+        op.execute(f"GRANT rds_iam TO {ROLE_NAME};")
 
     # Giving the new role access to tables that've already been created.
     op.execute(

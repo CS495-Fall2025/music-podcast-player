@@ -4,6 +4,7 @@ from pathlib import Path
 
 import boto3
 from mangum import Mangum
+from sqlalchemy.engine import URL
 
 from rss_music_db_service.app import create_app
 
@@ -16,40 +17,40 @@ def assign_library_directory() -> None:
     os.environ["LD_LIBRARY_PATH"] = f"{path}:{previous_path}"
 
 
-def get_rotated_secrets() -> None:
-    secrets_client = boto3.client("secretsmanager")
+def get_db_connection_url() -> URL:
+    database_info = json.loads(os.environ["DATABASE_INFO"])
 
-    connection_url = os.environ["DATABASE_URL_PARTIAL"]
-
-    db_credentials = json.loads(
-        secrets_client.get_secret_value(SecretId=os.environ["DATABASE_SECRET_ARN"])[
-            "SecretString"
-        ]
+    rds_client = boto3.client("rds")
+    token = rds_client.generate_db_auth_token(
+        DBHostname=database_info["address"],
+        Port=database_info["port"],
+        DBUsername=database_info["role"],
+        Region=database_info["region"],
     )
 
-    connection_url = connection_url.format(
-        user=db_credentials["username"], password=db_credentials["password"]
+    connection_url = URL.create(
+        drivername=database_info["driver"],
+        username=database_info["role"],
+        password=token,
+        host=database_info["address"],
+        port=database_info["port"],
+        database=database_info["database"],
+        query={"sslmode": "verify-full", "sslrootcert": "system"},
     )
 
-    return {"DATABASE_URL": connection_url}
+    return connection_url
 
 
 assign_library_directory()
-app_handler = None
+#app_handler = None
 
 
 def handler(event, context):
-    global app_handler
-    secrets = get_rotated_secrets()
+    # Intentionally not caching this for now, DB tokens only last 15 minutes.
+    #global app_handler
 
-    secrets_updated = False
-    for env_name, value in secrets.items():
-        if env_name in os.environ and os.environ[env_name] == value:
-            continue
-        os.environ[env_name] = value
-        secrets_updated = True
-
-    if secrets_updated:
-        app_handler = Mangum(create_app())
+    #if secrets_updated:
+    db_connection = get_db_connection_url()
+    app_handler = Mangum(create_app(db_connection))
 
     return app_handler(event, context)

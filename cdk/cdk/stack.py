@@ -242,7 +242,7 @@ class RSSMusicPlayerStack(Stack):
             },
             vpc=database_vpc,
             security_groups=[group],
-            timeout=Duration.seconds(5),
+            timeout=Duration.seconds(10),
         )
 
         database.secret.grant_read(function)
@@ -260,10 +260,13 @@ class RSSMusicPlayerStack(Stack):
             on_event_handler=migration_function,
         )
 
-        migration_resource = CustomResource(  # cr.AwsCustomResource(
+        migration_resource = CustomResource(
             self,
             "RSSMusicPlayerMigrationRunner",
             service_token=provider.service_token,
+            properties={
+                "CodeVersion": migration_function.current_version.version,
+            },
         )
 
         migration_resource.node.add_dependency(database)
@@ -276,6 +279,19 @@ class RSSMusicPlayerStack(Stack):
         database_vpc: ec2.Vpc,
         group: ec2.SecurityGroup,
     ) -> _lambda.Function:
+        # This corresponds to the role created in the database, make sure to make a 
+        # migration if you change this.
+        DB_SERVICE_ROLE = "rssmusicplayerapp"
+
+        database_info = {
+            "driver": "postgresql+psycopg2",
+            "address": database.db_instance_endpoint_address,
+            "port": database.db_instance_endpoint_port,
+            "role": DB_SERVICE_ROLE,
+            "region": "us-east-2",
+            "database": "rssmusicplayer",
+        }
+
         function = _lambda.Function(
             self,
             "RSSMusicPlayerDatabaseServiceFunction",
@@ -285,17 +301,14 @@ class RSSMusicPlayerStack(Stack):
             memory_size=256,
             architecture=_lambda.Architecture.ARM_64,
             environment={
-                "DATABASE_URL_PARTIAL": "postgresql://{user}:{password}@"
-                f"{database.db_instance_endpoint_address}:"
-                f"{database.db_instance_endpoint_port}",
-                "DATABASE_SECRET_ARN": database.secret.secret_arn,
+                "DATABASE_INFO": json.dumps(database_info),
             },
             vpc=database_vpc,
             security_groups=[group],
             timeout=Duration.seconds(5),
         )
 
-        database.secret.grant_read(function)
+        database.grant_connect(function, DB_SERVICE_ROLE)
 
         return function
 
@@ -511,6 +524,7 @@ class RSSMusicPlayerStack(Stack):
             database_name="rssmusicplayer",
             backup_retention=Duration.days(1),
             removal_policy=removal_policy,
+            iam_authentication=True,
         )
 
         database.connections.allow_default_port_from_any_ipv4(
@@ -539,16 +553,6 @@ class RSSMusicPlayerStack(Stack):
     def _make_database_vpc(self) -> ec2.Vpc:
         vpc = ec2.Vpc(self, "RSSMusicPlayerDatabaseVpc", max_azs=3, nat_gateways=0)
 
-        ec2.InterfaceVpcEndpoint(
-            self,
-            "RSSMusicPlayerDatabaseVpcSecretsEndpoint",
-            vpc=vpc,
-            service=ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
-            subnets=ec2.SubnetSelection(
-                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED,
-            ),
-        )
-
         return vpc
 
     def _get_file_hash(self, path: Path) -> str:
@@ -574,22 +578,11 @@ class RSSMusicPlayerStack(Stack):
                 vpc=vpc,
                 allow_all_outbound=True,
             ),
-            "endpoint": ec2.SecurityGroup(
-                self,
-                "RSSMusicPlayerEndpointSecurityGroup",
-                vpc=vpc,
-                allow_all_outbound=True,
-            ),
         }
 
         groups["database"].add_ingress_rule(
             peer=groups["function"],
             connection=ec2.Port.tcp(5432),
-        )
-
-        groups["endpoint"].add_ingress_rule(
-            peer=groups["function"],
-            connection=ec2.Port.tcp(443),
         )
 
         return groups
