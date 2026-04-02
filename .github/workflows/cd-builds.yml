@@ -20,6 +20,7 @@ jobs:
         with:
           name: frontend-build
           path: frontend/dist
+          retention-days: 1
   build-backend-api-service:
     uses: ./.github/workflows/build-backend.yml
     with:
