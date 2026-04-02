@@ -31,12 +31,16 @@ export function useMiniPlayer() {
   const getCurrentIndex = () => {
     const key = getTrackKey(currentTrack.value);
     if (key !== null) {
-      const keyedIndex = feedTracks.findIndex((track) => getTrackKey(track) === key);
+      const keyedIndex = feedTracks.findIndex(
+        (track) => getTrackKey(track) === key,
+      );
       if (keyedIndex !== -1) return keyedIndex;
     }
 
     if (!currentTrack.value || !currentTrack.value.audio) return -1;
-    return feedTracks.findIndex((track) => track.audio === currentTrack.value.audio);
+    return feedTracks.findIndex(
+      (track) => track.audio === currentTrack.value.audio,
+    );
   };
 
   const buildShuffleOrder = () => {

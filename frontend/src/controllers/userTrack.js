@@ -20,7 +20,8 @@ export default {
         if (selected?.track_url && track?.track_url) {
           return track.track_url === selected.track_url;
         }
-        if (selected?.audio && track?.audio) return track.audio === selected.audio;
+        if (selected?.audio && track?.audio)
+          return track.audio === selected.audio;
         return false;
       });
 
