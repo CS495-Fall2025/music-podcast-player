@@ -121,6 +121,7 @@ async function openPlaylist(playlist) {
   try {
     const detail = await fetchPlaylistDetail(playlist.id);
     selectedPlaylistTracks.value = detail.tracks;
+    currentTrack.value = "";
     feedTracks.splice(0, feedTracks.length, ...detail.tracks);
   } catch (err) {
     trackError.value =
@@ -343,7 +344,7 @@ function closePlaylist() {
       <p>Loading profile...</p>
     </div>
 
-    <MiniPlayer />
+    <MiniPlayer :showReverse="false" />
   </div>
 </template>
 
