@@ -15,7 +15,7 @@ services:
       context: ./backend/packages/
       dockerfile: ../docker/local_dev/Dockerfile.api-service
     ports:
-      - "5000:5000"
+      - "5002:5000"
     env_file: ./secrets/backend.env
     environment:
       RSS_PLAYER_ALLOWED_ORIGINS: http://localhost:5173
