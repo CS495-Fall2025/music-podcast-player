@@ -11,7 +11,7 @@ import { isAuthenticated } from "../auth/authService";
 import UserProfilePage from "../pages/UserPage.vue";
 
 const routes = [
-  { path: "/", component: InputFeedPage },
+  { path: "/", redirect: "/search" },
 
   {
     path: "/search",
@@ -78,8 +78,8 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   if (to.meta.requiresAuth && !isAuthenticated()) {
-    // redirect unauthenticated users to home
-    return "/";
+    // redirect unauthenticated users to home(search page)
+    return "/search";
   }
 });
 
