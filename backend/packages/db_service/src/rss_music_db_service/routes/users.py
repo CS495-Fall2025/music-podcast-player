@@ -12,6 +12,7 @@ from rss_music_db_service.users import (
     login,
     verification,
     password_reset,
+    privacy,
 )
 from rss_music_db_service.basic_validation import validate_json
 from rss_music_db_service.logging_config import log_request, get_logger
@@ -389,3 +390,63 @@ async def reset_user_password(request: Request, response: Response):
     )
 
     return db_user_responses.OperationSuccessResponse().dump(response_data)
+
+
+@users.get("/{user_id}/privacy")
+async def get_user_privacy(user_id: int):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Get user privacy request received",
+        route=f"/users/{user_id}/privacy",
+    )
+    profile_public = privacy.get_profile_public(user_id)
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route=f"/users/{user_id}/privacy",
+        status_code=200,
+    )
+    return {"profile_public": profile_public}
+
+
+@users.patch("/{user_id}/privacy")
+async def update_user_privacy(user_id: int, request: Request):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Update user privacy request received",
+        route=f"/users/{user_id}/privacy",
+    )
+    body = await request.json()
+    profile_public = body.get("profile_public")
+    if not isinstance(profile_public, bool):
+        log_request(
+            logger,
+            "warn",
+            "response_sent",
+            "Response sent",
+            route=f"/users/{user_id}/privacy",
+            status_code=400,
+        )
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": "InvalidArgument",
+                "message": "profile_public must be a boolean",
+            },
+        )
+    privacy.set_profile_public(user_id, profile_public)
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route=f"/users/{user_id}/privacy",
+        status_code=200,
+    )
+    return {"profile_public": profile_public}

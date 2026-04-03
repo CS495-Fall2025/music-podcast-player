@@ -97,6 +97,57 @@ def delete_playlist(id):
         return get_error_response(RequestError.NOT_FOUND)
 
 
+# Privacy settings
+
+
+@PLAYLISTS_BP.get("/me/privacy")
+@login_required
+def get_privacy():
+    user_id = int(get_current_user_id())
+    profile_public = db_service.get_user_privacy(user_id)
+    return {"profile_public": profile_public}, 200
+
+
+@PLAYLISTS_BP.patch("/me/privacy")
+@login_required
+def update_privacy():
+    user_id = int(get_current_user_id())
+    payload = request.get_json(silent=True) or {}
+    profile_public = payload.get("profile_public")
+    if not isinstance(profile_public, bool):
+        return get_error_response(RequestError.INVALID_ARGUMENT)
+    db_service.set_user_privacy(user_id, profile_public)
+    return {"profile_public": profile_public}, 200
+
+
+# Public: get playlists by username (no auth required)
+
+
+@PLAYLISTS_BP.get("/user/<string:username>")
+def get_public_user_playlists(username):
+    try:
+        result = db_service.get_playlists_by_username(username)
+        return {"playlists": result, "username": username}, 200
+    except db_errors.InternalAPINotFoundError:
+        return get_error_response(RequestError.NOT_FOUND)
+    except db_errors.InternalAPIForbiddenError:
+        return get_error_response(RequestError.NOT_FOUND)
+
+
+# Public: get playlist by ID with enriched tracks (no auth required)
+
+
+@PLAYLISTS_BP.get("/public/<int:id>")
+def get_public_playlist(id):
+    try:
+        playlist = db_service.get_playlist(playlist_id=id)
+    except db_errors.InternalAPINotFoundError:
+        return get_error_response(RequestError.NOT_FOUND)
+
+    playlist["tracks"] = _enrich_tracks(playlist.get("tracks", []))
+    return playlist, 200
+
+
 # Get playlist by ID (with enriched track metadata)
 
 

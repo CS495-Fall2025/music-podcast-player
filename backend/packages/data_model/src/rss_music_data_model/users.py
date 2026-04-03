@@ -24,6 +24,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(EMAIL_MAX_LENGTH), unique=True)
     password: Mapped[bytes] = mapped_column(LargeBinary(PASSWORD_LENGTH))
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    profile_public: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     email_verification_code: Mapped[str | None] = mapped_column(
         String(CODE_LENGTH), nullable=True
     )

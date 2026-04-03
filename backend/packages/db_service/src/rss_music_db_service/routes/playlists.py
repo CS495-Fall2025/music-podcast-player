@@ -37,6 +37,7 @@ from rss_music_db_service.playlists import (
     update,
     delete,
     get_by_user,
+    get_by_username,
     add_track,
     remove_track,
     reorder_track,
@@ -148,6 +149,24 @@ async def delete_playlist_route(id: int, request: Request, response: Response):
         )
 
     return {"message": "Deleted"}
+
+
+@playlists.get("/user/by-username/{username}")
+async def get_playlists_by_username_route(username: str):
+    try:
+        user, user_playlists = get_by_username.get_playlists_by_username(username)
+        if not user.profile_public:
+            return JSONResponse(
+                status_code=403,
+                content={"error": "Forbidden", "message": "This profile is private"},
+            )
+        response_data = PlaylistResponse(many=True).dump(user_playlists)
+        return {"playlists": response_data}
+    except UserNotFoundError as err:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "NotFound", "message": str(err)},
+        )
 
 
 @playlists.get("/user/{user_id}")

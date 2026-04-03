@@ -1,4 +1,4 @@
-import { currentTrack } from "./localFeedStore.js";
+import { currentTrack, feedTracks } from "./localFeedStore.js";
 import { sanitizeText } from "./textSanitizer.js";
 
 export default {
@@ -16,7 +16,18 @@ export default {
   methods: {
     // Sets the currentTrack variable to this track.
     selectTrack() {
-      currentTrack.value = this.track;
+      const selected = this.track;
+      const matched = feedTracks.find((track) => {
+        if (selected?.id && track?.id) return track.id === selected.id;
+        if (selected?.track_url && track?.track_url) {
+          return track.track_url === selected.track_url;
+        }
+        if (selected?.audio && track?.audio)
+          return track.audio === selected.audio;
+        return false;
+      });
+
+      currentTrack.value = matched || selected;
     },
 
     addToPlaylist() {
