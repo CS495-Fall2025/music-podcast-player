@@ -1,21 +1,86 @@
 import loadConfig from "../config";
 import { feed, feedTracks } from "./localFeedStore.js";
+import { setLoading, setError, clearError } from "./statusStore.js";
 
 export async function requestLinkedFeeds(url) {
   const config = await loadConfig();
+  setLoading(true);
 
-  fetch(`${config.backendUrl}/link/feed?url=${encodeURIComponent(url)}`)
-    .then((response) => {
-      if (!response.ok) {
-        console.log(`Request returned status ${response.status}`);
-        throw new Error(`Request returned status ${response.status}`);
+  try {
+    const response = await fetch(
+      `${config.backendUrl}/link/feed?url=${encodeURIComponent(url)}`,
+    );
+
+    // Try to parse error response from backend
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Check for specific error types
+      if (
+        data.error === "ExternalApiBadResponse" ||
+        data.error === "InternalApiBadResponse"
+      ) {
+        setError(
+          "feed-error",
+          "Feed Parse Error",
+          "Unable to read this RSS feed. The feed may have invalid syntax or be unreachable.",
+          "Try Another",
+          () => requestLinkedFeeds(url),
+        );
+      } else if (
+        data.error === "ExternalApiTimeout" ||
+        data.error === "InternalApiTimeout"
+      ) {
+        setError(
+          "external-error",
+          "Feed Timeout",
+          "The feed took too long to load. Please try again.",
+          "Retry",
+          () => requestLinkedFeeds(url),
+        );
+      } else if (data.error === "ExternalApiUnavaliable") {
+        setError(
+          "external-error",
+          "Service Unavailable",
+          "The feed service is temporarily unavailable. Please try again later.",
+          "Retry",
+          () => requestLinkedFeeds(url),
+        );
+      } else if (response.status >= 500) {
+        setError(
+          "error",
+          "Server Error",
+          "Something went wrong on our end. Please try again.",
+          "Retry",
+          () => requestLinkedFeeds(url),
+        );
+      } else if (response.status >= 400) {
+        setError(
+          "error",
+          "Invalid Request",
+          "Your request was rejected by the server. Please try again.",
+          "Retry",
+          () => requestLinkedFeeds(url),
+        );
       }
-      return response.json();
-    })
-    .then((response) => parseResponse(response))
-    .catch((error) => {
-      handleError(error.message);
-    });
+      return false;
+    }
+
+    clearError();
+    parseResponse(data);
+    return true;
+  } catch {
+    setError(
+      "offline",
+      "Connection Error",
+      "Unable to reach the server.",
+      "Retry",
+      () => requestLinkedFeeds(url),
+    );
+    return false;
+  } finally {
+    setLoading(false);
+  }
 }
 
 function parseResponse(response) {
@@ -89,9 +154,4 @@ function parseValue(response) {
     }
   }
   return recipients;
-}
-
-function handleError(message) {
-  console.log("Error encountered while reading response from backend.");
-  console.log(message);
 }
