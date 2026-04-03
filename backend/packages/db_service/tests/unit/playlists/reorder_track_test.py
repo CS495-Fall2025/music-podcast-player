@@ -14,12 +14,17 @@ def test_reorder_track_success(mock_make_session) -> None:
     fake_playlist = Playlist(id=1, created_by_user_id=1)
     mock_session.query(Playlist).filter_by().first.return_value = fake_playlist
 
-    fake_track = PlaylistTrack(id=3, playlist_id=1, track_url="http://example.com/feed.rss", position=1)
+    fake_track = PlaylistTrack(
+        id=3, playlist_id=1, track_url="http://example.com/feed.rss", position=1
+    )
     mock_session.query(PlaylistTrack).filter_by().first.return_value = fake_track
     mock_session.query(PlaylistTrack).filter_by().count.return_value = 3
 
     result = reorder_track.reorder_track(
-        playlist_id=1, user_id=1, track_url="http://example.com/feed.rss", new_position=3
+        playlist_id=1,
+        user_id=1,
+        track_url="http://example.com/feed.rss",
+        new_position=3,
     )
 
     mock_session.commit.assert_called_once()
@@ -34,12 +39,17 @@ def test_reorder_track_same_position_no_db_write(mock_make_session) -> None:
     fake_playlist = Playlist(id=1, created_by_user_id=1)
     mock_session.query(Playlist).filter_by().first.return_value = fake_playlist
 
-    fake_track = PlaylistTrack(id=1, playlist_id=1, track_url="http://example.com/feed.rss", position=2)
+    fake_track = PlaylistTrack(
+        id=1, playlist_id=1, track_url="http://example.com/feed.rss", position=2
+    )
     mock_session.query(PlaylistTrack).filter_by().first.return_value = fake_track
     mock_session.query(PlaylistTrack).filter_by().count.return_value = 3
 
     result = reorder_track.reorder_track(
-        playlist_id=1, user_id=1, track_url="http://example.com/feed.rss", new_position=2
+        playlist_id=1,
+        user_id=1,
+        track_url="http://example.com/feed.rss",
+        new_position=2,
     )
 
     mock_session.commit.assert_not_called()
@@ -55,7 +65,10 @@ def test_reorder_track_playlist_not_found_raises(mock_make_session) -> None:
 
     with pytest.raises(PlaylistNotFoundError):
         reorder_track.reorder_track(
-            playlist_id=99, user_id=1, track_url="http://example.com/feed.rss", new_position=1
+            playlist_id=99,
+            user_id=1,
+            track_url="http://example.com/feed.rss",
+            new_position=1,
         )
 
 
@@ -70,5 +83,8 @@ def test_reorder_track_track_not_found_raises(mock_make_session) -> None:
 
     with pytest.raises(PlaylistNotFoundError):
         reorder_track.reorder_track(
-            playlist_id=1, user_id=1, track_url="http://example.com/missing.rss", new_position=1
+            playlist_id=1,
+            user_id=1,
+            track_url="http://example.com/missing.rss",
+            new_position=1,
         )
