@@ -93,7 +93,7 @@ describe("AboutPage", () => {
     });
 
     // this is failing because the admin value is hardcoded.
-    // test needs to be updated once backend is connected. 
+    // test needs to be updated once backend is connected.
     // it("sets isAdmin to true when checkAdmin is called if user is admin", () => {
     //   expect(wrapper.vm.isAdmin).toBe(false);
 
