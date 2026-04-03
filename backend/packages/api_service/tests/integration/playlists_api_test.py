@@ -281,10 +281,18 @@ def test_add_track_sends_user_id(auth_client, user, custom_responses):
         f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/5/tracks/add"
     ] = ConstantResponse(
         status_code=201,
-        json_data={"id": 1, "playlist_id": 5, "track_url": "http://example.com/feed.rss", "position": 1, "added_at": "2026-01-01T00:00:00"},
+        json_data={
+            "id": 1,
+            "playlist_id": 5,
+            "track_url": "http://example.com/feed.rss",
+            "position": 1,
+            "added_at": "2026-01-01T00:00:00",
+        },
     )
 
-    auth_client.post("/playlists/5/tracks/add", json={"track_url": "http://example.com/feed.rss"})
+    auth_client.post(
+        "/playlists/5/tracks/add", json={"track_url": "http://example.com/feed.rss"}
+    )
 
     sent_body = json.loads(custom_responses["_requests"][-1].body)
     assert sent_body["created_by_user_id"] == user.id
@@ -388,7 +396,13 @@ def test_reorder_track_sends_user_id(auth_client, user, custom_responses):
         f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/5/tracks/reorder"
     ] = ConstantResponse(
         status_code=200,
-        json_data={"id": 1, "playlist_id": 5, "track_url": "http://example.com/feed.rss", "position": 2, "added_at": "2026-01-01T00:00:00"},
+        json_data={
+            "id": 1,
+            "playlist_id": 5,
+            "track_url": "http://example.com/feed.rss",
+            "position": 2,
+            "added_at": "2026-01-01T00:00:00",
+        },
     )
 
     auth_client.patch(

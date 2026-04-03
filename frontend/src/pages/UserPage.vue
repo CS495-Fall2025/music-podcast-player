@@ -340,9 +340,6 @@ function closePlaylist() {
 
     <MiniPlayer :showReverse="false" />
   </div>
-
-  <MiniPlayer />
-  </div>
 </template>
 
 <style src="./userPage.css"></style>
