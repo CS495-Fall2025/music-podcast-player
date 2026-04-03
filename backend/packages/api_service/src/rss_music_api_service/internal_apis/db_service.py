@@ -522,7 +522,9 @@ def _create_add_track_request(
     return request.prepare()
 
 
-def remove_track_from_playlist(playlist_id: int, user_id: int, track_url: str) -> dict:
+def remove_track_from_playlist(
+    playlist_id: int, user_id: int, track_url: str
+) -> dict:
     request = _create_remove_track_request(playlist_id, user_id, track_url)
     response = _send_request(request)
 
@@ -548,9 +550,7 @@ def _create_remove_track_request(
 def reorder_playlist_track(
     playlist_id: int, user_id: int, track_url: str, new_position: int
 ) -> dict:
-    request = _create_reorder_track_request(
-        playlist_id, user_id, track_url, new_position
-    )
+    request = _create_reorder_track_request(playlist_id, user_id, track_url, new_position)
     response = _send_request(request)
 
     if not response.status_code == 200:
@@ -566,11 +566,7 @@ def _create_reorder_track_request(
     url = urljoin(service_url, f"playlists/{playlist_id}/tracks/reorder")
 
     request_data = track_requests.ReorderTrackRequest().dump(
-        {
-            "track_url": track_url,
-            "new_position": new_position,
-            "created_by_user_id": user_id,
-        }
+        {"track_url": track_url, "new_position": new_position, "created_by_user_id": user_id}
     )
     request = requests.Request("PATCH", url, json=request_data)
     return request.prepare()

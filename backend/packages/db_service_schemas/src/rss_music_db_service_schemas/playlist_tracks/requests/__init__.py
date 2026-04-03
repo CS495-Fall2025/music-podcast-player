@@ -8,8 +8,4 @@ from rss_music_db_service_schemas.playlist_tracks.requests.reorder_track import 
     ReorderTrackRequest,
 )
 
-__all__ = [
-    "AddTrackToPlaylistRequest",
-    "RemoveTrackFromPlaylistRequest",
-    "ReorderTrackRequest",
-]
+__all__ = ["AddTrackToPlaylistRequest", "RemoveTrackFromPlaylistRequest", "ReorderTrackRequest"]
