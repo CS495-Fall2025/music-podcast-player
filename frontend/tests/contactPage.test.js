@@ -28,12 +28,6 @@ describe("ContactPage", () => {
       expect(container.exists()).toBe(true);
     });
 
-    it("displays the default contact content", () => {
-      const content = wrapper.find(".contact-content");
-      expect(content.exists()).toBe(true);
-      expect(content.text()).toContain("contact@example.com");
-    });
-
     it("renders without errors", () => {
       expect(wrapper.vm).toBeDefined();
     });

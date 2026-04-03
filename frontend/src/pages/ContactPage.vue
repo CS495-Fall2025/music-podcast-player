@@ -41,7 +41,7 @@ savedContent.value =
     <div class="edit-button">
       <button v-if="checkAdmin()" @click="startEditing">Edit</button>
     </div>
-    <div v-if="!isEditing" class="contact-contnet">
+    <div v-if="!isEditing" class="contact-content">
       <div v-html="sanitizeText(savedContent)"></div>
     </div>
     <div v-else class="contact-edit-container">
