@@ -198,18 +198,12 @@ function closePlaylist() {
 
             <div class="privacy-toggle">
               <div class="toggle-label">
-                <span>{{
-                  profilePublic ? "Public profile" : "Private profile"
-                }}</span>
+                <span>Public profile</span>
                 <button
                   class="toggle-switch"
                   :class="{ 'toggle-switch--on': profilePublic }"
                   @click="togglePrivacy"
-                  :aria-label="
-                    profilePublic
-                      ? 'Make profile private'
-                      : 'Make profile public'
-                  "
+                  :aria-label="'Make profile public'"
                 >
                   <span class="toggle-knob" />
                 </button>
