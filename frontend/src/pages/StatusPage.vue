@@ -21,11 +21,11 @@ defineEmits(["action"]);
 
 // Map error types to their icon imports
 const iconMap = {
-  "offline": offlineIcon,
+  offline: offlineIcon,
   "empty-feed-error": emptyFeedIcon,
   "external-error": externalErrorIcon,
   "feed-error": feedErrorIcon,
-  "error": errorIcon,
+  error: errorIcon,
 };
 
 const currentIcon = computed(() => iconMap[props.type] || errorIcon);
