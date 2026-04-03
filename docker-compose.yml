@@ -35,6 +35,7 @@ services:
           "podcast_index": 15
         }
       RSS_PLAYER_TOKEN_TABLE_NAME: RateLimitTokens
+      RSS_PLAYER_DISABLE_EMAIL_VERIFY: true
       AWS_ACCESS_KEY_ID: dummy
       AWS_SECRET_ACCESS_KEY: dummy
       AWS_DEFAULT_REGION: us-east-1
