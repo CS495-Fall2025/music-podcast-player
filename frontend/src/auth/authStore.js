@@ -60,6 +60,7 @@ export function useAuth() {
       if (data.valid === true) {
         isLoggedIn.value = true;
         currentUserData.value = {
+          id: data.user.id ?? data.user.user_id ?? data.user.userOd ?? null,
           username: data.user.username,
           email: data.user.email,
         };

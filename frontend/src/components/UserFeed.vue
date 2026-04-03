@@ -10,8 +10,15 @@
       <div class="feed-artist">{{ feedArtist }}</div>
     </div>
 
-    <Track v-for="(item, index) in feedTracks" :key="index" :track="item" />
-  </div>
+    <Track v-for="(item, index) in feedTracks" :key="index" :track="item" @add-to-playlist="handleAddToPlaylist" />
+ 
+    <AddToPlaylistModal
+      v-if="showAddToPlaylistModal"
+      :track="selectedTrackForPlaylist"
+      :userId="currentUserId"
+      @close="closeAddToPlaylistModal"
+  />
+ </div>
 </template>
 
 <style scoped>
