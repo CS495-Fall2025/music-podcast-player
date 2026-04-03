@@ -4,6 +4,7 @@ import { useAuth } from "../auth/authService";
 import {
   fetchUserPlaylists,
   fetchPlaylistDetail,
+  deletePlaylist,
   removeTrackFromPlaylist,
   reorderTrackInPlaylist,
 } from "../utils/playlistApi";
@@ -51,6 +52,7 @@ const selectedPlaylistTitle = ref("");
 const selectedPlaylistTracks = ref([]);
 const isLoadingTracks = ref(false);
 const trackError = ref("");
+const deletingPlaylistId = ref(null);
 
 function formatCreatedAt(createdAt) {
   const date = new Date(createdAt);
@@ -128,6 +130,38 @@ async function openPlaylist(playlist) {
       err instanceof Error ? err.message : "Could not load tracks.";
   } finally {
     isLoadingTracks.value = false;
+  }
+}
+
+async function deletePlaylistFromProfile(playlist) {
+  if (deletingPlaylistId.value !== null) {
+    return;
+  }
+
+  deletingPlaylistId.value = playlist.id;
+
+  try {
+    await deletePlaylist(playlist.id);
+
+    const idx = playlists.value.findIndex((p) => p.id === playlist.id);
+    if (idx === -1) {
+      return;
+    }
+
+    const [removedPlaylist] = playlists.value.splice(idx, 1);
+    playlistTotal.value = playlists.value.length;
+    totalTracks.value = Math.max(
+      0,
+      totalTracks.value - (removedPlaylist?.trackCount ?? 0),
+    );
+
+    if (selectedPlaylistId.value === playlist.id) {
+      closePlaylist();
+    }
+  } catch {
+    // silent fail — playlist stays in list
+  } finally {
+    deletingPlaylistId.value = null;
   }
 }
 
@@ -262,7 +296,18 @@ function closePlaylist() {
               }"
               @click="openPlaylist(playlist)"
             >
-              <h3>{{ playlist.title }}</h3>
+              <div class="playlist-item-header">
+                <h3>{{ playlist.title }}</h3>
+                <button
+                  class="playlist-delete-btn"
+                  :disabled="deletingPlaylistId === playlist.id"
+                  @click.stop="deletePlaylistFromProfile(playlist)"
+                  :aria-label="`Delete playlist ${playlist.title}`"
+                  title="Delete playlist"
+                >
+                  ✕
+                </button>
+              </div>
               <p class="playlist-description">{{ playlist.description }}</p>
 
               <div class="playlist-meta">

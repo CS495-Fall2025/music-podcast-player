@@ -26,6 +26,20 @@ export async function fetchPlaylistDetail(playlistId) {
   return response.json();
 }
 
+export async function deletePlaylist(playlistId) {
+  const config = await loadConfig();
+  const response = await fetch(`${config.backendUrl}/playlists/${playlistId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to delete playlist.");
+  }
+
+  return response.json();
+}
+
 export async function removeTrackFromPlaylist(playlistId, trackUrl) {
   const config = await loadConfig();
   const response = await fetch(

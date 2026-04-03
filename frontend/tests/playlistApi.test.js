@@ -76,6 +76,35 @@ describe("playlistApi", () => {
     });
   });
 
+  describe("deletePlaylist", () => {
+    it("sends DELETE with credentials", async () => {
+      mockConfig();
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ message: "Playlist deleted successfully" }),
+      });
+
+      await playlistApi.deletePlaylist(5);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("/playlists/5"),
+        expect.objectContaining({
+          method: "DELETE",
+          credentials: "include",
+        }),
+      );
+    });
+
+    it("throws on non-ok response", async () => {
+      mockConfig();
+      fetchMock.mockResolvedValueOnce({ ok: false });
+
+      await expect(playlistApi.deletePlaylist(5)).rejects.toThrow(
+        "Unable to delete playlist.",
+      );
+    });
+  });
+
   describe("removeTrackFromPlaylist", () => {
     it("sends DELETE with track_url in body", async () => {
       mockConfig();
