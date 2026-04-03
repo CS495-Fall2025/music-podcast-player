@@ -34,16 +34,26 @@ def upgrade() -> None:
         op.execute(f"CREATE ROLE {ROLE_NAME} WITH LOGIN;")
         op.execute(f"GRANT rds_iam TO {ROLE_NAME};")
 
-    # Giving the new role access to tables that've already been created.
+    # Giving the new role access to objects that've already been created.
     op.execute(
         "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public "
         f"TO {ROLE_NAME};"
     )
+    op.execute(
+        f"GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO {ROLE_NAME};"
+    )
+    op.execute(
+        f"GRANT USAGE ON SCHEMA public TO {ROLE_NAME};"
+    )
 
-    # Giving the new role access to tables created in the future.
+    # Giving the new role access to objects created in the future.
     op.execute(
         "ALTER DEFAULT PRIVILEGES IN SCHEMA public "
         f"GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {ROLE_NAME};"
+    )
+    op.execute(
+        "ALTER DEFAULT PRIVILEGES IN SCHEMA public "
+        f"GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO {ROLE_NAME};"
     )
 
 
