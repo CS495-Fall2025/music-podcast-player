@@ -4,6 +4,8 @@ import { sanitizeText } from "./textSanitizer.js";
 export default {
   name: "userTrack",
 
+  emits: ["add-to-playlist"],
+
   props: {
     track: {
       type: Object,
@@ -15,6 +17,10 @@ export default {
     // Sets the currentTrack variable to this track.
     selectTrack() {
       currentTrack.value = this.track;
+    },
+
+    addToPlaylist() {
+      this.$emit("add-to-playlist", this.track);
     },
   },
 
