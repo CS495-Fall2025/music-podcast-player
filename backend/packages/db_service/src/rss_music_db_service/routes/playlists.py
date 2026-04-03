@@ -14,12 +14,34 @@ from rss_music_db_service_schemas.playlists.responses.update_playlist import (
 from rss_music_db_service_schemas.playlists.responses.create_playlist import (
     CreatePlaylistResponse,
 )
+from rss_music_db_service_schemas.playlist_tracks.requests.add_track import (
+    AddTrackToPlaylistRequest,
+)
+from rss_music_db_service_schemas.playlist_tracks.requests.remove_track import (
+    RemoveTrackFromPlaylistRequest,
+)
+from rss_music_db_service_schemas.playlist_tracks.requests.reorder_track import (
+    ReorderTrackRequest,
+)
 
-from rss_music_db_service.errors import UserNotFoundError
+from rss_music_db_service.errors import (
+    UserNotFoundError,
+    PlaylistNotFoundError,
+    TrackAlreadyExistsError,
+)
 from fastapi import status, APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 
-from rss_music_db_service.playlists import create, update, delete, get_by_user
+from rss_music_db_service.playlists import (
+    create,
+    update,
+    delete,
+    get_by_user,
+    add_track,
+    remove_track,
+    reorder_track,
+    get_by_id,
+)
 from rss_music_db_service.basic_validation import validate_json
 from rss_music_db_service.logging_config import log_request, get_logger
 
@@ -154,6 +176,120 @@ async def get_user_playlists_route(user_id: int):
         return {"playlists": response_data}
 
     except UserNotFoundError as err:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "NotFound", "message": str(err)},
+        )
+
+
+@playlists.get("/{id}")
+async def get_playlist_route(id: int):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        f"Get playlist {id}",
+        route=f"/playlists/{id}",
+    )
+
+    try:
+        playlist_data = get_by_id.get_playlist_by_id(id)
+        return playlist_data
+    except PlaylistNotFoundError as err:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "NotFound", "message": str(err)},
+        )
+
+
+@playlists.post("/{id}/tracks/add", status_code=status.HTTP_201_CREATED)
+async def add_track_route(id: int, request: Request, response: Response):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        f"Add track to playlist {id}",
+        route=f"/playlists/{id}/tracks/add",
+    )
+
+    result = await validate_json(request, AddTrackToPlaylistRequest())
+    if isinstance(result, JSONResponse):
+        return result
+
+    try:
+        track_data = add_track.add_track_to_playlist(
+            playlist_id=id,
+            user_id=result["created_by_user_id"],
+            track_url=result["track_url"],
+        )
+        return track_data
+    except PlaylistNotFoundError as err:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "NotFound", "message": str(err)},
+        )
+    except TrackAlreadyExistsError as err:
+        return JSONResponse(
+            status_code=409,
+            content={
+                "error": "NotUnique",
+                "message": str(err),
+                "details": {"field": "track_url"},
+            },
+        )
+
+
+@playlists.delete("/{id}/tracks/remove")
+async def remove_track_route(id: int, request: Request, response: Response):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        f"Remove track from playlist {id}",
+        route=f"/playlists/{id}/tracks/remove",
+    )
+
+    result = await validate_json(request, RemoveTrackFromPlaylistRequest())
+    if isinstance(result, JSONResponse):
+        return result
+
+    try:
+        removed_id = remove_track.remove_track_from_playlist(
+            playlist_id=id,
+            user_id=result["created_by_user_id"],
+            track_url=result["track_url"],
+        )
+        return {"message": "Track removed", "playlist_track_id": removed_id}
+    except PlaylistNotFoundError as err:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "NotFound", "message": str(err)},
+        )
+
+
+@playlists.patch("/{id}/tracks/reorder")
+async def reorder_track_route(id: int, request: Request, response: Response):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        f"Reorder track in playlist {id}",
+        route=f"/playlists/{id}/tracks/reorder",
+    )
+
+    result = await validate_json(request, ReorderTrackRequest())
+    if isinstance(result, JSONResponse):
+        return result
+
+    try:
+        track_data = reorder_track.reorder_track(
+            playlist_id=id,
+            user_id=result["created_by_user_id"],
+            track_url=result["track_url"],
+            new_position=result["new_position"],
+        )
+        return track_data
+    except PlaylistNotFoundError as err:
         return JSONResponse(
             status_code=404,
             content={"error": "NotFound", "message": str(err)},
