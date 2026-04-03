@@ -25,7 +25,7 @@ export async function requestLinkedFeeds(url) {
           "Feed Parse Error",
           "Unable to read this RSS feed. The feed may have invalid syntax or be unreachable.",
           "Try Another",
-          () => requestLinkedFeeds(url),
+          () => clearError(),
         );
       } else if (
         data.error === "ExternalApiTimeout" ||
