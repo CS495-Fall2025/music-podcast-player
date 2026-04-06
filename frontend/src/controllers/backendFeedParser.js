@@ -1,6 +1,7 @@
 import loadConfig from "../config";
 import { searchedFeeds } from "./localFeedStore.js";
-import { setLoading, setError, clearError } from "./statusStore.js";
+import { setLoading, navigateToError, clearError } from "./statusStore.js";
+import router from "../router";
 
 export async function requestFeeds(query) {
   const config = await loadConfig();
@@ -17,7 +18,7 @@ export async function requestFeeds(query) {
     if (!response.ok) {
       // Check for specific external API errors
       if (data.error === "ExternalApiBadResponse") {
-        setError(
+        navigateToError(
           "external-error",
           "PodcastIndex Error",
           "The PodcastIndex returned invalid data. Please try again later.",
@@ -25,7 +26,7 @@ export async function requestFeeds(query) {
           () => requestFeeds(query),
         );
       } else if (data.error === "ExternalApiTimeout") {
-        setError(
+        navigateToError(
           "external-error",
           "Search Timeout",
           "The PodcastIndex is taking too long to respond. Please try again.",
@@ -33,7 +34,7 @@ export async function requestFeeds(query) {
           () => requestFeeds(query),
         );
       } else if (data.error === "ExternalApiUnavaliable") {
-        setError(
+        navigateToError(
           "external-error",
           "Service Unavailable",
           "The PodcastIndex service is temporarily unavailable. Please try again later.",
@@ -41,7 +42,7 @@ export async function requestFeeds(query) {
           () => requestFeeds(query),
         );
       } else if (response.status >= 500) {
-        setError(
+        navigateToError(
           "error",
           "Server Error",
           "Something went wrong on our end. Please try again.",
@@ -49,7 +50,7 @@ export async function requestFeeds(query) {
           () => requestFeeds(query),
         );
       } else if (response.status >= 400) {
-        setError(
+        navigateToError(
           "error",
           "Invalid Request",
           "Your request was rejected by the server. Please try again.",
@@ -62,19 +63,19 @@ export async function requestFeeds(query) {
 
     // Success case
     if (!data.feeds || data.feeds.length === 0) {
-      setError(
+      navigateToError(
         "empty-feed-error",
         "No Results",
         `No music feeds found matching "${query}".`,
-        "Try Another Search",
-        () => clearError(),
+        "Try Different Search",
+        () => router.push("/search"),
       );
     } else {
       clearError();
       parseResponse(data);
     }
   } catch {
-    setError(
+    navigateToError(
       "offline",
       "Connection Error",
       "Unable to reach the server.",

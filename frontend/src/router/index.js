@@ -7,6 +7,7 @@ import LoginPage from "../pages/LoginPage.vue";
 import SignupPage from "../pages/SignupPage.vue";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage.vue";
 import ResetPasswordPage from "../pages/ResetPasswordPage.vue";
+import ErrorPage from "../pages/ErrorPage.vue";
 import { isAuthenticated } from "../auth/authService";
 import UserProfilePage from "../pages/UserPage.vue";
 import { clearError } from "../controllers/statusStore.js";
@@ -69,6 +70,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
 
+  {
+    path: "/error",
+    component: ErrorPage,
+    meta: { requiresAuth: false, isErrorPage: true },
+  },
+
   ...(import.meta.env.VITE_INCLUDE_DEV_FEATURES !== "yes" ? [] : []),
 ];
 
@@ -78,8 +85,9 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
-  // Clear any persistent errors when navigating to new route
-  clearError();
+  if (!to.meta.isErrorPage) {
+    clearError();
+  }
 
   if (to.meta.requiresAuth && !isAuthenticated()) {
     // redirect unauthenticated users to home
