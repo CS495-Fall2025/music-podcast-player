@@ -9,8 +9,6 @@ import externalErrorIcon from "../assets/images/external-error.svg";
 import feedErrorIcon from "../assets/images/feed-error.svg";
 
 const props = defineProps({
-  isLoading: { type: Boolean, default: false },
-  useSkeleton: { type: Boolean, default: false },
   type: { type: String, default: "error" },
   title: { type: String, required: true },
   message: { type: String, default: "" },
@@ -33,16 +31,7 @@ const currentIcon = computed(() => iconMap[props.type] || errorIcon);
 
 <template>
   <div class="status-wrapper">
-    <div v-if="isLoading" class="status-content">
-      <div v-if="useSkeleton" class="skeleton-container">
-        <div class="skeleton-box" v-for="n in 3" :key="n"></div>
-      </div>
-      <div v-else class="spinner"></div>
-      <h2 class="status-title">{{ title || "Loading..." }}</h2>
-      <p class="status-message" v-if="message">{{ message }}</p>
-    </div>
-
-    <div v-else class="status-content">
+    <div class="status-content">
       <div class="status-icon">
         <img v-if="currentIcon" :src="currentIcon" :alt="props.type" />
       </div>
