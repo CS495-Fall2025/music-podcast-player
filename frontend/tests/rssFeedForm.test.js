@@ -8,7 +8,7 @@ vi.mock("../src/router", () => ({
 }));
 
 vi.mock("../src/controllers/backendLinkParser.js", () => ({
-  requestLinkedFeeds: vi.fn(async () => true),
+  requestLinkedFeeds: vi.fn(),
 }));
 
 describe("rssFeedForm controller", () => {
@@ -94,7 +94,7 @@ describe("rssFeedForm controller", () => {
     });
 
     // Test successful form submission with valid URL
-    it("submits form with valid URL", async () => {
+    it("submits form with valid URL", () => {
       const url = "https://example.com/feed";
       const formData = new Map([["userFeedUrl", url]]);
 
@@ -109,7 +109,7 @@ describe("rssFeedForm controller", () => {
         get: (key) => formData.get(key),
       }));
 
-      await onUserFeedFormSubmit(event);
+      onUserFeedFormSubmit(event);
 
       expect(event.target.reset).toHaveBeenCalled();
       expect(requestLinkedFeeds).toHaveBeenCalledWith(url);

@@ -1,7 +1,6 @@
 import loadConfig from "../config";
 import { feed, feedTracks } from "./localFeedStore.js";
-import { setLoading, navigateToError, clearError } from "./statusStore.js";
-import router from "../router";
+import { setLoading, setError, clearError } from "./statusStore.js";
 
 export async function requestLinkedFeeds(url) {
   const config = await loadConfig();
@@ -21,18 +20,18 @@ export async function requestLinkedFeeds(url) {
         data.error === "ExternalApiBadResponse" ||
         data.error === "InternalApiBadResponse"
       ) {
-        navigateToError(
+        setError(
           "feed-error",
           "Feed Parse Error",
           "Unable to read this RSS feed. The feed may have invalid syntax or be unreachable.",
           "Try Another",
-          () => router.push("/"),
+          () => clearError(),
         );
       } else if (
         data.error === "ExternalApiTimeout" ||
         data.error === "InternalApiTimeout"
       ) {
-        navigateToError(
+        setError(
           "external-error",
           "Feed Timeout",
           "The feed took too long to load. Please try again.",
@@ -40,7 +39,7 @@ export async function requestLinkedFeeds(url) {
           () => requestLinkedFeeds(url),
         );
       } else if (data.error === "ExternalApiUnavaliable") {
-        navigateToError(
+        setError(
           "external-error",
           "Service Unavailable",
           "The feed service is temporarily unavailable. Please try again later.",
@@ -48,7 +47,7 @@ export async function requestLinkedFeeds(url) {
           () => requestLinkedFeeds(url),
         );
       } else if (response.status >= 500) {
-        navigateToError(
+        setError(
           "error",
           "Server Error",
           "Something went wrong on our end. Please try again.",
@@ -56,7 +55,7 @@ export async function requestLinkedFeeds(url) {
           () => requestLinkedFeeds(url),
         );
       } else if (response.status >= 400) {
-        navigateToError(
+        setError(
           "error",
           "Invalid Request",
           "Your request was rejected by the server. Please try again.",
@@ -71,7 +70,7 @@ export async function requestLinkedFeeds(url) {
     parseResponse(data);
     return true;
   } catch {
-    navigateToError(
+    setError(
       "offline",
       "Connection Error",
       "Unable to reach the server.",

@@ -1,5 +1,4 @@
 import { reactive } from "vue";
-import router from "../router";
 
 export const statusState = reactive({
   isLoading: false,
@@ -28,16 +27,4 @@ export function clearError() {
 export function clearStatus() {
   statusState.isLoading = false;
   statusState.error = null;
-}
-
-export function navigateToError(
-  errorType,
-  title,
-  message,
-  actionText = null,
-  onAction = null,
-) {
-  setError(errorType, title, message, actionText, onAction);
-  setLoading(false);
-  router.push("/error");
 }
