@@ -11,6 +11,12 @@ describe("backendFeedParser controller", () => {
     });
   };
 
+  vi.mock("../src/controllers/statusStore.js", () => ({
+    setLoading: vi.fn(),
+    navigateToError: vi.fn(),
+    clearError: vi.fn(),
+  }));
+
   // Reset state and mock console/fetch before each test
   beforeEach(() => {
     searchedFeeds.splice(0, searchedFeeds.length);
@@ -43,32 +49,45 @@ describe("backendFeedParser controller", () => {
 
   // Test handling of HTTP error responses
   it("requestFeeds handles fetch error correctly", async () => {
-    const consoleSpy = vi.spyOn(console, "log");
+    const { navigateToError } = await import(
+      "../src/controllers/statusStore.js"
+    );
 
     mockConfig();
     globalThis.fetch.mockResolvedValueOnce({
       ok: false,
       status: 404,
+      json: () => Promise.resolve({}),
     });
 
     await requestFeeds("test query");
 
-    expect(consoleSpy).toHaveBeenCalledWith("Request returned status 404");
+    expect(navigateToError).toHaveBeenCalledWith(
+      "error",
+      "Invalid Request",
+      expect.any(String),
+      "Retry",
+      expect.any(Function),
+    );
   });
 
   // Test handling of network errors
   it("requestFeeds handles network error correctly", async () => {
-    const consoleSpy = vi.spyOn(console, "log");
-    const mockError = new Error("Network error");
+    const { navigateToError } = await import(
+      "../src/controllers/statusStore.js"
+    );
 
     mockConfig();
-    globalThis.fetch.mockRejectedValueOnce(mockError);
+    globalThis.fetch.mockRejectedValueOnce(new Error("Network error"));
 
     await requestFeeds("test query");
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      "Error encountered while reading response from backend.",
+    expect(navigateToError).toHaveBeenCalledWith(
+      "offline",
+      "Connection Error",
+      "Unable to reach the server.",
+      "Retry",
+      expect.any(Function),
     );
-    expect(consoleSpy).toHaveBeenCalledWith(mockError);
   });
 });
