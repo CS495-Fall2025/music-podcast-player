@@ -6,7 +6,7 @@ import { statusState } from "../controllers/statusStore.js";
 
 <template>
   <LoadingComponent v-if="statusState.isLoading" />
-  <RSSFeedForm v-else/>
+  <RSSFeedForm v-else />
 </template>
 
 <style scoped></style>

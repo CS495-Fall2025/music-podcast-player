@@ -1,21 +1,18 @@
 <template>
-    <div class="loading-content">
-      <div class="spinner"></div>
-      <h2 class="status-title">Loading...</h2>
-    </div>
+  <div class="loading-content">
+    <div class="spinner"></div>
+    <h2 class="status-title">Loading...</h2>
+  </div>
 </template>
 
 <style scoped>
-.loading-overlay {
-  background-color: rgba(255, 255, 255, 0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
 .loading-content {
+  padding-top: 10vh;
   text-align: center;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
 }
 
 .spinner {
