@@ -18,7 +18,7 @@
   flex-wrap: wrap;
   gap: 15px;
   justify-content: center;
-  max-height: 400px;
+  max-height: 100dvh;
   overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: 10px;
