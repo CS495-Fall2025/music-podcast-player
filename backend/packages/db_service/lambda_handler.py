@@ -42,14 +42,14 @@ def get_db_connection_url() -> URL:
 
 
 assign_library_directory()
-#app_handler = None
+# app_handler = None
 
 
 def handler(event, context):
     # Intentionally not caching this for now, DB tokens only last 15 minutes.
-    #global app_handler
+    # global app_handler
 
-    #if secrets_updated:
+    # if secrets_updated:
     db_connection = get_db_connection_url()
     app_handler = Mangum(create_app(db_connection))
 

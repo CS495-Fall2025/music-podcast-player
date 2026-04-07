@@ -14,8 +14,8 @@ from alembic import op
 ROLE_NAME = "rssmusicplayerapp"
 
 # revision identifiers, used by Alembic.
-revision: str = '5f5280d4564f'
-down_revision: Union[str, Sequence[str], None] = '23193244de59'
+revision: str = "5f5280d4564f"
+down_revision: Union[str, Sequence[str], None] = "23193244de59"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -27,9 +27,7 @@ role_password = os.getenv("DB_SERVICE_ROLE_PASSWORD")
 def upgrade() -> None:
     """Upgrade schema."""
     if role_password is not None:
-        op.execute(
-            f"CREATE ROLE {ROLE_NAME} WITH LOGIN PASSWORD '{role_password}';"
-        )
+        op.execute(f"CREATE ROLE {ROLE_NAME} WITH LOGIN PASSWORD '{role_password}';")
     else:
         op.execute(f"CREATE ROLE {ROLE_NAME} WITH LOGIN;")
         op.execute(f"GRANT rds_iam TO {ROLE_NAME};")
@@ -42,9 +40,7 @@ def upgrade() -> None:
     op.execute(
         f"GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO {ROLE_NAME};"
     )
-    op.execute(
-        f"GRANT USAGE ON SCHEMA public TO {ROLE_NAME};"
-    )
+    op.execute(f"GRANT USAGE ON SCHEMA public TO {ROLE_NAME};")
 
     # Giving the new role access to objects created in the future.
     op.execute(
