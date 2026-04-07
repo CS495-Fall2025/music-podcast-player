@@ -58,4 +58,4 @@ jobs:
         with:
           role-to-assume: ${{ vars.AWS_POST_DEPLOY_ROLE }}
           aws-region: ${{ vars.AWS_REGION }}
-      - run: python post_deploy.py
+      - run: python rotate_db_secret.py

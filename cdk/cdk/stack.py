@@ -9,6 +9,7 @@ from aws_cdk import (
     Stack,
     RemovalPolicy,
     CustomResource,
+    SecretValue,
     aws_apigatewayv2 as apigw2,
     aws_apigatewayv2_integrations as apigw2_int,
     aws_apigatewayv2_authorizers as apigw2_auth,
@@ -32,6 +33,7 @@ from aws_cdk import (
 from constructs import Construct
 
 from cdk.stages import CURRENT_STAGE, Stage
+from utils import passwords
 
 BACKEND_PATH = Path(__file__).parent.parent.parent / "backend"
 FRONTEND_PATH = Path(__file__).parent.parent.parent / "frontend"
@@ -39,6 +41,7 @@ BACKEND_BUILD = Path(os.environ.get("BACKEND_BUILD_PATH", BACKEND_PATH / "builds
 FRONTEND_BUILD = os.environ.get("FRONTEND_BUILD_PATH", FRONTEND_PATH / "dist")
 
 API_SERVICE_PREFIX = "/api/v1"
+DATABASE_MASTER_USERNAME = "rssmusicplayer"
 
 # Production variables
 DOMAIN_NAME = "musicpodcastplayer.com"
@@ -54,10 +57,17 @@ class RSSMusicPlayerStack(Stack):
         # Things in this VPC can reach the database, but not the outside internet.
         database_vpc = self._make_database_vpc()
         security_groups = self._make_security_groups(database_vpc)
-        database = self._make_database(database_vpc, security_groups["database"])
+
+        # Rotate this after deployment to avoid leaving it exposed in cloudformation and
+        # environment variables. (The migration function only needs it once, during
+        # deploy time.)
+        database_secret = SecretValue.plain_text(passwords.generate_db_secret())
+        database = self._make_database(
+            database_vpc, security_groups["database"], database_secret
+        )
 
         migration_function = self._make_migration_function(
-            database, database_vpc, security_groups["function"]
+            database, database_vpc, security_groups["function"], database_secret
         )
         self._make_migration_resource(migration_function, database)
 
@@ -105,6 +115,8 @@ class RSSMusicPlayerStack(Stack):
             search_endpoint_metric=search_endpoint_metric,
             feed_endpoint_metric=feed_endpoint_metric,
         )
+
+        #self._make_github_roles()
 
     def _make_frontend_bucket(self) -> s3.Bucket:
         bucket = s3.Bucket(
@@ -219,10 +231,19 @@ class RSSMusicPlayerStack(Stack):
         database: rds.DatabaseInstance,
         database_vpc: ec2.Vpc,
         group: ec2.SecurityGroup,
+        db_secret: SecretValue,
     ) -> _lambda.Function:
         code = _lambda.Code.from_asset(
             str(BACKEND_BUILD / "migration-handler-build.zip")
         )
+
+        db_cred = json.dumps({
+            "username": DATABASE_MASTER_USERNAME,
+            # Will be rotated immediately after (AUTOMATED) deployment to minimize risk
+            # of exposure from storing it in an environment variable and the
+            # cloudformation template.
+            "password": db_secret.unsafe_unwrap(),
+        })
 
         function = _lambda.Function(
             self,
@@ -236,16 +257,12 @@ class RSSMusicPlayerStack(Stack):
                 "DATABASE_URL_PARTIAL": "postgresql://{user}:{password}@"
                 f"{database.db_instance_endpoint_address}:"
                 f"{database.db_instance_endpoint_port}",
-                # Will be rotated after deployment to minimize risk of exposure from 
-                # storing in an environment variable and the cloudformation.
-                "DATABASE_CREDENTIAL": database.secret.secret_value.unsafe_unwrap(),
+                "DATABASE_CREDENTIAL": db_cred,
             },
             vpc=database_vpc,
             security_groups=[group],
             timeout=Duration.seconds(10),
         )
-
-        database.secret.grant_read(function)
 
         return function
 
@@ -492,7 +509,7 @@ class RSSMusicPlayerStack(Stack):
         )
 
     def _make_database(
-        self, database_vpc: ec2.Vpc, group: ec2.SecurityGroup
+        self, database_vpc: ec2.Vpc, group: ec2.SecurityGroup, secret: SecretValue,
     ) -> rds.DatabaseInstance:
         removal_policy = RemovalPolicy.DESTROY
         if CURRENT_STAGE == Stage.PRODUCTION:
@@ -518,8 +535,9 @@ class RSSMusicPlayerStack(Stack):
             allocated_storage=20,
             publicly_accessible=False,
             storage_encrypted=True,
-            credentials=rds.Credentials.from_generated_secret(
-                username="rssmusicplayer"
+            credentials=rds.Credentials.from_password(
+                username=DATABASE_MASTER_USERNAME,
+                password=secret,
             ),
             database_name="rssmusicplayer",
             backup_retention=Duration.days(1),
@@ -540,12 +558,6 @@ class RSSMusicPlayerStack(Stack):
             ),
         )
 
-        CfnOutput(
-            self,
-            "RSSMusicPlayerDatabaseSecretArn",
-            value=database.secret.secret_arn,
-        )
-        
         CfnOutput(
             self,
             "RSSMusicPlayerDatabaseIdentifier",
@@ -756,3 +768,13 @@ class RSSMusicPlayerStack(Stack):
         dashboard.add_widgets(
             cloudwatch.Row(search_endpoint_metric_widget, feed_endpoint_metric_widget)
         )
+
+    def _make_github_roles(self) -> list[iam.Role]:
+        id_provider = iam.OidcProviderNative(
+            self,
+            "RssMusicPlayerGitHubIdProvider",
+            url="https://token.actions.githubusercontent.com",
+            client_ids=["sts.amazonaws.com"],
+        )
+
+
