@@ -21,5 +21,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   height: 100dvh;
+  overflow: hidden;
+  width: 100%;
 }
 </style>

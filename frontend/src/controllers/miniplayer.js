@@ -23,7 +23,20 @@ export function useMiniPlayer() {
   const prevClickTimeout = ref(null);
   const DOUBLE_CLICK_DELAY = 800;
 
+  const getTrackKey = (track) => {
+    if (!track) return null;
+    return track.id ?? track.track_url ?? track.audio ?? null;
+  };
+
   const getCurrentIndex = () => {
+    const key = getTrackKey(currentTrack.value);
+    if (key !== null) {
+      const keyedIndex = feedTracks.findIndex(
+        (track) => getTrackKey(track) === key,
+      );
+      if (keyedIndex !== -1) return keyedIndex;
+    }
+
     if (!currentTrack.value || !currentTrack.value.audio) return -1;
     return feedTracks.findIndex(
       (track) => track.audio === currentTrack.value.audio,

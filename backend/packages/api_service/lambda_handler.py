@@ -23,8 +23,7 @@ def populate_static_secrets() -> None:
     for route_var, env_var in ssm_var_to_routes.items():
         route = os.environ[route_var]
         response = ssm_client.get_parameter(Name=route, WithDecryption=True)
-        value = response["Parameter"]["Value"]
-        os.environ[env_var] = value
+        os.environ[env_var] = response["Parameter"]["Value"]
 
 
 def create_auth_generator() -> None:
@@ -42,6 +41,10 @@ def create_auth_generator() -> None:
 
 
 populate_static_secrets()
+if not os.environ.get("RSS_PLAYER_SES_FROM_EMAIL"):
+    raise RuntimeError(
+        "Missing required environment variable: RSS_PLAYER_SES_FROM_EMAIL"
+    )
 create_auth_generator()
 app = create_app()
 handler = apig_wsgi.make_lambda_handler(app)

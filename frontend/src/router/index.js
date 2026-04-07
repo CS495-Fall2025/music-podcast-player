@@ -5,8 +5,11 @@ import ViewFeedPage from "../pages/ViewFeedPage.vue";
 import AuthCallback from "../pages/AuthCallback.vue";
 import LoginPage from "../pages/LoginPage.vue";
 import SignupPage from "../pages/SignupPage.vue";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage.vue";
+import ResetPasswordPage from "../pages/ResetPasswordPage.vue";
 import { isAuthenticated } from "../auth/authService";
 import UserProfilePage from "../pages/UserPage.vue";
+import PublicUserPage from "../pages/PublicUserPage.vue";
 
 const routes = [
   { path: "/", component: InputFeedPage },
@@ -36,6 +39,26 @@ const routes = [
   },
 
   {
+    path: "/verify-email",
+    redirect: {
+      path: "/signup",
+      query: { step: "verify" },
+    },
+  },
+
+  {
+    path: "/forgot-password",
+    component: ForgotPasswordPage,
+    meta: { requiresAuth: false },
+  },
+
+  {
+    path: "/reset-password",
+    component: ResetPasswordPage,
+    meta: { requiresAuth: false },
+  },
+
+  {
     path: "/auth/callback",
     component: AuthCallback,
   },
@@ -44,6 +67,12 @@ const routes = [
     path: "/user",
     component: UserProfilePage,
     meta: { requiresAuth: true },
+  },
+
+  {
+    path: "/user/:username",
+    component: PublicUserPage,
+    meta: { requiresAuth: false },
   },
 
   ...(import.meta.env.VITE_INCLUDE_DEV_FEATURES !== "yes" ? [] : []),

@@ -10,6 +10,21 @@
       <div class="track-artist">{{ trackArtist }}</div>
     </div>
     <div class="track-description" v-html="trackDescription"></div>
+
+    <button
+      class="add-playlist-btn"
+      @click.stop="addToPlaylist"
+      aria-label="Add to playlist"
+      title="Add to playlist"
+      type="button"
+    >
+      <img
+        class="add-to-playlist-icon"
+        src="../assets/images/plus-icon.svg"
+        alt=""
+        aria-hidden="true"
+      />
+    </button>
   </div>
 </template>
 
@@ -94,5 +109,34 @@
 .track:hover .track-description {
   line-clamp: 3;
   -webkit-line-clamp: unset;
+}
+
+.add-to-playlist-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: white;
+  color: white;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.add-to-playlist-btn:hover {
+  transform: scale(1.08);
+  opacity: 0.9;
+}
+
+.add-to-playlist-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  object-fit: contain;
 }
 </style>

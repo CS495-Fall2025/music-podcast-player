@@ -1,4 +1,6 @@
-from sqlalchemy import LargeBinary, String
+from datetime import datetime
+
+from sqlalchemy import Boolean, DateTime, LargeBinary, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from rss_music_data_model.base import Base
@@ -11,6 +13,7 @@ EMAIL_MAX_LENGTH = 254
 
 # The salt (16B) + hashed password (32B) should be 48 bytes.
 PASSWORD_LENGTH = 48
+CODE_LENGTH = 6
 
 
 class User(Base):
@@ -20,3 +23,17 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(USERNAME_MAX_LENGTH), unique=True)
     email: Mapped[str] = mapped_column(String(EMAIL_MAX_LENGTH), unique=True)
     password: Mapped[bytes] = mapped_column(LargeBinary(PASSWORD_LENGTH))
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    profile_public: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    email_verification_code: Mapped[str | None] = mapped_column(
+        String(CODE_LENGTH), nullable=True
+    )
+    email_verification_code_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    password_reset_code: Mapped[str | None] = mapped_column(
+        String(CODE_LENGTH), nullable=True
+    )
+    password_reset_code_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
