@@ -1,7 +1,7 @@
 <style src="../style.css"></style>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch, onBeforeUnmount } from "vue";
 import BoostModal from "./BoostModal.vue";
 import { useMiniPlayer } from "../controllers/miniplayer.js";
 import {
@@ -58,10 +58,106 @@ function clearDripTimer() {
     dripTimerId = null;
   }
 }
+
+function hideContributionPopup() {
+  contributionPopupVisible.value = false;
+
+  if (popupTimeoutId !== null) {
+    clearTimeout(popupTimeoutId);
+    popupTimeoutId = null;
+  }
+}
+
+function resetContributionInterval() {
+  activeDripMs = 0;
+  satsAccumulated = 0;
+  hideContributionPopup();
+}
+
+function showContributionPopup(totalSats) {
+  contributionPopupMessage.value = `You dripped ${totalSats} sats in the last ${DRIP_SUMMARY_INTERVAL_MINUTES} minutes.`;
+  contributionPopupVisible.value = true;
+
+  if (popupTimeoutId !== null) {
+    clearTimeout(popupTimeoutId);
+  }
+
+  popupTimeoutId = setTimeout(() => {
+    contributionPopupVisible.value = false;
+    popupTimeoutId = null;
+  }, POPUP_DURATION_MS);
+}
+
+function handleDripTick() {
+  if (
+    !satDripEnabled.value ||
+    Number(satDripRate.value) <= 0 ||
+    !isPlaying.value ||
+    !currentTrack.value
+  ) {
+    return;
+  }
+
+  activeDripMs += DRIP_TICK_MS;
+  satsAccumulated += Number(satDripRate.value) / 60;
+
+  if (activeDripMs >= DRIP_SUMMARY_INTERVAL_MS) {
+    showContributionPopup(Math.round(satsAccumulated));
+    activeDripMs = 0;
+    satsAccumulated = 0;
+  }
+}
+
+function updateDripTimer() {
+  const shouldTrackDripping =
+    satDripEnabled.value &&
+    Number(satDripRate.value) > 0 &&
+    isPlaying.value &&
+    !!currentTrack.value;
+
+  if (shouldTrackDripping) {
+    if (dripTimerId === null) {
+      dripTimerId = setInterval(handleDripTick, DRIP_TICK_MS);
+    }
+  } else {
+    clearDripTimer();
+  }
+}
+
+watch([isPlaying, currentTrack], updateDripTimer, { immediate: true });
+
+watch(satDripEnabled, (enabled) => {
+  if (!enabled) {
+    clearDripTimer();
+    resetContributionInterval();
+    return;
+  }
+
+  updateDripTimer();
+});
+
+watch(satDripRate, (newRate) => {
+  if (Number(newRate) <= 0) {
+    clearDripTimer();
+    resetContributionInterval();
+    return;
+  }
+
+  updateDripTimer();
+});
+
+onBeforeUnmount(() => {
+  clearDripTimer();
+  hideContributionPopup();
+});
 </script>
 
 <template>
   <div class="player-box" v-if="currentTrack">
+    <div v-if="contributionPopupVisible" class="contribution-popup">
+      {{ contributionPopupMessage }}
+    </div>
+
     <audio
       ref="audioRef"
       :src="currentTrack.audio"
@@ -157,6 +253,7 @@ function clearDripTimer() {
 <style scoped>
 .player-box {
   background-color: var(--player-background);
+  position: relative;
 
   padding: clamp(8px, 1.5vh, 16px);
   padding-bottom: calc(clamp(8px, 1.5vh, 16px) + env(safe-area-inset-bottom));
@@ -176,6 +273,22 @@ function clearDripTimer() {
   width: 100%;
   min-height: min-content;
   border-top: 2px solid var(--orange);
+}
+
+.contribution-popup {
+  position: absolute;
+  top: -58px;
+  right: 20px;
+  background-color: var(--nav-bg);
+  color: var(--light-orange);
+  border: 1px solid var(--orange);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  z-index: 2100;
+  max-width: 320px;
 }
 
 .player-box p {
