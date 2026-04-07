@@ -12,10 +12,18 @@
       </button>
 
       <div :class="['nav-links', { 'is-open': isOpen }]">
-        <router-link to="/" class="nav-link" @click="closeMenu">About</router-link>
-        <router-link to="/contact" class="nav-link" @click="closeMenu">Contact</router-link>
-        <router-link to="/search" class="nav-link" @click="closeMenu">Search</router-link>
-        <router-link to="/input" class="nav-link" @click="closeMenu">Input Feed</router-link>
+        <router-link to="/" class="nav-link" @click="closeMenu"
+          >About</router-link
+        >
+        <router-link to="/contact" class="nav-link" @click="closeMenu"
+          >Contact</router-link
+        >
+        <router-link to="/search" class="nav-link" @click="closeMenu"
+          >Search</router-link
+        >
+        <router-link to="/input" class="nav-link" @click="closeMenu"
+          >Input Feed</router-link
+        >
         <template v-if="includeDevPages">
           <!-- No dev pages currently. -->
         </template>

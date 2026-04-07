@@ -13,7 +13,7 @@ import UserProfilePage from "../pages/UserPage.vue";
 const routes = [
   { path: "/", redirect: "/search" },
 
-  { 
+  {
     path: "/input",
     component: InputFeedPage,
     meta: { requiresAuth: false },
