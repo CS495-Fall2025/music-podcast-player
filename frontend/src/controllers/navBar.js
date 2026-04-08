@@ -1,5 +1,6 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { startLogin, logout, useAuth } from "../auth/authService";
+import { walletConnected, connectWallet } from "./lightningPayments";
 
 export default function useNavbar() {
   const isOpen = ref(false);
@@ -48,5 +49,7 @@ export default function useNavbar() {
     handleLogin,
     handleSignup,
     handleLogout,
+		walletConnected,
+		connectWallet,
   };
 }

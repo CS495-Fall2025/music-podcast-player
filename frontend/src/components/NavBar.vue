@@ -29,9 +29,9 @@
         Hello, {{ currentUser?.username }}!
       </div>
 
-      <button class="sat-drip-button" @click="satDripModalOpen = true">
-        Sat Drip
-      </button>
+			<button class="sat-drip-button" @click="satDripModalOpen = true">
+				Sat Drip
+			</button>
 
       <div class="nav-dropdown" ref="dropdownRef">
         <button
@@ -60,6 +60,13 @@
   <div v-if="satDripModalOpen" class="sat-drip-modal-overlay">
     <div class="sat-drip-modal">
       <h2 class="sat-drip-title">Sat Drip Settings</h2>
+			<div class="sat-drip-wallet-row">
+				<button @click="connectWallet">
+					{{
+						walletConnected ? "Disconnect Wallet" : "Connect Wallet"
+					}}
+				</button>
+			</div>
 
       <div class="sat-drip-field">
         <label for="sat-rate">Sats per minute</label>
@@ -79,6 +86,7 @@
             id="sat-drip-enabled"
             v-model="satDripEnabled"
             type="checkbox"
+						:disabled="!walletConnected"
           />
           <span class="sat-toggle-slider"></span>
         </label>
@@ -93,6 +101,7 @@
 
 <script setup>
 import useNavbar from "../controllers/navBar.js";
+import { drippingState } from "../controllers/drippingState.js";
 import DripIndicator from "./DripIndicator.vue";
 import { ref } from "vue";
 
@@ -105,6 +114,8 @@ const {
   handleLogout,
   isAuthenticated,
   currentUser,
+	walletConnected,
+	connectWallet,
 } = useNavbar();
 const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
 const satDripModalOpen = ref(false);
@@ -113,6 +124,9 @@ const satDripEnabled = ref(false);
 
 function saveSatDripSettings() {
   satDripModalOpen.value = false;
+	// satDripEnabled.value is used here as opposed to satDripEnabled so that this only
+	// updates on saving.
+	drippingState.enabled = satDripEnabled.value;
 }
 </script>
 
@@ -289,6 +303,14 @@ function saveSatDripSettings() {
 .sat-drip-title {
   margin: 0 0 1rem 0;
   color: var(--light-orange);
+}
+
+.sat-drip-wallet-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  color: var(--light-blue);
 }
 
 .sat-drip-field {
