@@ -10,9 +10,16 @@ import ResetPasswordPage from "../pages/ResetPasswordPage.vue";
 import { isAuthenticated } from "../auth/authService";
 import UserProfilePage from "../pages/UserPage.vue";
 import ContactPage from "../pages/ContactPage.vue";
+import AboutPage from "../pages/AboutPage.vue";
 
 const routes = [
   { path: "/", component: InputFeedPage },
+
+  {
+    path: "/about",
+    component: AboutPage,
+    meta: { requiresAuth: false },
+  },
 
   {
     path: "/search",
