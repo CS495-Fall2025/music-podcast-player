@@ -1,4 +1,4 @@
-import { reactive } from "vue";
+import { reactive, watch } from "vue";
 
 export const drippingState = reactive({
 	// True when the user has configured dripping to be on.
@@ -8,3 +8,13 @@ export const drippingState = reactive({
 	// playing.)
 	active: false,
 });
+
+// Automatically stop dripping when dripping is disabled.
+watch(
+	() => drippingState.enabled,
+	(newEnabled) => {
+		if (!newEnabled) {
+			drippingState.active = false;
+		}
+	}
+);

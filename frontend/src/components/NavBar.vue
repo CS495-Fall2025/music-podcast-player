@@ -102,6 +102,7 @@
 <script setup>
 import useNavbar from "../controllers/navBar.js";
 import { drippingState } from "../controllers/drippingState.js";
+import useSatDripping from "../controllers/satDripping.js";
 import DripIndicator from "./DripIndicator.vue";
 import { ref } from "vue";
 
@@ -117,6 +118,8 @@ const {
 	walletConnected,
 	connectWallet,
 } = useNavbar();
+useSatDripping();
+
 const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
 const satDripModalOpen = ref(false);
 const satDripRate = ref(0);

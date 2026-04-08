@@ -1,5 +1,6 @@
 import { ref, watch } from "vue";
 import { currentTrack, feedTracks } from "../controllers/localFeedStore.js";
+import { drippingState } from "../controllers/drippingState.js";
 
 import playIcon from "../assets/images/play-icon.svg";
 import pauseIcon from "../assets/images/pause-icon.svg";
@@ -10,7 +11,7 @@ import repeatIcon from "../assets/images/undo-arrow-icon.svg";
 import reverseIcon from "../assets/images/reverse-icon.svg";
 
 export function useMiniPlayer() {
-  const isPlaying = ref(false);
+const isPlaying = ref(false);
   const ready = ref(false);
   const audioRef = ref(null);
   const currentTime = ref(0);
@@ -86,6 +87,26 @@ export function useMiniPlayer() {
         .catch(() => (isPlaying.value = false));
     }
   });
+
+	watch(isPlaying, (newIsPlaying) => {
+		if (drippingState.enabled) {
+			if (currentTrack.value.value.length === 0) {
+				return;
+			}
+			drippingState.active = newIsPlaying;
+		}
+	});
+
+	watch(
+		() => drippingState.enabled,
+		(newEnabled) => {
+			const canDrip = currentTrack.value.value.length > 0;
+			// Handles the case where dripping enabled while a track is playing.
+			if (newEnabled && canDrip && isPlaying.value) {
+				drippingState.active = true;
+			}
+		}
+	);
 
   const togglePlay = () => {
     const audio = audioRef.value;
