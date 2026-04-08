@@ -6,6 +6,7 @@
     class="dripping-indicator"
     :class="{ active: isDripping }"
     v-html="hourglassIconRaw"
+		v-if="drippingEnabled"
   ></div>
 </template>
 
