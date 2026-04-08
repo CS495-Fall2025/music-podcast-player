@@ -100,6 +100,9 @@ const isPlaying = ref(false);
 	watch(
 		() => drippingState.enabled,
 		(newEnabled) => {
+			if (!isPlaying.value) {
+				return;
+			}
 			const canDrip = currentTrack.value.value.length > 0;
 			// Handles the case where dripping enabled while a track is playing.
 			if (newEnabled && canDrip && isPlaying.value) {

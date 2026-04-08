@@ -7,6 +7,9 @@ export const drippingState = reactive({
 	// True when the application is running a timer to send sats. (When a track is
 	// playing.)
 	active: false,
+
+	// Number of sats per minute to drip.
+	dripRate: 0,
 });
 
 // Automatically stop dripping when dripping is disabled.
