@@ -42,9 +42,10 @@ function parseResponse(response) {
     };
     newFeed.push(feedObj);
 
-    for (const item of feedItem.items) {
+    feedItem.items.forEach((item, index) => {
       let track = {
         type: "track",
+        trackNumber: index + 1,
         title: item.title,
         artist: item.artist || feedItem.artist,
         description: item.description,
@@ -53,7 +54,7 @@ function parseResponse(response) {
         value: valueObject,
       };
       newFeedTracks.push(track);
-    }
+    });
     feed.splice(0, feed.length, ...newFeed);
     feedTracks.splice(0, feedTracks.length, ...newFeedTracks);
   }
