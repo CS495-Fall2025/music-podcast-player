@@ -63,9 +63,10 @@ describe("useAuth", () => {
 
       expect(result).toBe(true);
       expect(auth.isAuthenticated.value).toBe(true);
-      expect(auth.currentUser.value).toEqual({
+      expect(auth.currentUser.value).toMatchObject({
         username: "testuser",
         email: "test@example.com",
+        id: null,
       });
       expect(fetchMock).toHaveBeenCalledWith(
         expect.stringContaining("/auth/verify"),
@@ -141,9 +142,10 @@ describe("useAuth", () => {
       await auth.completeLogin();
 
       expect(auth.isAuthenticated.value).toBe(true);
-      expect(auth.currentUser.value).toEqual({
+      expect(auth.currentUser.value).toMatchObject({
         username: "testuser",
         email: "test@example.com",
+        id: null,
       });
     });
 
