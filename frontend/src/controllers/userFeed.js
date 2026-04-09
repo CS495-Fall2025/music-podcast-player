@@ -27,7 +27,7 @@ export default {
   },
 
   methods: {
-    async handleAddToPlaylist({ track, anchor }) {
+    async handleAddToPlaylist({ track }) {
       this.selectedTrack = track;
       this.popupError = "";
       this.newPlaylistTitle = "";
