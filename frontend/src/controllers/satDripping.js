@@ -1,6 +1,11 @@
 import { watch } from "vue";
-import { currentTrack } from "../controllers/localFeedStore.js";
+import { currentTrack, feed } from "../controllers/localFeedStore.js";
 import { drippingState } from "../controllers/drippingState.js";
+import {
+	sendBoost,
+	makeStreamMeta,
+	makeStreamValueMeta,
+} from "../controllers/lightningPayments.js";
 
 
 export default function useSatDripping() {
@@ -14,7 +19,33 @@ export default function useSatDripping() {
 
 	function startDripTimer() {
 		timerId = setInterval(() => {
-			console.log("Drip!");
+			const dripAmount = (dripInterval / userSetInterval) * drippingState.dripRate;
+			satsSpentFractional += dripAmount;
+
+			const spendAmount = Math.floor(satsSpentFractional) - satsSpentInt;
+			satsSpentInt += spendAmount;
+
+			if (spendAmount > 0) {
+				const streamMeta = makeStreamMeta(
+					feed[0].title,
+					feed[0].guid,
+					currentTrack.value.title,
+					currentTrack.value.guid,
+				);
+				// Note that makeStreamValueMeta is designed to statistically distribute small
+				// numbers of sats.
+				const valueMeta = makeStreamValueMeta(
+					spendAmount,
+					currentTrack.value.value,
+				);
+
+				console.log(`Spend ${spendAmount}`);
+				console.log(valueMeta);
+				console.log(currentTrack.value.value);
+				sendBoost(streamMeta, valueMeta);
+			}
+
+			console.log(`Frac: ${satsSpentFractional} - Int: ${satsSpentInt}`);
 		}, dripInterval);
 	}
 

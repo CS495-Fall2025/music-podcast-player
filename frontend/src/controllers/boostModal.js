@@ -7,7 +7,7 @@ import {
   makeValueMeta,
   sendBoost,
 } from "../controllers/lightningPayments.js";
-import { currentTrack } from "../controllers/localFeedStore.js";
+import { currentTrack, feed } from "../controllers/localFeedStore.js";
 
 export function useBoostModal() {
   const isOpen = ref(false);
@@ -77,8 +77,8 @@ export function useBoostModal() {
     if (!validate()) return;
 
     const boostMeta = makeBoostMeta(
-      currentTrack.value.feedTitle,
-      currentTrack.value.feedGuid,
+      feed[0].title,
+      feed[0].guid,
       currentTrack.value.title,
       currentTrack.value.guid,
       message.value,

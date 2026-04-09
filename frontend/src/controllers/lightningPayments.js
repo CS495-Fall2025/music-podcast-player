@@ -187,6 +187,7 @@ export function sendBoost(boostMeta, valueMeta) {
       console.log(payment);
     } else {
       wallet.value.keysend(payment);
+			console.log("KEYSEND");
     }
   }
 
@@ -262,7 +263,7 @@ export function makeStreamValueMeta(totalSats, recipients) {
     });
   }
 
-	let distributedSats = distributeStreamedSats(splits);
+	let distributedSats = distributeStreamedSats(splits, totalSats);
 
   for (let index = 0; index < valueMeta.length; index++) {
 		const recievedSats = distributedSats[index];
@@ -307,6 +308,7 @@ function distributeStreamedSats(splits, totalSats) {
 
 	for (let s = 0; s < totalSats; s++) {
 		const sample = Math.random();
+		console.log(sample);
 
 		for (let d = 0; d < distribution.length; d++) {
 			if (sample < distribution[d]) {
