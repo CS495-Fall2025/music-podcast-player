@@ -159,11 +159,11 @@
   border: none;
   background: white;
   cursor: pointer;
-  font-size: 1.8rem;
+  font-size: 1.2rem;
   line-height: 1;
-  padding: 0.35rem 0.7rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   color: #222;
   margin: 0;
 }

@@ -67,15 +67,24 @@ export default {
         this.popupError = "This track does not have a track URL.";
         return;
       }
-
+    
       try {
         await addTrackToPlaylist(playlistId, this.selectedTrack.track_url);
         this.closePlaylistPopup();
       } catch (error) {
-        this.popupError =
-          error instanceof Error
-            ? error.message
-            : "Unable to add track to playlist.";
+        const message = error instanceof Error ? error.message.toLowerCase() : "";
+    
+        if (
+          message.includes("already exists") ||
+          message.includes("already in") ||
+          message.includes("duplicate") ||
+          message.includes("409") ||
+          message.includes("conflict")
+        ) {
+          this.popupError = "Track already exists in this playlist.";
+        } else {
+          this.popupError = "Could not add track to playlist.";
+        }
       }
     },
 

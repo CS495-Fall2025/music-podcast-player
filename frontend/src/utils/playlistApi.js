@@ -138,9 +138,24 @@ export async function addTrackToPlaylist(playlistId, trackUrl) {
     },
   );
 
-  if (!response.ok) {
-    throw new Error("Unable to add track to playlist.");
+  const rawText = await response.text();
+  let data = {};
+
+  try {
+    data = rawText ? JSON.parse(rawText) : {};
+  } catch {
+    data = { raw: rawText };
   }
 
-  return response.json();
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        data.error ||
+        data.detail ||
+        data.raw ||
+        `Request failed with status ${response.status}`,
+    );
+  }
+
+  return data;
 }
