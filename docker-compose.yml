@@ -20,8 +20,24 @@ services:
     environment:
       RSS_PLAYER_ALLOWED_ORIGINS: http://localhost:5173
       RSS_PLAYER_DB_SERVICE_URL: http://backend-db-service:5001
+      RSS_PLAYER_DYNAMODB_URL: http://dynamodb:8000
       RSS_PLAYER_ENVIRONMENT: dev
       RSS_PLAYER_SECRET_KEY: dev-secret-key-7Th41h!tDGU@vI1^8&9%
+      RSS_PLAYER_API_TOKENS_PER_REFILL: >
+        {
+          "global": {"overall": 60, "podcast_index": 15},
+          "public": {"overall": 60, "podcast_index": 15},
+          "user": {"overall": 60, "podcast_index": 15}
+        }
+      RSS_PLAYER_TOKEN_REFILL_SECONDS: 60
+      RSS_PLAYER_TOKEN_PENALTY: >
+        {
+          "podcast_index": 15
+        }
+      RSS_PLAYER_TOKEN_TABLE_NAME: RateLimitTokens
+      AWS_ACCESS_KEY_ID: dummy
+      AWS_SECRET_ACCESS_KEY: dummy
+      AWS_DEFAULT_REGION: us-east-1
     depends_on:
       database:
         condition: service_healthy
@@ -36,9 +52,9 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:dev-db-password@database:5432
     depends_on:
-      database:
-        condition: service_healthy
       migrations:
+        condition: service_completed_successfully
+      dynamodb-tables:
         condition: service_completed_successfully
   migrations:
     build:
@@ -49,6 +65,19 @@ services:
     depends_on:
       database:
         condition: service_healthy
+  dynamodb-tables:
+    build:
+      context: ./backend/packages/
+      dockerfile: ../docker/local_dev/Dockerfile.dynamodb-tables
+    environment:
+      DYNAMODB_URL: http://dynamodb:8000
+      RSS_PLAYER_TOKEN_TABLE_NAME: RateLimitTokens
+      AWS_ACCESS_KEY_ID: dummy
+      AWS_SECRET_ACCESS_KEY: dummy
+      AWS_DEFAULT_REGION: us-east-1
+    depends_on:
+      dynamodb:
+        condition: service_healthy
   database:
     image: postgres:17
     environment:
@@ -58,6 +87,13 @@ services:
       - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 5s
+      retries: 15
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    healthcheck:
+      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/8000"]
       interval: 1s
       timeout: 5s
       retries: 15

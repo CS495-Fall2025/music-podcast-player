@@ -36,10 +36,6 @@ def create_playlist():
         return result, 201
     except db_errors.InternalAPINotFoundError:
         return get_error_response(RequestError.NOT_FOUND)
-    except db_errors.InternalAPIBadResponseError:
-        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
-    except db_errors.InternalAPITransportError:
-        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
 
 # Get user playlists
@@ -81,10 +77,6 @@ def update_playlist(id):
         return playlist_resps.UpdatePlaylistResponse().dump(updated_playlist)
     except db_errors.InternalAPINotFoundError:
         return get_error_response(RequestError.NOT_FOUND)
-    except db_errors.InternalAPIBadResponseError:
-        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
-    except db_errors.InternalAPITransportError:
-        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)
 
 
 # Delete playlist
@@ -100,7 +92,3 @@ def delete_playlist(id):
         return {"message": "Playlist deleted successfully"}, 200
     except db_errors.InternalAPINotFoundError:
         return get_error_response(RequestError.NOT_FOUND)
-    except db_errors.InternalAPIBadResponseError:
-        return get_error_response(RequestError.INTERNAL_API_BAD_RESPONSE)
-    except db_errors.InternalAPITransportError:
-        return get_error_response(RequestError.INTERNAL_API_TIMEOUT)

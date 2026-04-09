@@ -213,7 +213,12 @@ onBeforeUnmount(() => {
         vmodel="ready"
         :disabled="!ready || !feedTracks.length"
       >
-        <img :src="reverseIcon" alt="Reverse" class="play-icon" />
+        <img
+          :src="reverseIcon"
+          alt="Reverse"
+          class="play-icon"
+          :style="'transform: rotate(90deg);'"
+        />
       </button>
       <button
         class="media-button skip-back-button"
@@ -252,8 +257,10 @@ onBeforeUnmount(() => {
   background-color: var(--player-background);
   position: relative;
 
+  background-color: var(--player-background);
   padding: clamp(8px, 1.5vh, 16px);
   padding-bottom: calc(clamp(8px, 1.5vh, 16px) + env(safe-area-inset-bottom));
+
   right: 0;
   bottom: 0;
   left: 0;

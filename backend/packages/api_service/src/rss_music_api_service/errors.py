@@ -6,10 +6,12 @@ class RequestError(Enum):
     INVALID_ARGUMENT = auto()
     EXTERNAL_API_TIMEOUT = auto()
     EXTERNAL_API_BAD_RESPONSE = auto()
+    EXTERNAL_API_UNAVALIABLE = auto()
     VALUE_NOT_UNIQUE = auto()
     INTERNAL_API_TIMEOUT = auto()
     INTERNAL_API_BAD_RESPONSE = auto()
     NOT_FOUND = auto()
+    TOO_MANY_REQUESTS = auto()
 
 
 _ERROR_RESPONSE_VALUES = {
@@ -53,10 +55,22 @@ _ERROR_RESPONSE_VALUES = {
         ),
         "code": 502,
     },
+    RequestError.EXTERNAL_API_UNAVALIABLE: {
+        "error": "ExternalApiUnavaliable",
+        "message": (
+            "The external API we use for this request is temporarily unavaliable"
+        ),
+        "code": 503,
+    },
     RequestError.NOT_FOUND: {
         "error": "NotFound",
         "message": "The requested resource could not be found",
         "code": 404,
+    },
+    RequestError.TOO_MANY_REQUESTS: {
+        "error": "TooManyRequests",
+        "message": "The server is recieving too many requests right now to handle this one!",
+        "code": 429,
     },
 }
 

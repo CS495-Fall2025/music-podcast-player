@@ -19,6 +19,7 @@
   --disabled-text: #999;
   --border-color: #d0d0d0;
   --hover-blue: #b1d4e4;
+  --active-blue: #8bbed5;
   --dark-blue: #053750;
 
   /* Spacing */
@@ -75,6 +76,15 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+#app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+}
+
 body {
   display: flex;
   flex-direction: column;
@@ -83,14 +93,13 @@ body {
   margin: 0;
 
   height: 100dvh;
-  min-height: 100vh;
 
   overflow: hidden;
+  -webkit-overflow-scrolling: touch;
 
   background-color: var(--body-background);
 
   padding: 0;
-  padding-bottom: var(--player-height, 150px);
 }
 
 /* ========================================

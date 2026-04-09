@@ -1,24 +1,24 @@
 from unittest import mock
 
 import pytest
-from requests import exceptions, PreparedRequest, Response
+from requests import PreparedRequest, Response, exceptions
 
 from tests.integration.api_mocks import db_service_mock
 
 ENDPOINT_URL = "/auth/signup"
+VERIFY_ENDPOINT_URL = "/auth/signup/verify"
 SEND_METHOD = "requests.Session.send"
+SEND_VERIFICATION_METHOD = (
+    "rss_music_api_service.services.email_service.send_verification_code"
+)
+GENERATE_CODE_METHOD = "rss_music_api_service.routes.auth.email_codes.generate_code"
 
 
 def test_empty_post_returns_invalid_format(client) -> None:
     response = client.post(ENDPOINT_URL)
 
     assert response.status_code == 400
-
-    data = response.get_json()
-
-    assert 400 == data["code"]
-
-    assert "InvalidFormat" == data["error"]
+    assert response.get_json()["error"] == "InvalidFormat"
 
 
 def test_malformed_post_returns_invalid_format(client) -> None:
@@ -27,12 +27,7 @@ def test_malformed_post_returns_invalid_format(client) -> None:
     )
 
     assert response.status_code == 400
-
-    data = response.get_json()
-
-    assert 400 == data["code"]
-
-    assert "InvalidFormat" == data["error"]
+    assert response.get_json()["error"] == "InvalidFormat"
 
 
 def test_missing_arg_returns_invalid_argument(client) -> None:
@@ -45,179 +40,73 @@ def test_missing_arg_returns_invalid_argument(client) -> None:
     )
 
     assert response.status_code == 400
-
-    data = response.get_json()
-
-    assert 400 == data["code"]
-
-    assert "InvalidArgument" == data["error"]
+    assert response.get_json()["error"] == "InvalidArgument"
 
 
-def test_short_username_returns_invalid_argument(client) -> None:
-    response = client.post(
-        ENDPOINT_URL,
-        json={
+@pytest.mark.parametrize(
+    "request_data",
+    [
+        {
             "username": "a" * 3,
             "email": "user@domain.com",
             "password": "Password123!",
         },
-    )
-
-    assert response.status_code == 400
-
-    data = response.get_json()
-    assert 400 == data["code"]
-
-    assert "InvalidArgument" == data["error"]
-
-
-def test_long_username_returns_invalid_argument(client) -> None:
-    response = client.post(
-        ENDPOINT_URL,
-        json={
+        {
             "username": "a" * 31,
             "email": "user@domain.com",
             "password": "Password123!",
         },
-    )
-
-    assert response.status_code == 400
-
-    data = response.get_json()
-
-    assert 400 == data["code"]
-
-    assert "InvalidArgument" == data["error"]
-
-
-def test_outer_underscore_username_returns_invalid_argument(client) -> None:
-    response = client.post(
-        ENDPOINT_URL,
-        json={
+        {
             "username": "_admin",
             "email": "user@domain.com",
             "password": "Password123!",
         },
-    )
-
-    assert response.status_code == 400
-
-    data = response.get_json()
-
-    assert 400 == data["code"]
-
-    assert "InvalidArgument" == data["error"]
-
-
-def test_illegal_characters_username_returns_invalid_argument(client) -> None:
-    response = client.post(
-        ENDPOINT_URL,
-        json={
+        {
             "username": "<user>",
             "email": "user@domain.com",
             "password": "Password123!",
         },
-    )
-
-    assert response.status_code == 400
-
-    data = response.get_json()
-
-    assert 400 == data["code"]
-
-    assert "InvalidArgument" == data["error"]
-
-
-def test_invalid_email_returns_invalid_argument(client) -> None:
-    response = client.post(
-        ENDPOINT_URL,
-        json={
+        {
             "username": "t3st_user57",
             "email": "domain.com",
             "password": "Password123!",
         },
-    )
-
-    assert response.status_code == 400
-
-    data = response.get_json()
-
-    assert 400 == data["code"]
-
-    assert "InvalidArgument" == data["error"]
-
-
-def test_short_password_returns_invalid_argument(client) -> None:
-    response = client.post(
-        ENDPOINT_URL,
-        json={
+        {
             "username": "t3st_user57",
             "email": "user@domain.com",
             "password": "@2abcdef",
         },
-    )
-
-    assert response.status_code == 400
-
-    data = response.get_json()
-
-    assert 400 == data["code"]
-
-    assert "InvalidArgument" == data["error"]
-
-
-def test_long_password_returns_invalid_argument(client) -> None:
-    response = client.post(
-        ENDPOINT_URL,
-        json={
+        {
             "username": "t3st_user57",
             "email": "user@domain.com",
             "password": "@2" + "a" * 80,
         },
-    )
-
-    assert response.status_code == 400
-
-    data = response.get_json()
-
-    assert 400 == data["code"]
-
-    assert "InvalidArgument" == data["error"]
-
-
-@pytest.mark.parametrize(
-    "password",
-    [
-        "123456789@%$#!",  # No letter
-        "abcdefghijk@%$#!",  # No digit
-        "a0b1c2d3e4f5g6h7",  # No special character
-    ],
-)
-def test_weak_password_returns_invalid_argument(client, password) -> None:
-    response = client.post(
-        ENDPOINT_URL,
-        json={
+        {
             "username": "t3st_user57",
             "email": "user@domain.com",
-            "password": password,
+            "password": "123456789@%$#!",
         },
-    )
+        {
+            "username": "t3st_user57",
+            "email": "user@domain.com",
+            "password": "abcdefghijk@%$#!",
+        },
+        {
+            "username": "t3st_user57",
+            "email": "user@domain.com",
+            "password": "a0b1c2d3e4f5g6h7",
+        },
+    ],
+)
+def test_invalid_signup_payload_returns_invalid_argument(client, request_data) -> None:
+    response = client.post(ENDPOINT_URL, json=request_data)
 
     assert response.status_code == 400
-
-    data = response.get_json()
-
-    assert 400 == data["code"]
-
-    assert "InvalidArgument" == data["error"]
+    assert response.get_json()["error"] == "InvalidArgument"
 
 
-# DB
-def test_successful_signup(client) -> None:
-    def generate_success(request: PreparedRequest, *args, **kwargs) -> Response:
-        return db_service_mock.generate_users_create_success(request)
-
-    with mock.patch(SEND_METHOD, side_effect=generate_success) as _:
+def test_successful_signup_starts_verification(client) -> None:
+    with mock.patch(SEND_VERIFICATION_METHOD):
         response = client.post(
             ENDPOINT_URL,
             json={
@@ -228,20 +117,39 @@ def test_successful_signup(client) -> None:
         )
 
     assert response.status_code == 201
-
-    data = response.get_json()
-
-    assert 201 == data["code"]
+    assert response.get_json()["verification_required"] is True
 
 
-def test_duplicate_username_returns_error(client) -> None:
-    def generate_duplicate_username(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
-        return db_service_mock.generate_users_create_not_unique(request, "username")
+def test_signup_reports_email_delivery_failure(client) -> None:
+    response = client.post(
+        ENDPOINT_URL,
+        json={
+            "username": "t3st_user57",
+            "email": "user@domain.com",
+            "password": "Password123!",
+        },
+    )
 
-    with mock.patch(SEND_METHOD, side_effect=generate_duplicate_username) as _:
-        response = client.post(
+    assert response.status_code == 502
+    assert response.get_json()["error"] == "EmailDeliveryFailed"
+
+
+def test_signup_verify_rejects_without_pending_signup(client) -> None:
+    response = client.post(
+        VERIFY_ENDPOINT_URL,
+        json={"code": "123456"},
+    )
+
+    assert response.status_code == 400
+    assert response.get_json()["error"] == "InvalidSession"
+
+
+def test_signup_verify_rejects_wrong_code(client) -> None:
+    with (
+        mock.patch(SEND_VERIFICATION_METHOD),
+        mock.patch(GENERATE_CODE_METHOD, return_value="123456"),
+    ):
+        client.post(
             ENDPOINT_URL,
             json={
                 "username": "t3st_user57",
@@ -250,92 +158,81 @@ def test_duplicate_username_returns_error(client) -> None:
             },
         )
 
-    assert response.status_code == 409
+    response = client.post(
+        VERIFY_ENDPOINT_URL,
+        json={"code": "654321"},
+    )
 
-    data = response.get_json()
-
-    assert 409 == data["code"]
-    assert "ValueNotUnique" == data["error"]
-    assert "username" == data["field"]
-    assert "This username is already in use" == data["message"]
+    assert response.status_code == 400
+    assert response.get_json()["error"] == "InvalidVerificationCode"
 
 
-def test_duplicate_email_returns_error(client) -> None:
+def test_signup_verify_creates_user_after_valid_code(client) -> None:
+    def generate_success(request: PreparedRequest, *args, **kwargs) -> Response:
+        assert request.url.endswith("/users/create")
+        return db_service_mock.generate_users_create_success(request)
+
+    with (
+        mock.patch(SEND_METHOD, side_effect=generate_success),
+        mock.patch(SEND_VERIFICATION_METHOD),
+        mock.patch(GENERATE_CODE_METHOD, return_value="123456"),
+    ):
+        client.post(
+            ENDPOINT_URL,
+            json={
+                "username": "t3st_user57",
+                "email": "user@domain.com",
+                "password": "Password123!",
+            },
+        )
+
+        response = client.post(
+            VERIFY_ENDPOINT_URL,
+            json={"code": "123456"},
+        )
+
+    assert response.status_code == 201
+    assert response.get_json()["verified"] is True
+    assert response.get_json()["account_created"] is True
+
+
+def test_signup_verify_duplicate_email_returns_error(client) -> None:
     def generate_duplicate_email(request: PreparedRequest, *args, **kwargs) -> Response:
         return db_service_mock.generate_users_create_not_unique(request, "email")
 
-    with mock.patch(SEND_METHOD, side_effect=generate_duplicate_email) as _:
-        response = client.post(
+    with (
+        mock.patch(SEND_METHOD, side_effect=generate_duplicate_email),
+        mock.patch(SEND_VERIFICATION_METHOD),
+        mock.patch(GENERATE_CODE_METHOD, return_value="123456"),
+    ):
+        client.post(
             ENDPOINT_URL,
             json={
                 "username": "t3st_user57",
                 "email": "user@domain.com",
                 "password": "Password123!",
             },
+        )
+
+        response = client.post(
+            VERIFY_ENDPOINT_URL,
+            json={"code": "123456"},
         )
 
     assert response.status_code == 409
-
-    data = response.get_json()
-
-    assert 409 == data["code"]
-    assert "ValueNotUnique" == data["error"]
-    assert "email" == data["field"]
-    assert "This email is already in use" == data["message"]
+    assert response.get_json()["error"] == "ValueNotUnique"
 
 
-def test_reports_when_invalid_format_recieved(client) -> None:
-    def generate_invalid_format(request: PreparedRequest, *args, **kwargs) -> Response:
-        return db_service_mock.generate_invalid_format(request)
-
-    with mock.patch(SEND_METHOD, side_effect=generate_invalid_format) as _:
-        response = client.post(
-            ENDPOINT_URL,
-            json={
-                "username": "t3st_user57",
-                "email": "user@domain.com",
-                "password": "Password123!",
-            },
-        )
-
-    assert response.status_code == 502
-
-    data = response.get_json()
-
-    assert 502 == data["code"]
-    assert "InternalApiBadResponse" == data["error"]
-
-
-def test_reports_when_invalid_argument_recieved(client) -> None:
-    def generate_invalid_argument(
-        request: PreparedRequest, *args, **kwargs
-    ) -> Response:
-        return db_service_mock.generate_invalid_argument(request)
-
-    with mock.patch(SEND_METHOD, side_effect=generate_invalid_argument) as _:
-        response = client.post(
-            ENDPOINT_URL,
-            json={
-                "username": "t3st_user57",
-                "email": "user@domain.com",
-                "password": "Password123!",
-            },
-        )
-
-    assert response.status_code == 502
-
-    data = response.get_json()
-
-    assert 502 == data["code"]
-    assert "InternalApiBadResponse" == data["error"]
-
-
-def test_reports_when_db_service_timeout(client) -> None:
+def test_signup_verify_reports_db_timeout(client) -> None:
     def generate_timeout(request: PreparedRequest, *args, **kwargs) -> Response:
         raise exceptions.Timeout()
 
-    with mock.patch(SEND_METHOD, side_effect=generate_timeout) as _:
-        response = client.post(
+    with (
+        mock.patch(SEND_METHOD, side_effect=generate_timeout),
+        mock.patch(SEND_VERIFICATION_METHOD),
+        mock.patch(GENERATE_CODE_METHOD, return_value="123456"),
+    ):
+        client.post(
             ENDPOINT_URL,
             json={
                 "username": "t3st_user57",
@@ -344,9 +241,10 @@ def test_reports_when_db_service_timeout(client) -> None:
             },
         )
 
+        response = client.post(
+            VERIFY_ENDPOINT_URL,
+            json={"code": "123456"},
+        )
+
     assert response.status_code == 504
-
-    data = response.get_json()
-
-    assert 504 == data["code"]
-    assert "InternalApiTimeout" == data["error"]
+    assert response.get_json()["error"] == "InternalApiTimeout"

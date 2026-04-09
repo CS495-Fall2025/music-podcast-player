@@ -68,3 +68,7 @@ jobs:
     with:
       package-path: backend/packages/migration_handler
       uses_psycopg2: true
+  backend-dynamodb-tables-ci:
+    uses: ./.github/workflows/ci-backend.yml
+    with:
+      package-path: backend/packages/dynamodb_tables
