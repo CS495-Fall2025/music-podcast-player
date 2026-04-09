@@ -33,7 +33,7 @@ function initializeLightning() {
       nwc: {
         authorizationUrlOptions: {
           requestMethods: ["get_balance", "pay_keysend"],
-        },
+     },
       },
     },
   });
@@ -129,7 +129,7 @@ export function makeValueMeta(totalSats, recipients) {
       address: recipient.address,
       customRecord: recipient.customRecord,
       meta: {
-        name: recipient.name,
+        name: recipient.recipient,
         value_msat: truncatedValueRecieved * 1000,
         total_value_msat: totalSats * 1000,
       },
@@ -187,7 +187,6 @@ export function sendBoost(boostMeta, valueMeta) {
       console.log(payment);
     } else {
       wallet.value.keysend(payment);
-			console.log("KEYSEND");
     }
   }
 
@@ -255,7 +254,7 @@ export function makeStreamValueMeta(totalSats, recipients) {
       address: recipient.address,
       customRecord: recipient.customRecord,
       meta: {
-        name: recipient.name,
+        name: recipient.recipient,
 				// value_msat will be updated after the sats have been distributed.
         value_msat: 0,
         total_value_msat: totalSats * 1000,
@@ -308,7 +307,6 @@ function distributeStreamedSats(splits, totalSats) {
 
 	for (let s = 0; s < totalSats; s++) {
 		const sample = Math.random();
-		console.log(sample);
 
 		for (let d = 0; d < distribution.length; d++) {
 			if (sample < distribution[d]) {

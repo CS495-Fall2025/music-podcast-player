@@ -17,6 +17,7 @@ vi.mock("../src/controllers/localFeedStore.js", async () => {
   const { ref } = await import("vue");
   return {
     currentTrack: ref(null),
+		feed: [],
   };
 });
 
@@ -27,7 +28,7 @@ import {
   makeValueMeta,
   sendBoost,
 } from "../src/controllers/lightningPayments.js";
-import { currentTrack } from "../src/controllers/localFeedStore.js";
+import { currentTrack, feed } from "../src/controllers/localFeedStore.js";
 
 const makeTrack = () => ({
   feedTitle: "Feed Title",
@@ -37,9 +38,20 @@ const makeTrack = () => ({
   value: { some: "value" },
 });
 
+const makeFeed = () => ({
+	type: "feed",
+	artist: "Feed Artist",
+	title: "Feed Title",
+	guid: "feed-guid",
+	description: "Feed description.",
+	link: "https://somelink.com",
+	image: "https://somelink.com/image",
+});
+
 beforeEach(() => {
   vi.clearAllMocks();
   currentTrack.value = makeTrack();
+  feed[0] = makeFeed();
 });
 
 afterEach(() => {
