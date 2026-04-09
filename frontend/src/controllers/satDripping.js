@@ -36,6 +36,7 @@ export default function useSatDripping() {
     const dripAmount =
       (dripInterval / userSetInterval) * drippingState.dripRate;
     drippingState.currentFractionalSatsOwed += dripAmount;
+		drippingState.totalFractionalSats += dripAmount;
   }
 
   function updateDrippingTrack() {

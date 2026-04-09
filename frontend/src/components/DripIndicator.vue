@@ -2,22 +2,35 @@
 <script src="../controllers/dripIndicator.js"></script>
 
 <template>
-  <div
-    class="dripping-indicator"
-    :class="{ active: isDripping }"
-    v-html="hourglassIconRaw"
-    v-if="drippingEnabled"
-  ></div>
+	<div
+		class="dripping-indicators"
+		v-if="drippingEnabled"
+	>
+		<div
+			class="dripping-indicator"
+			:class="{ active: isDripping }"
+			v-html="hourglassIconRaw"
+		/>
+		<span>{{ totalSats }} Sats</span>
+	</div>
 </template>
 
 <style scoped>
+.dripping-indicators {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+	margin: 0px 8px;
+}
+
 .dripping-indicator {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   color: var(--disabled-text);
+	margin: 0px 8px;
 }
 
 .dripping-indicator svg {
