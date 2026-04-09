@@ -7,6 +7,8 @@ import {
   deletePlaylist,
   removeTrackFromPlaylist,
   reorderTrackInPlaylist,
+  createPlaylist,
+  addTrackToPlaylist,
 } from "../utils/playlistApi";
 import loadConfig from "../config";
 import { currentTrack, feedTracks } from "../controllers/localFeedStore.js";
@@ -53,6 +55,18 @@ const selectedPlaylistTracks = ref([]);
 const isLoadingTracks = ref(false);
 const trackError = ref("");
 const deletingPlaylistId = ref(null);
+const playlistPopupOpen = ref(false);
+const popupStyle = ref({
+  top: "0px",
+  left: "0px",
+  transform: "translate(-50%, -50%)",
+});
+const selectedTrack = ref(null);
+const popupPlaylists = ref([]);
+const newPlaylistTitle = ref("");
+const newPlaylistDescription = ref("");
+const popupError = ref("");
+const popupLoading = ref(false);
 
 function formatCreatedAt(createdAt) {
   const date = new Date(createdAt);
@@ -212,6 +226,90 @@ function closePlaylist() {
   currentTrack.value = "";
   feedTracks.splice(0, feedTracks.length);
 }
+async function handleAddToPlaylist({ track }) {
+  selectedTrack.value = track;
+  popupError.value = "";
+  newPlaylistTitle.value = "";
+  newPlaylistDescription.value = "";
+
+  popupStyle.value = {
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+  };
+
+  playlistPopupOpen.value = true;
+  popupLoading.value = true;
+
+  try {
+    const response = await fetchUserPlaylists();
+    popupPlaylists.value = response.playlists || [];
+  } catch (error) {
+    popupError.value =
+      error instanceof Error ? error.message : "Unable to load playlists.";
+    popupPlaylists.value = [];
+  } finally {
+    popupLoading.value = false;
+  }
+}
+
+function closePlaylistPopup() {
+  playlistPopupOpen.value = false;
+  selectedTrack.value = null;
+  popupError.value = "";
+  newPlaylistTitle.value = "";
+  newPlaylistDescription.value = "";
+}
+
+async function handleAddTrackToPlaylist(playlistId) {
+  if (!selectedTrack.value?.track_url) {
+    popupError.value = "This track does not have a track URL.";
+    return;
+  }
+
+  try {
+    await addTrackToPlaylist(playlistId, selectedTrack.value.track_url);
+    closePlaylistPopup();
+  } catch (error) {
+    const message = error instanceof Error ? error.message.toLowerCase() : "";
+
+    if (
+      message.includes("already exists") ||
+      message.includes("already in") ||
+      message.includes("duplicate") ||
+      message.includes("409") ||
+      message.includes("conflict")
+    ) {
+      popupError.value = "Track already exists in this playlist.";
+    } else {
+      popupError.value = "Could not add track to playlist.";
+    }
+  }
+}
+
+async function handleCreatePlaylist() {
+  const title = newPlaylistTitle.value.trim();
+  const description = newPlaylistDescription.value.trim();
+
+  if (!title) {
+    popupError.value = "Enter a playlist title.";
+    return;
+  }
+
+  if (!selectedTrack.value?.track_url) {
+    popupError.value = "This track does not have a track URL.";
+    return;
+  }
+
+  try {
+    const created = await createPlaylist(title, description);
+    await addTrackToPlaylist(created.id, selectedTrack.value.track_url);
+    closePlaylistPopup();
+  } catch (error) {
+    popupError.value =
+      error instanceof Error ? error.message : "Unable to create playlist.";
+  }
+}
 </script>
 
 <template>
@@ -346,7 +444,7 @@ function closePlaylist() {
                 :key="track.id"
                 class="track-row"
               >
-                <UserTrack :track="track" />
+                <UserTrack :track="track" @add-to-playlist="handleAddToPlaylist" />
                 <div class="track-actions">
                   <button
                     class="track-action-btn"
@@ -383,7 +481,180 @@ function closePlaylist() {
       <p>Loading profile...</p>
     </div>
 
-    <MiniPlayer :showReverse="false" />
+    <div
+      v-if="playlistPopupOpen"
+      :style="{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        zIndex: 1000,
+        width: '320px',
+        maxWidth: '90vw',
+        background: '#111',
+        border: '1px solid #444',
+        borderRadius: '16px',
+        boxShadow: '0 12px 32px rgba(0, 0, 0, 0.35)',
+        padding: '20px',
+      }"
+    >
+      <div
+        :style="{
+          position: 'relative',
+          marginBottom: '16px',
+          minHeight: '32px',
+        }"
+      >
+        <strong
+          :style="{
+            color: 'white',
+            fontWeight: '700',
+            fontSize: '1.1rem',
+            display: 'block',
+            paddingRight: '44px',
+          }"
+        >
+          Add to playlist
+        </strong>
+
+        <button
+  @click="closePlaylistPopup"
+  :style="{
+    position: 'absolute',
+    top: '0',
+    right: '0',
+    width: '32px',
+    height: '32px',
+    border: 'none',
+    outline: 'none',
+    boxShadow: 'none',
+    background: 'transparent',
+    color: 'white',
+    fontSize: '1.4rem',
+    lineHeight: '1',
+    cursor: 'pointer',
+    padding: '0',
+    margin: '0',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    appearance: 'none',
+    WebkitAppearance: 'none',
+  }"
+>
+  ✕
+</button>
+      </div>
+
+      <div
+        v-if="popupLoading"
+        :style="{ color: '#ccc', fontSize: '0.95rem', marginBottom: '12px' }"
+      >
+        Loading playlists...
+      </div>
+
+      <div v-else>
+        <div
+          v-if="popupError"
+          :style="{
+            color: '#ff4d6d',
+            fontSize: '0.9rem',
+            marginBottom: '12px',
+          }"
+        >
+          {{ popupError }}
+        </div>
+
+        <div
+          v-if="popupPlaylists.length"
+          :style="{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            marginBottom: '14px',
+          }"
+        >
+          <button
+            v-for="playlist in popupPlaylists"
+            :key="playlist.id"
+            @click="handleAddTrackToPlaylist(playlist.id)"
+            :style="{
+              border: 'none',
+              borderRadius: '12px',
+              background: '#1b1f27',
+              color: 'white',
+              padding: '14px 16px',
+              textAlign: 'left',
+              cursor: 'pointer',
+              fontSize: '1rem',
+            }"
+          >
+            {{ playlist.title }}
+          </button>
+        </div>
+
+        <div
+          :style="{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+          }"
+        >
+          <input
+            v-model="newPlaylistTitle"
+            type="text"
+            placeholder="New playlist name"
+            :style="{
+              width: '100%',
+              boxSizing: 'border-box',
+              border: '1px solid #666',
+              borderRadius: '12px',
+              padding: '14px 16px',
+              background: '#3a3a3a',
+              color: 'white',
+              fontSize: '1rem',
+            }"
+          />
+
+          <textarea
+            v-model="newPlaylistDescription"
+            placeholder="Description (optional)"
+            rows="4"
+            :style="{
+              width: '100%',
+              boxSizing: 'border-box',
+              border: '1px solid #666',
+              borderRadius: '12px',
+              padding: '14px 16px',
+              background: '#3a3a3a',
+              color: 'white',
+              fontSize: '1rem',
+              resize: 'none',
+              minHeight: '120px',
+              overflow: 'auto',
+            }"
+          ></textarea>
+
+          <button
+            @click="handleCreatePlaylist"
+            :style="{
+              border: 'none',
+              borderRadius: '12px',
+              background: '#2563eb',
+              color: 'white',
+              padding: '14px 16px',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: '600',
+            }"
+          >
+            Create + Add
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <MiniPlayer :showReverse="true" />
   </div>
 </template>
 

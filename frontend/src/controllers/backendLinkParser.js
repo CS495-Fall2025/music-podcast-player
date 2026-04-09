@@ -49,7 +49,8 @@ function parseResponse(response, sourceUrl) {
         artist: item.artist || feedItem.artist,
         description: item.description,
         audio: item.enclosure_url,
-        track_url: sourceUrl,
+        track_url: item.link || item.guid || item.enclosure_url,
+        feed_url: sourceUrl,
         image: item.image || feedItem.art_url,
         value: valueObject,
       };
