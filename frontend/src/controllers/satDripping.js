@@ -10,7 +10,6 @@ import {
 export default function useSatDripping() {
   // Drips every five seconds. Users define sat drip amounts in sats/minute.
   const dripInterval = 5000;
-  const userSetInterval = 60000;
 
   let timerId = null;
 
@@ -34,7 +33,7 @@ export default function useSatDripping() {
 
   function onDrippingInterval() {
     const dripAmount =
-      (dripInterval / userSetInterval) * drippingState.dripRate;
+      (dripInterval / 60000) * drippingState.dripRatePerMinute;
     drippingState.currentFractionalSatsOwed += dripAmount;
 		drippingState.totalFractionalSats += dripAmount;
   }
