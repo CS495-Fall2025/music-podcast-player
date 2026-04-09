@@ -33,7 +33,7 @@ function initializeLightning() {
       nwc: {
         authorizationUrlOptions: {
           requestMethods: ["get_balance", "pay_keysend"],
-     },
+        },
       },
     },
   });
@@ -193,12 +193,7 @@ export function sendBoost(boostMeta, valueMeta) {
   return true;
 }
 
-export function makeStreamMeta(
-  podcastName,
-  podcastGuid,
-  trackName,
-  trackGuid
-) {
+export function makeStreamMeta(podcastName, podcastGuid, trackName, trackGuid) {
   const boostMeta = {
     podcast: podcastName,
     guid: podcastGuid,
@@ -241,11 +236,11 @@ export function makeStreamValueMeta(totalSats, recipients) {
   }
 
   let valueMeta = [];
-	let splits = [];
+  let splits = [];
   for (let index = 0; index < recipients.length; index++) {
     const recipient = recipients[index];
     let normalizedSplit = Number(recipient.split) / valueSum;
-		splits.push(normalizedSplit);
+    splits.push(normalizedSplit);
 
     // It's possible to have multiple entries that are identical, and they're meant to
     // be treated as independent anyways, so we store the index with the address to
@@ -255,25 +250,25 @@ export function makeStreamValueMeta(totalSats, recipients) {
       customRecord: recipient.customRecord,
       meta: {
         name: recipient.recipient,
-				// value_msat will be updated after the sats have been distributed.
+        // value_msat will be updated after the sats have been distributed.
         value_msat: 0,
         total_value_msat: totalSats * 1000,
       },
     });
   }
 
-	let distributedSats = distributeStreamedSats(splits, totalSats);
+  let distributedSats = distributeStreamedSats(splits, totalSats);
 
   for (let index = 0; index < valueMeta.length; index++) {
-		const recievedSats = distributedSats[index];
+    const recievedSats = distributedSats[index];
     if (recievedSats === 0) {
       valueMeta.splice(index, 1);
-			distributedSats.splice(index, 1);
+      distributedSats.splice(index, 1);
       index--;
-			continue;
+      continue;
     }
 
-		valueMeta[index].meta.value_msat = recievedSats * 1000;
+    valueMeta[index].meta.value_msat = recievedSats * 1000;
   }
 
   return valueMeta;
@@ -290,59 +285,58 @@ async function ensureWalletConnected() {
 }
 
 function distributeStreamedSats(splits, totalSats) {
-	if (totalSats > 500) {
-		return distributeBySplits(splits, totalSats);
-	}
+  if (totalSats > 500) {
+    return distributeBySplits(splits, totalSats);
+  }
 
-	let amounts = [];
+  let amounts = [];
 
-	let distribution = [];
-	let accumulatedSplit = 0.0;
-	for (let i = 0; i < splits.length; i++) {
-		const split = splits[i];
-		accumulatedSplit += split;
-		distribution.push(accumulatedSplit);
-		amounts.push(0);
-	}
+  let distribution = [];
+  let accumulatedSplit = 0.0;
+  for (let i = 0; i < splits.length; i++) {
+    const split = splits[i];
+    accumulatedSplit += split;
+    distribution.push(accumulatedSplit);
+    amounts.push(0);
+  }
 
-	for (let s = 0; s < totalSats; s++) {
-		const sample = Math.random();
+  for (let s = 0; s < totalSats; s++) {
+    const sample = Math.random();
 
-		for (let d = 0; d < distribution.length; d++) {
-			if (sample < distribution[d]) {
-				amounts[d] += 1;
-				break;
-			}
-		}
-	}
+    for (let d = 0; d < distribution.length; d++) {
+      if (sample < distribution[d]) {
+        amounts[d] += 1;
+        break;
+      }
+    }
+  }
 
-	return amounts;
+  return amounts;
 }
-
 
 // This is a lot more efficient for larger sat amounts, as we don't have to sample for
 // each sat. However, for small amounts, (generally <100), it may never award any sats
 // to small recipients, so sampling is prefered in that case.
 function distributeBySplits(splits, totalSats) {
-	let amounts = [];
-	let largestSplit = 0.0;
-	let largestSplitIndex = 0;
-	let totalAwarded = 0;
+  let amounts = [];
+  let largestSplit = 0.0;
+  let largestSplitIndex = 0;
+  let totalAwarded = 0;
 
-	for (let i = 0; i < splits.length; i++) {
-		const split = splits[i];
-		const amount = Math.floor(split * totalSats);
-		amounts.push(amount);
-		totalAwarded += amount;
+  for (let i = 0; i < splits.length; i++) {
+    const split = splits[i];
+    const amount = Math.floor(split * totalSats);
+    amounts.push(amount);
+    totalAwarded += amount;
 
-		if (split > largestSplit) {
-			largestSplit = split;
-			largestSplitIndex = i;
-		}
-	}
+    if (split > largestSplit) {
+      largestSplit = split;
+      largestSplitIndex = i;
+    }
+  }
 
-	const extra = totalSats - totalAwarded;
-	amounts[largestSplitIndex] += extra;
+  const extra = totalSats - totalAwarded;
+  amounts[largestSplitIndex] += extra;
 
-	return amounts;
+  return amounts;
 }

@@ -2,13 +2,11 @@
   <div class="sat-drip-modal-overlay">
     <div class="sat-drip-modal">
       <h2 class="sat-drip-title">Sat Drip Settings</h2>
-			<div class="sat-drip-wallet-row">
-				<button @click="connectWallet">
-					{{
-						walletConnected ? "Disconnect Wallet" : "Connect Wallet"
-					}}
-				</button>
-			</div>
+      <div class="sat-drip-wallet-row">
+        <button @click="connectWallet">
+          {{ walletConnected ? "Disconnect Wallet" : "Connect Wallet" }}
+        </button>
+      </div>
 
       <div class="sat-drip-field">
         <label for="sat-rate">Sats per minute</label>
@@ -28,7 +26,7 @@
             id="sat-drip-enabled"
             v-model="currentSatDripEnabled"
             type="checkbox"
-						:disabled="!walletConnected"
+            :disabled="!walletConnected"
           />
           <span class="sat-toggle-slider"></span>
         </label>
@@ -45,27 +43,26 @@
 <script setup>
 import useSatDripModal from "../controllers/satDripModal.js";
 import useSatDripping from "../controllers/satDripping.js";
-import { walletConnected, connectWallet } from "../controllers/lightningPayments.js";
+import {
+  walletConnected,
+  connectWallet,
+} from "../controllers/lightningPayments.js";
 
 useSatDripping();
 
-const {
-	currentSatDripRate,
-	currentSatDripEnabled,
-	saveSatDripSettings,
-} = useSatDripModal();
+const { currentSatDripRate, currentSatDripEnabled, saveSatDripSettings } =
+  useSatDripModal();
 
 const emit = defineEmits(["close"]);
 
 function onSave() {
-	saveSatDripSettings();
-	emit("close");
+  saveSatDripSettings();
+  emit("close");
 }
 
 function onCancel() {
-	emit("close");
+  emit("close");
 }
-
 </script>
 
 <style src="../style.css" />
@@ -204,7 +201,7 @@ function onCancel() {
   transform: scale(1.02);
 }
 
-.sat-drip-cancel{
+.sat-drip-cancel {
   background-color: var(--disabled-text);
   color: var(--dark-text);
   border: none;

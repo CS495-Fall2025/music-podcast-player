@@ -17,7 +17,7 @@ vi.mock("../src/controllers/localFeedStore.js", async () => {
   const { ref } = await import("vue");
   return {
     currentTrack: ref(null),
-		feed: [],
+    feed: [],
   };
 });
 
@@ -39,13 +39,13 @@ const makeTrack = () => ({
 });
 
 const makeFeed = () => ({
-	type: "feed",
-	artist: "Feed Artist",
-	title: "Feed Title",
-	guid: "feed-guid",
-	description: "Feed description.",
-	link: "https://somelink.com",
-	image: "https://somelink.com/image",
+  type: "feed",
+  artist: "Feed Artist",
+  title: "Feed Title",
+  guid: "feed-guid",
+  description: "Feed description.",
+  link: "https://somelink.com",
+  image: "https://somelink.com/image",
 });
 
 beforeEach(() => {

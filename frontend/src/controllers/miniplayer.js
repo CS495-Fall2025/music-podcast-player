@@ -11,7 +11,7 @@ import repeatIcon from "../assets/images/undo-arrow-icon.svg";
 import reverseIcon from "../assets/images/reverse-icon.svg";
 
 export function useMiniPlayer() {
-const isPlaying = ref(false);
+  const isPlaying = ref(false);
   const ready = ref(false);
   const audioRef = ref(null);
   const currentTime = ref(0);
@@ -88,28 +88,28 @@ const isPlaying = ref(false);
     }
   });
 
-	watch(isPlaying, (newIsPlaying) => {
-		if (drippingState.enabled) {
-			if (currentTrack.value.value.length === 0) {
-				return;
-			}
-			drippingState.active = newIsPlaying;
-		}
-	});
+  watch(isPlaying, (newIsPlaying) => {
+    if (drippingState.enabled) {
+      if (currentTrack.value.value.length === 0) {
+        return;
+      }
+      drippingState.active = newIsPlaying;
+    }
+  });
 
-	watch(
-		() => drippingState.enabled,
-		(newEnabled) => {
-			if (!isPlaying.value) {
-				return;
-			}
-			const canDrip = currentTrack.value.value.length > 0;
-			// Handles the case where dripping enabled while a track is playing.
-			if (newEnabled && canDrip && isPlaying.value) {
-				drippingState.active = true;
-			}
-		}
-	);
+  watch(
+    () => drippingState.enabled,
+    (newEnabled) => {
+      if (!isPlaying.value) {
+        return;
+      }
+      const canDrip = currentTrack.value.value.length > 0;
+      // Handles the case where dripping enabled while a track is playing.
+      if (newEnabled && canDrip && isPlaying.value) {
+        drippingState.active = true;
+      }
+    },
+  );
 
   const togglePlay = () => {
     const audio = audioRef.value;

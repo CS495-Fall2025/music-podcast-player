@@ -9,9 +9,9 @@ export default {
     };
   },
   computed: {
-		drippingEnabled() {
-			return drippingState.enabled;
-		},
+    drippingEnabled() {
+      return drippingState.enabled;
+    },
     isDripping() {
       return drippingState.active;
     },

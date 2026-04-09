@@ -29,9 +29,9 @@
         Hello, {{ currentUser?.username }}!
       </div>
 
-			<button class="sat-drip-button" @click="satDripModalOpen = true">
-				Sat Drip
-			</button>
+      <button class="sat-drip-button" @click="satDripModalOpen = true">
+        Sat Drip
+      </button>
 
       <div class="nav-dropdown" ref="dropdownRef">
         <button
@@ -57,7 +57,7 @@
     </div>
   </nav>
 
-	<SatDripModal v-if="satDripModalOpen" @close="satDripModalOpen = false" />
+  <SatDripModal v-if="satDripModalOpen" @close="satDripModalOpen = false" />
 </template>
 
 <script setup>
@@ -69,7 +69,7 @@ import SatDripModal from "./SatDripModal.vue";
 const {
   isOpen,
   dropdownOpen,
-	satDripModalOpen,
+  satDripModalOpen,
   dropdownRef,
   handleLogin,
   handleSignup,
