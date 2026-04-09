@@ -77,7 +77,6 @@ export default {
       try {
         const config = await loadConfig();
 
-        
         const res = await fetch(
           `${config.backendUrl}/playlists/${playlist.id}/tracks/add`,
           {
@@ -85,7 +84,6 @@ export default {
             credentials: "include",
             headers: { "Content-Type": "application/json" },
 
-            
             body: JSON.stringify({
               title: this.track?.title ?? "",
               artist: this.track?.artist ?? "",
@@ -95,7 +93,6 @@ export default {
         );
 
         if (!res.ok) {
-          
           console.warn(
             "Add track to playlist failed:",
             res.status,
@@ -103,7 +100,10 @@ export default {
           );
         }
       } catch (err) {
-        console.warn("Add track request error (expected if endpoint missing):", err);
+        console.warn(
+          "Add track request error (expected if endpoint missing):",
+          err,
+        );
       } finally {
         this.submitting = false;
         this.close();

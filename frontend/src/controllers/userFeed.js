@@ -1,17 +1,17 @@
 import Track from "../components/UserTrack.vue";
 import { feed, feedTracks } from "./localFeedStore.js";
-import{
+import {
   fetchUserPlaylists,
   createPlaylist,
   addTrackToPlaylist,
-} from "../utils/playlistApi.js"
+} from "../utils/playlistApi.js";
 
 export default {
   name: "UserFeed",
   components: { Track },
 
-  data(){
-    return{
+  data() {
+    return {
       playlistPopupOpen: false,
       popupStyle: {
         top: "0px",
@@ -26,86 +26,83 @@ export default {
     };
   },
 
-  
-methods: {
-  async handleAddToPlaylist({ track, anchor }) {
-  this.selectedTrack = track;
-  this.popupError = "";
-  this.newPlaylistTitle = "";
-  this.newPlaylistDescription = "";
+  methods: {
+    async handleAddToPlaylist({ track, anchor }) {
+      this.selectedTrack = track;
+      this.popupError = "";
+      this.newPlaylistTitle = "";
+      this.newPlaylistDescription = "";
 
-  this.popupStyle = {
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-  };
+      this.popupStyle = {
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+      };
 
-  this.playlistPopupOpen = true;
-  this.popupLoading = true;
+      this.playlistPopupOpen = true;
+      this.popupLoading = true;
 
-  try {
-    const response = await fetchUserPlaylists();
-    this.playlists = response.playlists || [];
-  } catch (error) {
-    this.popupError =
-      error instanceof Error ? error.message : "Unable to load playlists.";
-    this.playlists = [];
-  } finally {
-    this.popupLoading = false;
-  }
-},
+      try {
+        const response = await fetchUserPlaylists();
+        this.playlists = response.playlists || [];
+      } catch (error) {
+        this.popupError =
+          error instanceof Error ? error.message : "Unable to load playlists.";
+        this.playlists = [];
+      } finally {
+        this.popupLoading = false;
+      }
+    },
 
-closePlaylistPopup() {
-  this.playlistPopupOpen = false;
-  this.selectedTrack = null;
-  this.popupError = "";
-  this.newPlaylistTitle = "";
-  this.newPlaylistDescription = "";
-},
+    closePlaylistPopup() {
+      this.playlistPopupOpen = false;
+      this.selectedTrack = null;
+      this.popupError = "";
+      this.newPlaylistTitle = "";
+      this.newPlaylistDescription = "";
+    },
 
-async handleAddTrackToPlaylist(playlistId) {
-  if (!this.selectedTrack?.track_url) {
-    this.popupError = "This track does not have a track URL.";
-    return;
-  }
+    async handleAddTrackToPlaylist(playlistId) {
+      if (!this.selectedTrack?.track_url) {
+        this.popupError = "This track does not have a track URL.";
+        return;
+      }
 
-  try {
-    await addTrackToPlaylist(playlistId, this.selectedTrack.track_url);
-    this.closePlaylistPopup();
-  } catch (error) {
-    this.popupError =
-      error instanceof Error
-        ? error.message
-        : "Unable to add track to playlist.";
-  }
-},
+      try {
+        await addTrackToPlaylist(playlistId, this.selectedTrack.track_url);
+        this.closePlaylistPopup();
+      } catch (error) {
+        this.popupError =
+          error instanceof Error
+            ? error.message
+            : "Unable to add track to playlist.";
+      }
+    },
 
-async handleCreatePlaylist() {
-  const title = this.newPlaylistTitle.trim();
-  const description = this.newPlaylistDescription.trim();
+    async handleCreatePlaylist() {
+      const title = this.newPlaylistTitle.trim();
+      const description = this.newPlaylistDescription.trim();
 
-  if (!title) {
-    this.popupError = "Enter a playlist title.";
-    return;
-  }
+      if (!title) {
+        this.popupError = "Enter a playlist title.";
+        return;
+      }
 
-  if (!this.selectedTrack?.track_url) {
-    this.popupError = "This track does not have a track URL.";
-    return;
-  }
+      if (!this.selectedTrack?.track_url) {
+        this.popupError = "This track does not have a track URL.";
+        return;
+      }
 
-  try {
-    const created = await createPlaylist(title, description);
-    await addTrackToPlaylist(created.id, this.selectedTrack.track_url);
-    this.closePlaylistPopup();
-  } catch (error) {
-    this.popupError =
-      error instanceof Error
-        ? error.message
-        : "Unable to create playlist.";
-    }
+      try {
+        const created = await createPlaylist(title, description);
+        await addTrackToPlaylist(created.id, this.selectedTrack.track_url);
+        this.closePlaylistPopup();
+      } catch (error) {
+        this.popupError =
+          error instanceof Error ? error.message : "Unable to create playlist.";
+      }
+    },
   },
-},
 
   computed: {
     // Returns feed if a feed is loaded. If a feed is not loaded, returns mock empty feed (until a feed is loaded) to prevent crashing.

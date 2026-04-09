@@ -16,11 +16,7 @@
       :track="item"
       @add-to-playlist="handleAddToPlaylist"
     />
-    <div
-      v-if="playlistPopupOpen"
-      class="playlist-popup"
-      :style="popupStyle"
-    >
+    <div v-if="playlistPopupOpen" class="playlist-popup" :style="popupStyle">
       <div class="playlist-popup-header">
         <strong>Add to playlist</strong>
         <button class="playlist-popup-close" @click="closePlaylistPopup">
@@ -57,11 +53,11 @@
           />
 
           <textarea
-    v-model="newPlaylistDescription"
-    placeholder="Description (optional)"
-    class="playlist-popup-textarea"
-    rows="4"
-  ></textarea>
+            v-model="newPlaylistDescription"
+            placeholder="Description (optional)"
+            class="playlist-popup-textarea"
+            rows="4"
+          ></textarea>
 
           <button
             class="playlist-popup-create-btn"

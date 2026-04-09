@@ -32,7 +32,7 @@ export default {
 
     addToPlaylist(event) {
       const buttonRect = event.currentTarget.getBoundingClientRect();
-    
+
       this.$emit("add-to-playlist", {
         track: this.track,
         anchor: {
