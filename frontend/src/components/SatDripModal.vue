@@ -9,7 +9,12 @@
       </div>
 
       <div class="sat-drip-field">
-        <label for="sat-rate">Sats per minute</label>
+				<div class="sat-drip-label-row">
+					<label for="sat-rate">Sats per {{ useMinutes ? "minute" : "hour" }}</label>
+					<button @click=onFlipUnitClick>
+						Use {{ useMinutes ? "hours" : "minutes" }}
+					</button>
+				</div>
         <input
           id="sat-rate"
           v-model.number="currentSatDripRate"
@@ -50,8 +55,13 @@ import {
 
 useSatDripping();
 
-const { currentSatDripRate, currentSatDripEnabled, saveSatDripSettings } =
-  useSatDripModal();
+const {
+	currentSatDripRate,
+	useMinutes,
+	currentSatDripEnabled,
+	onFlipUnitClick,
+	saveSatDripSettings,
+} = useSatDripModal();
 
 const emit = defineEmits(["close"]);
 
@@ -107,7 +117,18 @@ function onCancel() {
   margin-bottom: 1rem;
 }
 
-.sat-drip-field label,
+.sat-drip-label-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.sat-drip-label-row button {
+	padding: 2px 6px;
+}
+
+.sat-drip-label-row label,
 .sat-drip-toggle-row label {
   color: var(--light-blue);
 }
