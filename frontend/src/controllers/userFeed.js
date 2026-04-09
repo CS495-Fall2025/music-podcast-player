@@ -1,25 +1,111 @@
 import Track from "../components/UserTrack.vue";
-import AddToPlaylistModal from "../components/AddToPlaylistModal.vue";
 import { feed, feedTracks } from "./localFeedStore.js";
-import { useAuth } from "../auth/authService";
-
+import{
+  fetchUserPlaylists,
+  createPlaylist,
+  addTrackToPlaylist,
+} from "../utils/playlistApi.js"
 
 export default {
   name: "UserFeed",
-  components: { Track, AddToPlaylistModal },
+  components: { Track },
 
   data(){
     return{
-      showAddToPlaylist: false,
-      selectedTrackForPlaylist: null,
+      playlistPopupOpen: false,
+      popupStyle: {
+        top: "0px",
+        left: "0px",
+      },
+      selectedTrack: null,
+      playlists: [],
+      newPlaylistTitle: "",
+      newPlaylistDescription: "",
+      popupError: "",
+      popupLoading: false,
     };
   },
 
-  methods: {
-    handleAddToPlaylist(track) {
-      console.log("Add to playlist clicked for track", track);
-    },
+  
+methods: {
+  async handleAddToPlaylist({ track, anchor }) {
+  this.selectedTrack = track;
+  this.popupError = "";
+  this.newPlaylistTitle = "";
+  this.newPlaylistDescription = "";
+
+  this.popupStyle = {
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+  };
+
+  this.playlistPopupOpen = true;
+  this.popupLoading = true;
+
+  try {
+    const response = await fetchUserPlaylists();
+    this.playlists = response.playlists || [];
+  } catch (error) {
+    this.popupError =
+      error instanceof Error ? error.message : "Unable to load playlists.";
+    this.playlists = [];
+  } finally {
+    this.popupLoading = false;
+  }
+},
+
+closePlaylistPopup() {
+  this.playlistPopupOpen = false;
+  this.selectedTrack = null;
+  this.popupError = "";
+  this.newPlaylistTitle = "";
+  this.newPlaylistDescription = "";
+},
+
+async handleAddTrackToPlaylist(playlistId) {
+  if (!this.selectedTrack?.track_url) {
+    this.popupError = "This track does not have a track URL.";
+    return;
+  }
+
+  try {
+    await addTrackToPlaylist(playlistId, this.selectedTrack.track_url);
+    this.closePlaylistPopup();
+  } catch (error) {
+    this.popupError =
+      error instanceof Error
+        ? error.message
+        : "Unable to add track to playlist.";
+  }
+},
+
+async handleCreatePlaylist() {
+  const title = this.newPlaylistTitle.trim();
+  const description = this.newPlaylistDescription.trim();
+
+  if (!title) {
+    this.popupError = "Enter a playlist title.";
+    return;
+  }
+
+  if (!this.selectedTrack?.track_url) {
+    this.popupError = "This track does not have a track URL.";
+    return;
+  }
+
+  try {
+    const created = await createPlaylist(title, description);
+    await addTrackToPlaylist(created.id, this.selectedTrack.track_url);
+    this.closePlaylistPopup();
+  } catch (error) {
+    this.popupError =
+      error instanceof Error
+        ? error.message
+        : "Unable to create playlist.";
+    }
   },
+},
 
   computed: {
     // Returns feed if a feed is loaded. If a feed is not loaded, returns mock empty feed (until a feed is loaded) to prevent crashing.
@@ -47,32 +133,6 @@ export default {
     // Returns the feed's artist, if there's no artist, returns placeholder.
     feedArtist() {
       return this.feed.artist || "Feed artist not found";
-    },
-  },
-
-  currentUserId(){
-    const { currentUser } = useAuth();
-    return (
-      currentUser.value?.id ??
-      currentUser.value?.user_id ??
-      currentUser.value?.userId
-    );
-  },
-
-  methods:{
-    handleAddtoPlaylist(track){
-      if (this.currentUserId == null){
-        console.warn(
-          "Cannot open add-to-playlist modal: user id not available yet."
-        );
-        return;
-      }
-      this.selectedTrackForPlaylist = track;
-      this.showAddToPlaylist = true;
-    },
-    closeAddToPlaylistModal() {
-      this.showAddToPlaylist = false;
-      this.selectedTrackForPlaylist = null;
     },
   },
 };

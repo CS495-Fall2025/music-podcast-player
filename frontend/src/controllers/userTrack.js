@@ -30,8 +30,18 @@ export default {
       currentTrack.value = matched || selected;
     },
 
-    addToPlaylist() {
-      this.$emit("add-to-playlist", this.track);
+    addToPlaylist(event) {
+      const buttonRect = event.currentTarget.getBoundingClientRect();
+    
+      this.$emit("add-to-playlist", {
+        track: this.track,
+        anchor: {
+          top: buttonRect.bottom + window.scrollY,
+          left: buttonRect.left + window.scrollX,
+          width: buttonRect.width,
+          height: buttonRect.height,
+        },
+      });
     },
   },
 

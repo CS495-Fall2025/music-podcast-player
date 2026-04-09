@@ -111,31 +111,33 @@
   -webkit-line-clamp: unset;
 }
 
-.add-to-playlist-btn {
+.add-playlist-btn {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border: none;
   border-radius: 50%;
   background: white;
-  color: white;
   cursor: pointer;
   display: grid;
   place-items: center;
   padding: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
   transition:
     transform 0.15s ease,
-    opacity 0.15s ease;
+    opacity 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
-.add-to-playlist-btn:hover {
+.add-playlist-btn:hover {
   transform: scale(1.08);
-  opacity: 0.9;
+  opacity: 0.95;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
 }
 
 .add-to-playlist-icon {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   display: block;
   object-fit: contain;
 }
