@@ -14,39 +14,44 @@ export default function useSatDripping() {
 	const userSetInterval = 60000;
 
 	let timerId = null;
-	let satsSpentInt = 0;
-	let satsSpentFractional = 0.0;
+
+	function sendBatchedPayment() {
+		if (drippingState.currentFractionalSatsOwed < 1.0){
+			return;
+		}
+
+		// Note that makeStreamValueMeta is designed to statistically distribute small
+		// numbers of sats.
+		const valueMeta = makeStreamValueMeta(
+			Math.floor(drippingState.currentFractionalSatsOwed),
+			drippingState.currentValueRecipients,
+		);
+
+		sendBoost(drippingState.currentStreamMeta, valueMeta);
+
+		// Should be reset anyways, but just in case:
+		drippingState.currentFractionalSatsOwed = 0.0;
+	}
+
+	function onDrippingInterval() {
+		const dripAmount = (dripInterval / userSetInterval) * drippingState.dripRate;
+		drippingState.currentFractionalSatsOwed += dripAmount;
+	}
+
+	function updateDrippingTrack() {
+		drippingState.currentStreamMeta = makeStreamMeta(
+			feed[0].title,
+			feed[0].guid,
+			currentTrack.value.title,
+			currentTrack.value.guid,
+		);
+
+		drippingState.currentValueRecipients = currentTrack.value.value;
+		drippingState.currentFractionalSatsOwed = 0.0;
+	}
 
 	function startDripTimer() {
-		timerId = setInterval(() => {
-			const dripAmount = (dripInterval / userSetInterval) * drippingState.dripRate;
-			satsSpentFractional += dripAmount;
-
-			const spendAmount = Math.floor(satsSpentFractional) - satsSpentInt;
-			satsSpentInt += spendAmount;
-
-			if (spendAmount > 0) {
-				const streamMeta = makeStreamMeta(
-					feed[0].title,
-					feed[0].guid,
-					currentTrack.value.title,
-					currentTrack.value.guid,
-				);
-				// Note that makeStreamValueMeta is designed to statistically distribute small
-				// numbers of sats.
-				const valueMeta = makeStreamValueMeta(
-					spendAmount,
-					currentTrack.value.value,
-				);
-
-				console.log(`Spend ${spendAmount}`);
-				console.log(valueMeta);
-				console.log(currentTrack.value.value);
-				sendBoost(streamMeta, valueMeta);
-			}
-
-			console.log(`Frac: ${satsSpentFractional} - Int: ${satsSpentInt}`);
-		}, dripInterval);
+		timerId = setInterval(onDrippingInterval, dripInterval);
 	}
 
 	function stopDripTimer() {
@@ -67,10 +72,12 @@ export default function useSatDripping() {
 		() => drippingState.active,
 		(active) => {
 			if (active) {
+				updateDrippingTrack();
 				startDripTimer();
 			}
 			else {
 				stopDripTimer();
+				sendBatchedPayment();
 			}
 		}
 	);

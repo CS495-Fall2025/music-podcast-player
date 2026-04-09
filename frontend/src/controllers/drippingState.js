@@ -10,6 +10,13 @@ export const drippingState = reactive({
 
 	// Number of sats per minute to drip.
 	dripRate: 0,
+
+	// Current track to send stream payments to, let satDripping update this.
+	currentStreamMeta: null,
+	currentValueRecipients: null,
+
+	// Current fractional amount of sats to send, let satDripping update this.
+	currentFractionalSatsOwed: 0.0,
 });
 
 // Automatically stop dripping when dripping is disabled.
