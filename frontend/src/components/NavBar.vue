@@ -12,10 +12,18 @@
       </button>
 
       <div :class="['nav-links', { 'is-open': isOpen }]">
-        <router-link to="/" class="nav-link" @click="closeMenu">About</router-link>
-        <router-link to="/" class="nav-link" @click="closeMenu">Contact</router-link>
-        <router-link to="/search" class="nav-link" @click="closeMenu">Search</router-link>
-        <router-link to="/input" class="nav-link" @click="closeMenu">Input Feed</router-link>
+        <router-link to="/" class="nav-link" @click="closeMenu"
+          >About</router-link
+        >
+        <router-link to="/" class="nav-link" @click="closeMenu"
+          >Contact</router-link
+        >
+        <router-link to="/search" class="nav-link" @click="closeMenu"
+          >Search</router-link
+        >
+        <router-link to="/input" class="nav-link" @click="closeMenu"
+          >Input Feed</router-link
+        >
         <template v-if="includeDevPages">
           <!-- No dev pages currently. -->
         </template>
@@ -92,10 +100,7 @@
 <script setup>
 import useNavbar from "../controllers/navBar.js";
 import { ref } from "vue";
-import {
-  satDripRate,
-  satDripEnabled,
-} from "../controllers/localFeedStore.js";
+import { satDripRate, satDripEnabled } from "../controllers/localFeedStore.js";
 
 const {
   isOpen,
@@ -109,7 +114,6 @@ const {
 } = useNavbar();
 const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
 const satDripModalOpen = ref(false);
-
 
 function saveSatDripSettings() {
   satDripModalOpen.value = false;

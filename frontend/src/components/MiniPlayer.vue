@@ -4,10 +4,7 @@
 import { ref, watch, onBeforeUnmount } from "vue";
 import BoostModal from "./BoostModal.vue";
 import { useMiniPlayer } from "../controllers/miniplayer.js";
-import {
-  satDripEnabled,
-  satDripRate,
-} from "../controllers/localFeedStore.js";
+import { satDripEnabled, satDripRate } from "../controllers/localFeedStore.js";
 
 const {
   isPlaying,
