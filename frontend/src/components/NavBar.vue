@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar">
     <div class="nav-left">
-      <div class="brand">RSS Music Player</div>
+      <div class="brand">Music Podcast Player</div>
 
       <button
         class="navbar-toggle"
@@ -12,11 +12,18 @@
       </button>
 
       <div :class="['nav-links', { 'is-open': isOpen }]">
-        <router-link to="/" class="nav-link">Home</router-link>
-        <router-link to="/" class="nav-link">About</router-link>
-        <router-link to="/" class="nav-link">Contact</router-link>
-        <router-link to="/search" class="nav-link">Search Feeds</router-link>
-        <router-link to="/" class="nav-link">Input Feed</router-link>
+        <router-link to="/" class="nav-link" @click="closeMenu"
+          >About</router-link
+        >
+        <router-link to="/contact" class="nav-link" @click="closeMenu"
+          >Contact</router-link
+        >
+        <router-link to="/search" class="nav-link" @click="closeMenu"
+          >Search</router-link
+        >
+        <router-link to="/input" class="nav-link" @click="closeMenu"
+          >Input Feed</router-link
+        >
         <template v-if="includeDevPages">
           <!-- No dev pages currently. -->
         </template>
@@ -113,6 +120,10 @@ const satDripEnabled = ref(false);
 
 function saveSatDripSettings() {
   satDripModalOpen.value = false;
+}
+
+function closeMenu() {
+  isOpen.value = false;
 }
 </script>
 

@@ -12,7 +12,13 @@ import UserProfilePage from "../pages/UserPage.vue";
 import { clearError } from "../controllers/statusStore.js";
 
 const routes = [
-  { path: "/", component: InputFeedPage },
+  { path: "/", redirect: "/search" },
+
+  {
+    path: "/input",
+    component: InputFeedPage,
+    meta: { requiresAuth: false },
+  },
 
   {
     path: "/search",
@@ -82,8 +88,8 @@ router.beforeEach((to) => {
   clearError();
 
   if (to.meta.requiresAuth && !isAuthenticated()) {
-    // redirect unauthenticated users to home
-    return "/";
+    // redirect unauthenticated users to home(search page)
+    return "/search";
   }
 });
 
