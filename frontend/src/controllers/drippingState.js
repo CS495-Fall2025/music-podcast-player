@@ -18,9 +18,9 @@ export const drippingState = reactive({
   // Current fractional amount of sats to send, let satDripping update this.
   currentFractionalSatsOwed: 0.0,
 
-	// The total number of sats spent on streaming, including ones that will be sent in
-	// the next batch payment.
-	totalFractionalSats: 0.0,
+  // The total number of sats spent on streaming, including ones that will be sent in
+  // the next batch payment.
+  totalFractionalSats: 0.0,
 });
 
 // Automatically stop dripping when dripping is disabled.
@@ -29,7 +29,7 @@ watch(
   (newEnabled) => {
     if (!newEnabled) {
       drippingState.active = false;
-			drippingState.totalFractionalSats = 0.0;
+      drippingState.totalFractionalSats = 0.0;
     }
   },
 );

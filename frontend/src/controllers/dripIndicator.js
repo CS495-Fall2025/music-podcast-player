@@ -15,8 +15,8 @@ export default {
     isDripping() {
       return drippingState.active;
     },
-		totalSats() {
-			return Math.floor(drippingState.totalFractionalSats);
-		}
+    totalSats() {
+      return Math.floor(drippingState.totalFractionalSats);
+    },
   },
 };

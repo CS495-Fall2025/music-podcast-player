@@ -23,12 +23,12 @@ export default function useSatUsd() {
   const priceMessage = computed(() => {
     if (loadingPrice.value) return "Loading price...";
     if (!satPrice.value) return "Price unavailable";
-		return `${sats.value} sat ≈ ${(sats.value * satPrice.value).toFixed(2)} USD`;
+    return `${sats.value} sat ≈ ${(sats.value * satPrice.value).toFixed(2)} USD`;
   });
 
-	return {
-		sats,
-		fetchPrice,
-		priceMessage,
-	}
+  return {
+    sats,
+    fetchPrice,
+    priceMessage,
+  };
 }

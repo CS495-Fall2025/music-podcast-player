@@ -32,10 +32,9 @@ export default function useSatDripping() {
   }
 
   function onDrippingInterval() {
-    const dripAmount =
-      (dripInterval / 60000) * drippingState.dripRatePerMinute;
+    const dripAmount = (dripInterval / 60000) * drippingState.dripRatePerMinute;
     drippingState.currentFractionalSatsOwed += dripAmount;
-		drippingState.totalFractionalSats += dripAmount;
+    drippingState.totalFractionalSats += dripAmount;
   }
 
   function updateDrippingTrack() {

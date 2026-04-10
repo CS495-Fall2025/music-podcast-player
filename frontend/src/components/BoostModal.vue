@@ -16,7 +16,7 @@
           <label>Amount (sats)</label>
           <input type="number" min="0" step="100" v-model="sats" />
 
-					<SatUsd :satCount="sats"/>
+          <SatUsd :satCount="sats" />
 
           <p class="error-message" v-if="satsError">{{ satsError }}</p>
 

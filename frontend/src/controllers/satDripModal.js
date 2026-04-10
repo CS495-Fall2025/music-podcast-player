@@ -5,10 +5,10 @@ const useMinutes = ref(false);
 
 export default function useSatDripModal() {
   const currentSatDripRate = ref(
-		useMinutes.value
-			? drippingState.dripRatePerMinute
-			: drippingState.dripRatePerMinute * 60
-	);
+    useMinutes.value
+      ? drippingState.dripRatePerMinute
+      : drippingState.dripRatePerMinute * 60,
+  );
   const currentSatDripEnabled = ref(drippingState.enabled);
 
   const saveSatDripSettings = () => {
@@ -16,32 +16,30 @@ export default function useSatDripModal() {
     // updates on saving.
     drippingState.enabled = currentSatDripEnabled.value;
 
-		if (useMinutes.value) {
-			drippingState.dripRatePerMinute = currentSatDripRate.value;
-		}
-		else {
-			drippingState.dripRatePerMinute = currentSatDripRate.value / 60.0;
-		}
+    if (useMinutes.value) {
+      drippingState.dripRatePerMinute = currentSatDripRate.value;
+    } else {
+      drippingState.dripRatePerMinute = currentSatDripRate.value / 60.0;
+    }
   };
 
-	const onFlipUnitClick = () => {
-		useMinutes.value = !useMinutes.value;
-	}
+  const onFlipUnitClick = () => {
+    useMinutes.value = !useMinutes.value;
+  };
 
-	watch(useMinutes, (newUseMinutes) => {
-		if (newUseMinutes) {
-			currentSatDripRate.value = currentSatDripRate.value / 60;
-		}
-		else {
-			currentSatDripRate.value = currentSatDripRate.value * 60;
-		}
-	});
+  watch(useMinutes, (newUseMinutes) => {
+    if (newUseMinutes) {
+      currentSatDripRate.value = currentSatDripRate.value / 60;
+    } else {
+      currentSatDripRate.value = currentSatDripRate.value * 60;
+    }
+  });
 
   return {
     currentSatDripRate,
-		useMinutes,
+    useMinutes,
     currentSatDripEnabled,
-		onFlipUnitClick,
+    onFlipUnitClick,
     saveSatDripSettings,
   };
 }
