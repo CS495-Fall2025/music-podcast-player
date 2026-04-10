@@ -22,6 +22,7 @@
           type="number"
           min="0"
         />
+				<SatUsd :satCount="currentSatDripRate"/>
       </div>
 
       <div class="sat-drip-toggle-row">
@@ -52,6 +53,7 @@ import {
   walletConnected,
   connectWallet,
 } from "../controllers/lightningPayments.js";
+import SatUsd from "../components/SatUsd.vue";
 
 useSatDripping();
 

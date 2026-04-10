@@ -13,8 +13,6 @@ export function useBoostModal() {
   const isOpen = ref(false);
   const sats = ref(0);
   const message = ref("");
-  const satPrice = ref(null);
-  const loadingPrice = ref(false);
   const satsError = ref("");
   const recipients = ref([]);
 
@@ -22,7 +20,6 @@ export function useBoostModal() {
     isOpen.value = true;
     // Will be [] if no recipients or recipients with unsupported payment methods.
     recipients.value = currentTrack.value;
-    await fetchPrice();
   };
 
   const closeModal = () => {
@@ -35,31 +32,6 @@ export function useBoostModal() {
   const onConnectWallet = async () => {
     await connectWallet();
   };
-
-  const fetchPrice = async () => {
-    loadingPrice.value = true;
-    try {
-      const res = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
-      );
-      const data = await res.json();
-      satPrice.value = data.bitcoin.usd / 100000000;
-    } catch (e) {
-      console.error("Error fetching BTC price:", e);
-    } finally {
-      loadingPrice.value = false;
-    }
-  };
-
-  const priceMessage = computed(() => {
-    if (loadingPrice.value) return "Loading price...";
-    if (!satPrice.value) return "Price unavailable";
-    return `1 sat ≈ ${satPrice.value.toFixed(8)} USD`;
-  });
-
-  const usdEquivalent = computed(() => {
-    return satPrice.value && sats.value > 0 ? sats.value * satPrice.value : 0;
-  });
 
   const validate = () => {
     let valid = true;
@@ -103,8 +75,6 @@ export function useBoostModal() {
     satsError,
     recipients,
     walletConnected,
-    priceMessage,
-    usdEquivalent,
     openModal,
     closeModal,
     onConnectWallet,
