@@ -32,7 +32,7 @@ export function onUserFeedInputInput(event) {
   formValidation.userFeedUrl = valid;
 }
 
-export function onUserFeedFormSubmit(event) {
+export async function onUserFeedFormSubmit(event) {
   event.preventDefault();
   let data = new FormData(event.target);
 
@@ -40,8 +40,10 @@ export function onUserFeedFormSubmit(event) {
 
   if (canSubmit.value) {
     event.target.reset();
-    requestLinkedFeeds(data.get("userFeedUrl"));
-    router.push("/view");
+    const success = await requestLinkedFeeds(data.get("userFeedUrl"));
+    if (success) {
+      router.push("/view");
+    }
   }
 }
 
