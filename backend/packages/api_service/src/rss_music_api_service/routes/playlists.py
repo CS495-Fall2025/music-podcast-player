@@ -160,37 +160,24 @@ def get_playlist(id):
         return get_error_response(RequestError.NOT_FOUND)
 
     playlist["tracks"] = _enrich_tracks(playlist.get("tracks", []))
+    print("PLAYLIST TRACKS RETURNED:", playlist["tracks"])
     return playlist, 200
 
 
 def _enrich_tracks(tracks: list) -> list:
     enriched = []
     for track in tracks:
-        track_url = track.get("track_url", "")
-        metadata = {
-            "title": None,
-            "audio": None,
-            "artist": None,
-            "description": None,
-            "image": None,
-            "value": None,
-        }
-        try:
-            feed = LinkFunctions.get_feed_by_url(track_url)
-            metadata["title"] = feed.title
-            metadata["artist"] = feed.artist
-            metadata["description"] = feed.description
-            metadata["image"] = feed.art_url or None
-            if feed.items:
-                audio = feed.items[0].get("enclosure_url") or None
-                metadata["audio"] = audio
-            if feed.value_items and feed.value_items[0]:
-                metadata["value"] = feed.value_items[0]
-        except ExternalAPIError:
-            pass
-        except Exception:
-            pass
-        enriched.append({**track, **metadata})
+        enriched.append(
+            {
+                **track,
+                "title": track.get("title"),
+                "artist": track.get("artist"),
+                "description": track.get("description"),
+                "audio": track.get("audio"),
+                "image": track.get("image"),
+                "value": track.get("value"),
+            }
+        )
     return enriched
 
 
@@ -212,10 +199,15 @@ def add_track(id):
 
     try:
         result = db_service.add_track_to_playlist(
-            playlist_id=id,
-            user_id=user_id,
-            track_url=request_data["track_url"],
-        )
+        playlist_id=id,
+        user_id=user_id,
+        track_url=request_data["track_url"],
+        title=request_data.get("title", ""),
+         artist=request_data.get("artist", ""),
+        description=request_data.get("description", ""),
+        audio=request_data.get("audio", ""),
+        image=request_data.get("image", ""),
+    )
         return result, 201
     except db_errors.InternalAPINotFoundError:
         return get_error_response(RequestError.NOT_FOUND)

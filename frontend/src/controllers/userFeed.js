@@ -1,4 +1,5 @@
 import Track from "../components/UserTrack.vue";
+import AddToPlaylistModal from "../components/AddToPlaylistModal.vue";
 import { feed, feedTracks } from "./localFeedStore.js";
 import {
   fetchUserPlaylists,
@@ -8,15 +9,11 @@ import {
 
 export default {
   name: "UserFeed",
-  components: { Track },
+  components: { Track, AddToPlaylistModal },
 
   data() {
     return {
       playlistPopupOpen: false,
-      popupStyle: {
-        top: "0px",
-        left: "0px",
-      },
       selectedTrack: null,
       playlists: [],
       newPlaylistTitle: "",
@@ -32,16 +29,10 @@ export default {
       this.popupError = "";
       this.newPlaylistTitle = "";
       this.newPlaylistDescription = "";
-
-      this.popupStyle = {
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-      };
-
+    
       this.playlistPopupOpen = true;
       this.popupLoading = true;
-
+    
       try {
         const response = await fetchUserPlaylists();
         this.playlists = response.playlists || [];
@@ -51,6 +42,27 @@ export default {
         this.playlists = [];
       } finally {
         this.popupLoading = false;
+      }
+    },
+    
+    async handleCreatePlaylistFromModal({ title, description }) {
+      if (!title) {
+        this.popupError = "Enter a playlist title.";
+        return;
+      }
+    
+      if (!this.selectedTrack?.track_url) {
+        this.popupError = "This track does not have a track URL.";
+        return;
+      }
+    
+      try {
+        const created = await createPlaylist(title, description);
+        await addTrackToPlaylist(created.id, this.selectedTrack);
+        this.closePlaylistPopup();
+      } catch (error) {
+        this.popupError =
+          error instanceof Error ? error.message : "Unable to create playlist.";
       }
     },
 
@@ -69,7 +81,7 @@ export default {
       }
     
       try {
-        await addTrackToPlaylist(playlistId, this.selectedTrack.track_url);
+        await addTrackToPlaylist(playlistId, this.selectedTrack);
         this.closePlaylistPopup();
       } catch (error) {
         const message = error instanceof Error ? error.message.toLowerCase() : "";
@@ -85,30 +97,6 @@ export default {
         } else {
           this.popupError = "Could not add track to playlist.";
         }
-      }
-    },
-
-    async handleCreatePlaylist() {
-      const title = this.newPlaylistTitle.trim();
-      const description = this.newPlaylistDescription.trim();
-
-      if (!title) {
-        this.popupError = "Enter a playlist title.";
-        return;
-      }
-
-      if (!this.selectedTrack?.track_url) {
-        this.popupError = "This track does not have a track URL.";
-        return;
-      }
-
-      try {
-        const created = await createPlaylist(title, description);
-        await addTrackToPlaylist(created.id, this.selectedTrack.track_url);
-        this.closePlaylistPopup();
-      } catch (error) {
-        this.popupError =
-          error instanceof Error ? error.message : "Unable to create playlist.";
       }
     },
   },

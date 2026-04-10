@@ -15,6 +15,16 @@ class PlaylistTrack(Base):
 
     track_url: Mapped[str] = mapped_column(String, nullable=False)
 
+    title: Mapped[str] = mapped_column(String, nullable=False, default="")
+   
+    artist: Mapped[str] = mapped_column(String, nullable=False, default="")
+   
+    description: Mapped[str] = mapped_column(String, nullable=False, default="")
+   
+    audio: Mapped[str] = mapped_column(String, nullable=False, default="")
+   
+    image: Mapped[str] = mapped_column(String, nullable=False, default="")
+   
     position: Mapped[int] = mapped_column(nullable=False)
 
     added_at: Mapped[datetime] = mapped_column(

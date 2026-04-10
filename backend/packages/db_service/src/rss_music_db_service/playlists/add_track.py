@@ -8,7 +8,14 @@ logger = get_logger(__name__)
 
 
 def add_track_to_playlist(
-    playlist_id: int, user_id: int, track_url: str
+    playlist_id: int,
+    user_id: int,
+    track_url: str,
+    title: str = "",
+    artist: str = "",
+    description: str = "",
+    audio: str = "",
+    image: str = "",
 ) -> PlaylistTrack:
     with make_session() as session:
         playlist = (
@@ -29,6 +36,11 @@ def add_track_to_playlist(
         track = PlaylistTrack(
             playlist_id=playlist_id,
             track_url=track_url,
+            title=title,
+            artist=artist,
+            description=description,
+            audio=audio,
+            image=image,
             position=next_position,
         )
 
@@ -42,6 +54,11 @@ def add_track_to_playlist(
                 "id": track.id,
                 "playlist_id": track.playlist_id,
                 "track_url": track.track_url,
+                "title": track.title,
+                "artist": track.artist,
+                "description": track.description,
+                "audio": track.audio,
+                "image": track.image,
                 "position": track.position,
                 "added_at": track.added_at,
             }
@@ -55,7 +72,7 @@ def add_track_to_playlist(
                 table="playlist_tracks",
                 playlist_id=playlist_id,
             )
-
+            print("TRACK SAVED:", result)
             return result
 
         except IntegrityError:

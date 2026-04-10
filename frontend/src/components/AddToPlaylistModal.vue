@@ -10,24 +10,28 @@
         <button class="modal-close" type="button" @click="close">✕</button>
       </div>
 
-      <div class="modal-subtitle" v-if="track">
+      <div v-if="track" class="modal-subtitle">
         <div class="subtitle-line">
           <span class="subtitle-label">Track:</span>
-          <span class="subtitle-value">{{ track.title }}</span>
+          <span class="subtitle-value">
+            {{ track.title || "Track title not found" }}
+          </span>
         </div>
         <div class="subtitle-line">
           <span class="subtitle-label">Artist:</span>
-          <span class="subtitle-value">{{ track.artist }}</span>
+          <span class="subtitle-value">
+            {{ track.artist || "Track artist not found" }}
+          </span>
         </div>
       </div>
 
       <div v-if="loading" class="modal-state">Loading playlists...</div>
 
-      <div v-else-if="error" class="modal-state error">
-        {{ error }}
-      </div>
-
       <div v-else>
+        <div v-if="error" class="modal-state error">
+          {{ error }}
+        </div>
+
         <div v-if="!playlists || playlists.length === 0" class="modal-state">
           No playlists found.
         </div>
@@ -42,7 +46,38 @@
             @click="selectPlaylist(p)"
           >
             <div class="playlist-title">{{ p.title }}</div>
-            <div class="playlist-meta">{{ p.track_count }} tracks</div>
+            <div class="playlist-meta">
+              {{ p.track_count ?? p.trackCount ?? 0 }} tracks
+            </div>
+          </button>
+        </div>
+
+        <div class="create-section">
+          <h3 class="create-title">Create new playlist</h3>
+
+          <input
+            v-model="newPlaylistTitle"
+            class="create-input"
+            type="text"
+            placeholder="New playlist name"
+            :disabled="submitting"
+          />
+
+          <textarea
+            v-model="newPlaylistDescription"
+            class="create-textarea"
+            rows="4"
+            placeholder="Description (optional)"
+            :disabled="submitting"
+          ></textarea>
+
+          <button
+            class="primary-btn"
+            type="button"
+            :disabled="submitting"
+            @click="createAndAdd"
+          >
+            Create + Add
           </button>
         </div>
       </div>
@@ -141,7 +176,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 320px;
+  max-height: 220px;
   overflow: auto;
   padding-right: 2px;
 }
@@ -180,6 +215,54 @@
   font-size: 0.85rem;
   opacity: 0.75;
   flex-shrink: 0;
+}
+
+.create-section {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.create-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.create-input,
+.create-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: white;
+  font: inherit;
+}
+
+.create-textarea {
+  resize: none;
+  min-height: 96px;
+}
+
+.primary-btn {
+  border: none;
+  background: #1f6feb;
+  color: white;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primary-btn:hover {
+  opacity: 0.92;
+}
+
+.primary-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .modal-footer {

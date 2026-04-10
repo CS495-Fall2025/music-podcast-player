@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref } from "vue";
+import AddToPlaylistModal from "../components/AddToPlaylistModal.vue";
 import { useAuth } from "../auth/authService";
 import {
   fetchUserPlaylists,
@@ -268,7 +269,7 @@ async function handleAddTrackToPlaylist(playlistId) {
   }
 
   try {
-    await addTrackToPlaylist(playlistId, selectedTrack.value.track_url);
+    await addTrackToPlaylist(playlistId, selectedTrack.value);
     closePlaylistPopup();
   } catch (error) {
     const message = error instanceof Error ? error.message.toLowerCase() : "";
@@ -303,7 +304,7 @@ async function handleCreatePlaylist() {
 
   try {
     const created = await createPlaylist(title, description);
-    await addTrackToPlaylist(created.id, selectedTrack.value.track_url);
+    await addTrackToPlaylist(created.id, selectedTrack.value);
     closePlaylistPopup();
   } catch (error) {
     popupError.value =
@@ -481,178 +482,16 @@ async function handleCreatePlaylist() {
       <p>Loading profile...</p>
     </div>
 
-    <div
-      v-if="playlistPopupOpen"
-      :style="{
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 1000,
-        width: '320px',
-        maxWidth: '90vw',
-        background: '#111',
-        border: '1px solid #444',
-        borderRadius: '16px',
-        boxShadow: '0 12px 32px rgba(0, 0, 0, 0.35)',
-        padding: '20px',
-      }"
-    >
-      <div
-        :style="{
-          position: 'relative',
-          marginBottom: '16px',
-          minHeight: '32px',
-        }"
-      >
-        <strong
-          :style="{
-            color: 'white',
-            fontWeight: '700',
-            fontSize: '1.1rem',
-            display: 'block',
-            paddingRight: '44px',
-          }"
-        >
-          Add to playlist
-        </strong>
-
-        <button
-  @click="closePlaylistPopup"
-  :style="{
-    position: 'absolute',
-    top: '0',
-    right: '0',
-    width: '32px',
-    height: '32px',
-    border: 'none',
-    outline: 'none',
-    boxShadow: 'none',
-    background: 'transparent',
-    color: 'white',
-    fontSize: '1.4rem',
-    lineHeight: '1',
-    cursor: 'pointer',
-    padding: '0',
-    margin: '0',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    appearance: 'none',
-    WebkitAppearance: 'none',
-  }"
->
-  ✕
-</button>
-      </div>
-
-      <div
-        v-if="popupLoading"
-        :style="{ color: '#ccc', fontSize: '0.95rem', marginBottom: '12px' }"
-      >
-        Loading playlists...
-      </div>
-
-      <div v-else>
-        <div
-          v-if="popupError"
-          :style="{
-            color: '#ff4d6d',
-            fontSize: '0.9rem',
-            marginBottom: '12px',
-          }"
-        >
-          {{ popupError }}
-        </div>
-
-        <div
-          v-if="popupPlaylists.length"
-          :style="{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '10px',
-            marginBottom: '14px',
-          }"
-        >
-          <button
-            v-for="playlist in popupPlaylists"
-            :key="playlist.id"
-            @click="handleAddTrackToPlaylist(playlist.id)"
-            :style="{
-              border: 'none',
-              borderRadius: '12px',
-              background: '#1b1f27',
-              color: 'white',
-              padding: '14px 16px',
-              textAlign: 'left',
-              cursor: 'pointer',
-              fontSize: '1rem',
-            }"
-          >
-            {{ playlist.title }}
-          </button>
-        </div>
-
-        <div
-          :style="{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-          }"
-        >
-          <input
-            v-model="newPlaylistTitle"
-            type="text"
-            placeholder="New playlist name"
-            :style="{
-              width: '100%',
-              boxSizing: 'border-box',
-              border: '1px solid #666',
-              borderRadius: '12px',
-              padding: '14px 16px',
-              background: '#3a3a3a',
-              color: 'white',
-              fontSize: '1rem',
-            }"
-          />
-
-          <textarea
-            v-model="newPlaylistDescription"
-            placeholder="Description (optional)"
-            rows="4"
-            :style="{
-              width: '100%',
-              boxSizing: 'border-box',
-              border: '1px solid #666',
-              borderRadius: '12px',
-              padding: '14px 16px',
-              background: '#3a3a3a',
-              color: 'white',
-              fontSize: '1rem',
-              resize: 'none',
-              minHeight: '120px',
-              overflow: 'auto',
-            }"
-          ></textarea>
-
-          <button
-            @click="handleCreatePlaylist"
-            :style="{
-              border: 'none',
-              borderRadius: '12px',
-              background: '#2563eb',
-              color: 'white',
-              padding: '14px 16px',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              fontWeight: '600',
-            }"
-          >
-            Create + Add
-          </button>
-        </div>
-      </div>
-    </div>
+    <AddToPlaylistModal
+  v-if="playlistPopupOpen"
+  :playlists="popupPlaylists"
+  :loading="popupLoading"
+  :error="popupError"
+  :track="selectedTrack"
+  @close="closePlaylistPopup"
+  @select-playlist="handleAddTrackToPlaylist($event.id)"
+  @create-playlist="handleCreatePlaylist"
+/>
 
     <MiniPlayer :showReverse="true" />
   </div>

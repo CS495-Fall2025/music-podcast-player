@@ -126,7 +126,7 @@ export async function createPlaylist(title, description = "") {
   return response.json();
 }
 
-export async function addTrackToPlaylist(playlistId, trackUrl) {
+export async function addTrackToPlaylist(playlistId, track) {
   const config = await loadConfig();
   const response = await fetch(
     `${config.backendUrl}/playlists/${playlistId}/tracks/add`,
@@ -134,7 +134,14 @@ export async function addTrackToPlaylist(playlistId, trackUrl) {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ track_url: trackUrl }),
+      body: JSON.stringify({
+        track_url: track.track_url,
+        title: track.title || "",
+        artist: track.artist || "",
+        description: track.description || "",
+        audio: track.audio || "",
+        image: track.image || "",
+      }),
     },
   );
 
