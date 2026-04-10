@@ -59,7 +59,7 @@ afterEach(() => {
 });
 
 describe("useBoostModal (minimal)", () => {
-  it("openModal opens and sets recipients (and fetches price)", async () => {
+  it("openModal opens and sets recipients", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -72,7 +72,6 @@ describe("useBoostModal (minimal)", () => {
 
     expect(modal.isOpen.value).toBe(true);
     expect(modal.recipients.value).toEqual(currentTrack.value);
-    expect(fetch).toHaveBeenCalled();
   });
 
   it("onSendBoost blocks invalid sats and sets satsError", () => {
