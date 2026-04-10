@@ -269,7 +269,7 @@ async function handleAddTrackToPlaylist(playlistId) {
   }
 
   try {
-    await addTrackToPlaylist(playlistId, selectedTrack.value);
+    await addTrackToPlaylist(playlistId, selectedTrack.value.track_url);
     closePlaylistPopup();
   } catch (error) {
     const message = error instanceof Error ? error.message.toLowerCase() : "";

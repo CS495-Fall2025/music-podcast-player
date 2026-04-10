@@ -58,7 +58,7 @@ export default {
     
       try {
         const created = await createPlaylist(title, description);
-        await addTrackToPlaylist(created.id, this.selectedTrack);
+        await addTrackToPlaylist(created.id, this.selectedTrack.track_url);
         this.closePlaylistPopup();
       } catch (error) {
         this.popupError =
@@ -81,7 +81,7 @@ export default {
       }
     
       try {
-        await addTrackToPlaylist(playlistId, this.selectedTrack);
+        await addTrackToPlaylist(playlistId, this.selectedTrack.track_url);
         this.closePlaylistPopup();
       } catch (error) {
         const message = error instanceof Error ? error.message.toLowerCase() : "";

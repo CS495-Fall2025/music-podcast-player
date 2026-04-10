@@ -81,12 +81,6 @@
           </button>
         </div>
       </div>
-
-      <div class="modal-footer">
-        <button class="secondary-btn" type="button" @click="close">
-          Cancel
-        </button>
-      </div>
     </div>
   </div>
 </template>
@@ -99,15 +93,19 @@
   display: grid;
   place-items: center;
   z-index: 9999;
-  padding: 16px;
+  padding: 12px;
 }
 
 .modal-card {
-  width: min(520px, 95vw);
+  width: min(520px, 100%);
+  max-width: 100%;
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
   background: white;
   border-radius: 14px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
   padding: 14px;
+  box-sizing: border-box;
 }
 
 .modal-header {
@@ -233,12 +231,8 @@
 .create-input,
 .create-textarea {
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  border-radius: 12px;
-  padding: 10px 12px;
-  background: white;
-  font: inherit;
 }
 
 .create-textarea {
@@ -263,23 +257,5 @@
 .primary-btn:disabled {
   opacity: 0.65;
   cursor: not-allowed;
-}
-
-.modal-footer {
-  margin-top: 12px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.secondary-btn {
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  background: white;
-  padding: 8px 12px;
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-.secondary-btn:hover {
-  background: rgba(0, 0, 0, 0.03);
 }
 </style>
