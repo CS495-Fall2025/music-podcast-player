@@ -35,6 +35,7 @@
 
 @media (prefers-color-scheme: dark) {
   .profile-card {
+    position: relative;
     width: min(1080px, 100%);
     padding: clamp(1.25rem, 3vw, 2.5rem);
     border-radius: 24px;
@@ -51,6 +52,7 @@
 
 @media (prefers-color-scheme: light) {
   .profile-card {
+    position: relative;
     width: min(1080px, 100%);
     padding: clamp(1.25rem, 3vw, 2.5rem);
     border-radius: 24px;
@@ -63,6 +65,78 @@
     box-shadow: 0 28px 60px rgba(10, 24, 38, 0.22);
     color: var(--dark-text);
   }
+}
+
+/* Profile three-dots menu */
+.profile-menu-wrapper {
+  position: absolute;
+  top: clamp(1.25rem, 3vw, 2.5rem);
+  right: clamp(1.25rem, 3vw, 2.5rem);
+  z-index: 10;
+}
+
+.profile-menu-btn {
+  background: none;
+  border: 1px solid rgba(128, 128, 128, 0.28);
+  border-radius: 8px;
+  padding: 0.2rem 0.6rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  color: var(--text, #10202f);
+  line-height: 1.4;
+  transition: background 0.15s ease;
+}
+
+.profile-menu-btn:hover {
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.profile-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 160px;
+  background: var(--h-background, #fff);
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
+  overflow: hidden;
+  z-index: 10;
+}
+
+.profile-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text, #10202f);
+  transition: background 0.12s ease;
+}
+
+.profile-menu-item:hover {
+  background: rgba(128, 128, 128, 0.1);
+  transform: none;
+}
+
+.profile-menu-item--danger {
+  color: #d9534f;
+}
+
+.profile-menu-item--danger:hover {
+  background: rgba(217, 83, 79, 0.1);
+}
+
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  background: transparent;
 }
 
 .profile-hero {
@@ -265,6 +339,93 @@
 .playlist-delete-btn:disabled {
   opacity: 0.25;
   cursor: default;
+}
+
+.playlist-btn-group {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.playlist-edit-btn {
+  background: none;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  box-shadow: none;
+  border-radius: 8px;
+  color: var(--text);
+  opacity: 0.6;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.25rem 0.45rem;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.playlist-edit-btn:hover {
+  background: rgba(35, 100, 170, 0.1);
+  opacity: 1;
+  border-color: rgba(35, 100, 170, 0.4);
+}
+
+.playlist-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.playlist-edit-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 8px;
+  background: var(--h-background, #fff);
+  color: var(--text, #10202f);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.playlist-edit-textarea {
+  resize: none;
+}
+
+.playlist-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.playlist-edit-save {
+  padding: 0.35rem 0.85rem;
+  border: none;
+  border-radius: 8px;
+  background: #1f6feb;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.playlist-edit-save:hover {
+  opacity: 0.9;
+  transform: none;
+}
+
+.playlist-edit-cancel {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 8px;
+  background: none;
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.playlist-edit-cancel:hover {
+  background: rgba(128, 128, 128, 0.1);
+  transform: none;
 }
 
 .playlist-item {
@@ -562,6 +723,22 @@
   }
 
   .loading-state {
+    color: #eef5fb;
+  }
+
+  .profile-menu-dropdown {
+    background: #0d1f30;
+    border-color: rgba(214, 230, 245, 0.18);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  .profile-menu-item {
+    color: #eef5fb;
+  }
+
+  .playlist-edit-input {
+    background: rgba(10, 24, 38, 0.6);
+    border-color: rgba(214, 230, 245, 0.2);
     color: #eef5fb;
   }
 }

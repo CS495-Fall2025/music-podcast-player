@@ -124,6 +124,22 @@ export async function createPlaylist(title, description = "") {
   return response.json();
 }
 
+export async function updatePlaylist(playlistId, title, description = "") {
+  const config = await loadConfig();
+  const response = await fetch(`${config.backendUrl}/playlists/${playlistId}`, {
+    method: "PUT",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, description }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to update playlist.");
+  }
+
+  return response.json();
+}
+
 export async function addTrackToPlaylist(playlistId, trackUrl, feedUrl = null) {
   const config = await loadConfig();
   const response = await fetch(

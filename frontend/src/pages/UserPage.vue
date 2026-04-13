@@ -9,6 +9,7 @@ import {
   reorderTrackInPlaylist,
   createPlaylist,
   addTrackToPlaylist,
+  updatePlaylist,
 } from "../utils/playlistApi";
 import loadConfig from "../config";
 import { currentTrack, feedTracks } from "../controllers/localFeedStore.js";
@@ -268,12 +269,99 @@ function closeModal() {
   modalTrack.value = null;
   modalError.value = "";
 }
+
+// Profile three-dots menu
+const profileMenuOpen = ref(false);
+
+async function shareProfile() {
+  const url = `${window.location.origin}/user/${currentUser.value.username}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    window.alert("Share link copied to clipboard.");
+  } catch {
+    window.alert("Could not copy share link.");
+  }
+  profileMenuOpen.value = false;
+}
+
+async function deleteProfile() {
+  profileMenuOpen.value = false;
+  if (!window.confirm("Delete your profile? This cannot be undone.")) return;
+
+  try {
+    const config = await loadConfig();
+    const response = await fetch(`${config.backendUrl}/auth/me`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      window.alert("Could not delete profile.");
+      return;
+    }
+
+    window.location.assign("/");
+  } catch {
+    window.alert("Could not delete profile.");
+  }
+}
+
+// Playlist inline editing
+const editingPlaylistId = ref(null);
+const editTitle = ref("");
+const editDescription = ref("");
+
+function startEditPlaylist(playlist) {
+  editingPlaylistId.value = playlist.id;
+  editTitle.value = playlist.title;
+  editDescription.value = playlist.description === "No description added yet." ? "" : playlist.description;
+}
+
+function cancelEditPlaylist() {
+  editingPlaylistId.value = null;
+  editTitle.value = "";
+  editDescription.value = "";
+}
+
+async function saveEditPlaylist(playlist) {
+  const title = editTitle.value.trim();
+  if (!title) return;
+  try {
+    await updatePlaylist(playlist.id, title, editDescription.value.trim());
+    const p = playlists.value.find((x) => x.id === playlist.id);
+    if (p) {
+      p.title = title;
+      p.description = editDescription.value.trim() || "No description added yet.";
+    }
+    cancelEditPlaylist();
+  } catch {
+    // silent fail — keep form open
+  }
+}
 </script>
 
 <template>
   <div class="page-layout">
     <div v-if="currentUser" class="profile-container">
       <div class="profile-card">
+        <div class="profile-menu-wrapper">
+          <button
+            class="profile-menu-btn"
+            type="button"
+            aria-label="Profile options"
+            @click.stop="profileMenuOpen = !profileMenuOpen"
+          >⋯</button>
+          <div v-if="profileMenuOpen" class="profile-menu-dropdown">
+            <button class="profile-menu-item" type="button" @click="shareProfile">
+              Share profile
+            </button>
+            <button class="profile-menu-item profile-menu-item--danger" type="button" @click="deleteProfile">
+              Delete profile
+            </button>
+          </div>
+        </div>
+        <div v-if="profileMenuOpen" class="menu-backdrop" @click="profileMenuOpen = false" />
+
         <section class="profile-hero">
           <div class="profile-avatar" aria-hidden="true">
             {{ currentUser.username.slice(0, 1).toUpperCase() }}
@@ -350,26 +438,54 @@ function closeModal() {
               :class="{
                 'playlist-item--active': selectedPlaylistId === playlist.id,
               }"
-              @click="openPlaylist(playlist)"
+              @click="editingPlaylistId !== playlist.id && openPlaylist(playlist)"
             >
-              <div class="playlist-item-header">
-                <h3>{{ playlist.title }}</h3>
-                <button
-                  class="playlist-delete-btn"
-                  :disabled="deletingPlaylistId === playlist.id"
-                  @click.stop="deletePlaylistFromProfile(playlist)"
-                  :aria-label="`Delete playlist ${playlist.title}`"
-                  title="Delete playlist"
-                >
-                  ✕
-                </button>
-              </div>
-              <p class="playlist-description">{{ playlist.description }}</p>
-
-              <div class="playlist-meta">
-                <span>{{ playlist.trackCount }} tracks</span>
-                <span>Created {{ playlist.createdLabel }}</span>
-              </div>
+              <template v-if="editingPlaylistId === playlist.id">
+                <div class="playlist-edit-form" @click.stop>
+                  <input
+                    v-model="editTitle"
+                    class="playlist-edit-input"
+                    type="text"
+                    placeholder="Playlist name"
+                  />
+                  <textarea
+                    v-model="editDescription"
+                    class="playlist-edit-input playlist-edit-textarea"
+                    placeholder="Description (optional)"
+                    rows="2"
+                  ></textarea>
+                  <div class="playlist-edit-actions">
+                    <button class="playlist-edit-save" type="button" @click.stop="saveEditPlaylist(playlist)">Save</button>
+                    <button class="playlist-edit-cancel" type="button" @click.stop="cancelEditPlaylist">Cancel</button>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <div class="playlist-item-header">
+                  <h3>{{ playlist.title }}</h3>
+                  <div class="playlist-btn-group">
+                    <button
+                      class="playlist-edit-btn"
+                      type="button"
+                      @click.stop="startEditPlaylist(playlist)"
+                      :aria-label="`Edit playlist ${playlist.title}`"
+                      title="Edit playlist"
+                    >✎</button>
+                    <button
+                      class="playlist-delete-btn"
+                      :disabled="deletingPlaylistId === playlist.id"
+                      @click.stop="deletePlaylistFromProfile(playlist)"
+                      :aria-label="`Delete playlist ${playlist.title}`"
+                      title="Delete playlist"
+                    >✕</button>
+                  </div>
+                </div>
+                <p class="playlist-description">{{ playlist.description }}</p>
+                <div class="playlist-meta">
+                  <span>{{ playlist.trackCount }} tracks</span>
+                  <span>Created {{ playlist.createdLabel }}</span>
+                </div>
+              </template>
             </article>
           </div>
 
