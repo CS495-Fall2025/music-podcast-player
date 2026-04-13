@@ -179,7 +179,7 @@ class LinkFunctions:
                 valueMethod = ""
 
             if valueType != "lightning" or valueMethod != "keysend":
-                value_items = [{}]
+                value_items = []
 
             image = channel.find(it("image"))
             if image is not None:

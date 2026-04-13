@@ -5,6 +5,7 @@ export default function useNavbar() {
   const isOpen = ref(false);
   const dropdownOpen = ref(false);
   const dropdownRef = ref(null);
+  const satDripModalOpen = ref(false);
 
   // Use the reactive auth store
   const { isAuthenticated, currentUser } = useAuth();
@@ -42,6 +43,7 @@ export default function useNavbar() {
   return {
     isOpen,
     dropdownOpen,
+    satDripModalOpen,
     dropdownRef,
     isAuthenticated,
     currentUser,

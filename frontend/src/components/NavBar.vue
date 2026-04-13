@@ -64,48 +64,19 @@
     </div>
   </nav>
 
-  <div v-if="satDripModalOpen" class="sat-drip-modal-overlay">
-    <div class="sat-drip-modal">
-      <h2 class="sat-drip-title">Sat Drip Settings</h2>
-
-      <div class="sat-drip-field">
-        <label for="sat-rate">Sats per minute</label>
-        <input
-          id="sat-rate"
-          v-model.number="satDripRate"
-          class="sat-drip-input"
-          type="number"
-          min="0"
-        />
-      </div>
-
-      <div class="sat-drip-toggle-row">
-        <label for="sat-drip-enabled">Enable Sat Dripping</label>
-        <label class="sat-toggle">
-          <input
-            id="sat-drip-enabled"
-            v-model="satDripEnabled"
-            type="checkbox"
-          />
-          <span class="sat-toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="sat-drip-actions">
-        <button class="sat-drip-save" @click="saveSatDripSettings">Save</button>
-      </div>
-    </div>
-  </div>
+  <SatDripModal v-if="satDripModalOpen" @close="satDripModalOpen = false" />
 </template>
 
 <script setup>
 import useNavbar from "../controllers/navBar.js";
+import useSatDripping from "../controllers/satDripping.js";
 import DripIndicator from "./DripIndicator.vue";
-import { ref } from "vue";
+import SatDripModal from "./SatDripModal.vue";
 
 const {
   isOpen,
   dropdownOpen,
+  satDripModalOpen,
   dropdownRef,
   handleLogin,
   handleSignup,
@@ -113,14 +84,9 @@ const {
   isAuthenticated,
   currentUser,
 } = useNavbar();
-const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
-const satDripModalOpen = ref(false);
-const satDripRate = ref(0);
-const satDripEnabled = ref(false);
+useSatDripping();
 
-function saveSatDripSettings() {
-  satDripModalOpen.value = false;
-}
+const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
 
 function closeMenu() {
   isOpen.value = false;
@@ -300,6 +266,14 @@ function closeMenu() {
 .sat-drip-title {
   margin: 0 0 1rem 0;
   color: var(--light-orange);
+}
+
+.sat-drip-wallet-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  color: var(--light-blue);
 }
 
 .sat-drip-field {
