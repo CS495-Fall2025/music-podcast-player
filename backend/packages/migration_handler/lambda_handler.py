@@ -2,8 +2,6 @@ import json
 import os
 from pathlib import Path
 
-import boto3
-
 import rss_music_migration_handler
 
 
@@ -15,16 +13,9 @@ def assign_library_directory() -> None:
     os.environ["LD_LIBRARY_PATH"] = f"{path}:{previous_path}"
 
 
-def get_rotated_secrets() -> None:
-    secrets_client = boto3.client("secretsmanager")
-
+def get_secrets() -> None:
     connection_url = os.environ["DATABASE_URL_PARTIAL"]
-
-    db_credentials = json.loads(
-        secrets_client.get_secret_value(SecretId=os.environ["DATABASE_SECRET_ARN"])[
-            "SecretString"
-        ]
-    )
+    db_credentials = json.loads(os.environ["DATABASE_CREDENTIAL"])
 
     connection_url = connection_url.format(
         user=db_credentials["username"], password=db_credentials["password"]
@@ -38,11 +29,9 @@ def handler(event, context):
         return
 
     assign_library_directory()
-    secrets = get_rotated_secrets()
+    secrets = get_secrets()
 
     for env_name, value in secrets.items():
-        if env_name in os.environ and os.environ[env_name] == value:
-            continue
         os.environ[env_name] = value
 
     rss_music_migration_handler.run()

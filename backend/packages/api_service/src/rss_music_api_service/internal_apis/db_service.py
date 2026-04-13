@@ -2,7 +2,8 @@ from urllib.parse import urljoin
 
 from flask import current_app
 import requests
-from marshmallow import exceptions
+import requests.exceptions
+import marshmallow.exceptions
 
 from rss_music_db_service_schemas import ErrorResponse, ErrorType
 from rss_music_db_service_schemas.users import (
@@ -145,10 +146,14 @@ def _create_user_request(
 def _handle_error(response: requests.Response) -> None:
     try:
         error_data = ErrorResponse().load(response.json())
-    except exceptions.ValidationError as error:
+    except marshmallow.exceptions.ValidationError as error:
         raise errors.InternalAPIBadResponseError(
             "Recieved unexpected data from database service",
             error.messages,
+        )
+    except requests.exceptions.JSONDecodeError:
+        raise errors.InternalAPIBadResponseError(
+            "Recieved improperly formatted data from database service",
         )
 
     match error_data["error"]:

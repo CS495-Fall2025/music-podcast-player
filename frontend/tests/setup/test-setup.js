@@ -13,6 +13,8 @@ import { vi, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
 // Enable fake timers for all tests
 beforeAll(() => {
   vi.useFakeTimers();
+  globalThis.__NAME__ = "MusicPodcastPlayerTest";
+  globalThis.__VERSION__ = "1.0.0";
 });
 
 // Restore real timers after all tests complete
