@@ -240,29 +240,30 @@
 
 .playlist-delete-btn {
   background: none;
-  border: 1px solid rgba(39, 59, 79, 0.2);
+  border: 1px solid rgba(128, 128, 128, 0.3);
   box-shadow: none;
   border-radius: 8px;
-  color: rgba(26, 26, 26, 0.55);
+  color: var(--text);
+  opacity: 0.6;
   font-size: 0.8rem;
   line-height: 1;
   padding: 0.25rem 0.45rem;
   cursor: pointer;
   transition:
     background 0.15s ease,
-    color 0.15s ease,
+    opacity 0.15s ease,
     border-color 0.15s ease;
 }
 
 .playlist-delete-btn:hover:not(:disabled) {
-  background: rgba(252, 118, 106, 0.12);
-  color: #7a1f18;
-  border-color: rgba(252, 118, 106, 0.4);
-  transform: none;
+  background: rgba(220, 53, 34, 0.12);
+  color: var(--text);
+  opacity: 1;
+  border-color: rgba(220, 53, 34, 0.4);
 }
 
 .playlist-delete-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.25;
   cursor: default;
 }
 

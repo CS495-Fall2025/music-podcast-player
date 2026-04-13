@@ -20,7 +20,7 @@
       type="button"
     >
       <img
-        class="add-to-playlist-icon"
+        class="add-playlist-icon"
         src="../assets/images/plus-icon.svg"
         alt=""
         aria-hidden="true"
@@ -38,7 +38,7 @@
   padding: 0.5rem 0.75rem;
   background-color: var(--track-background);
   border-radius: var(--border-radius-sm);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition:
     transform 0.2s ease,
@@ -129,32 +129,37 @@
   -webkit-line-clamp: unset;
 }
 
-.add-to-playlist-btn {
+.add-playlist-btn {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   border: none;
   border-radius: 50%;
-  background: white;
-  color: white;
+  background: rgba(128, 128, 128, 0.15);
   cursor: pointer;
   display: grid;
   place-items: center;
   padding: 0;
-  transition:
-    transform 0.15s ease,
-    opacity 0.15s ease;
+  transition: background 0.15s ease, transform 0.15s ease;
 }
 
-.add-to-playlist-btn:hover {
-  transform: scale(1.08);
-  opacity: 0.9;
+.add-playlist-btn:hover {
+  background: rgba(128, 128, 128, 0.3);
+  transform: scale(1.1);
 }
 
-.add-to-playlist-icon {
-  width: 16px;
-  height: 16px;
+.add-playlist-icon {
+  width: 12px;
+  height: 12px;
   display: block;
   object-fit: contain;
+  opacity: 0.6;
+}
+
+@media (prefers-color-scheme: dark) {
+  .add-playlist-icon {
+    filter: invert(1);
+    opacity: 0.7;
+  }
 }
 </style>

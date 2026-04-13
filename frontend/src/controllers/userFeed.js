@@ -1,18 +1,76 @@
 import Track from "../components/UserTrack.vue";
+import AddToPlaylistModal from "../components/AddToPlaylistModal.vue";
 import { feed, feedTracks } from "./localFeedStore.js";
+import { fetchUserPlaylists, createPlaylist, addTrackToPlaylist } from "../utils/playlistApi.js";
 
 export default {
   name: "UserFeed",
-  components: { Track },
+  components: { Track, AddToPlaylistModal },
+
+  data() {
+    return {
+      modalOpen: false,
+      selectedTrack: null,
+      playlists: [],
+      loading: false,
+      error: "",
+    };
+  },
 
   methods: {
-    handleAddToPlaylist(track) {
-      console.log("Add to playlist clicked for track", track);
+    async handleAddToPlaylist(track) {
+      this.selectedTrack = track;
+      this.error = "";
+      this.modalOpen = true;
+      this.loading = true;
+
+      try {
+        const res = await fetchUserPlaylists();
+        this.playlists = res.playlists || [];
+      } catch {
+        this.error = "Unable to load playlists.";
+        this.playlists = [];
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async handleSelectPlaylist(playlist) {
+      if (!this.selectedTrack?.audio) return;
+      try {
+        await addTrackToPlaylist(playlist.id, this.selectedTrack.audio, this.selectedTrack.feed_url);
+        this.closeModal();
+      } catch (e) {
+        const msg = e.message?.toLowerCase() ?? "";
+        this.error = msg.includes("unique") || msg.includes("already") || msg.includes("409")
+          ? "Track is already in this playlist."
+          : "Could not add track.";
+      }
+    },
+
+    async handleCreatePlaylist({ title, description }) {
+      if (!title) {
+        this.error = "Enter a playlist name.";
+        return;
+      }
+      if (!this.selectedTrack?.audio) return;
+      try {
+        const playlist = await createPlaylist(title, description);
+        await addTrackToPlaylist(playlist.id, this.selectedTrack.audio, this.selectedTrack.feed_url);
+        this.closeModal();
+      } catch {
+        this.error = "Could not create playlist.";
+      }
+    },
+
+    closeModal() {
+      this.modalOpen = false;
+      this.selectedTrack = null;
+      this.error = "";
     },
   },
 
   computed: {
-    // Returns feed if a feed is loaded. If a feed is not loaded, returns mock empty feed (until a feed is loaded) to prevent crashing.
     feed() {
       return feed.length
         ? feed[0]
@@ -22,20 +80,16 @@ export default {
             artist: "",
           };
     },
-    // Returns the list of track objects within the feed. Each object holds its own data.
     feedTracks() {
       return feedTracks;
     },
-    // Returns the feed's image, if there's no image, returns placeholder.
     feedImage() {
       return this.feed.image || "/src/assets/images/default-image.jpg";
     },
-    // Returns the feed's title, if there's no title, returns empty.
     feedTitle() {
       if (this.feed.title === "Unknown") return "";
       return this.feed.title;
     },
-    // Returns the feed's artist, if there's no artist, returns empty.
     feedArtist() {
       if (this.feed.artist === "Unknown") return "";
       return this.feed.artist;

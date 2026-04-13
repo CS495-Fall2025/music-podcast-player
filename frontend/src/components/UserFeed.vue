@@ -16,6 +16,17 @@
       :track="item"
       @add-to-playlist="handleAddToPlaylist"
     />
+
+    <AddToPlaylistModal
+      v-if="modalOpen"
+      :track="selectedTrack"
+      :playlists="playlists"
+      :loading="loading"
+      :error="error"
+      @close="closeModal"
+      @select-playlist="handleSelectPlaylist"
+      @create-playlist="handleCreatePlaylist"
+    />
   </div>
 </template>
 

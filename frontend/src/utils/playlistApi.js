@@ -107,3 +107,40 @@ export async function fetchPublicPlaylistDetail(playlistId) {
 
   return response.json();
 }
+
+export async function createPlaylist(title, description = "") {
+  const config = await loadConfig();
+  const response = await fetch(`${config.backendUrl}/playlists/create`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, description }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to create playlist.");
+  }
+
+  return response.json();
+}
+
+export async function addTrackToPlaylist(playlistId, trackUrl, feedUrl = null) {
+  const config = await loadConfig();
+  const response = await fetch(
+    `${config.backendUrl}/playlists/${playlistId}/tracks/add`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ track_url: trackUrl, feed_url: feedUrl }),
+    },
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || data.error || `Request failed with status ${response.status}`);
+  }
+
+  return data;
+}

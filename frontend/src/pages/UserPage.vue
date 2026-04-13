@@ -7,11 +7,14 @@ import {
   deletePlaylist,
   removeTrackFromPlaylist,
   reorderTrackInPlaylist,
+  createPlaylist,
+  addTrackToPlaylist,
 } from "../utils/playlistApi";
 import loadConfig from "../config";
 import { currentTrack, feedTracks } from "../controllers/localFeedStore.js";
 import UserTrack from "../components/UserTrack.vue";
 import MiniPlayer from "../components/MiniPlayer.vue";
+import AddToPlaylistModal from "../components/AddToPlaylistModal.vue";
 
 const { currentUser, verifyToken } = useAuth();
 const playlists = ref([]);
@@ -212,6 +215,59 @@ function closePlaylist() {
   currentTrack.value = "";
   feedTracks.splice(0, feedTracks.length);
 }
+
+// Add-to-playlist modal
+const modalOpen = ref(false);
+const modalTrack = ref(null);
+const modalPlaylists = ref([]);
+const modalLoading = ref(false);
+const modalError = ref("");
+
+async function handleAddToPlaylist(track) {
+  modalTrack.value = track;
+  modalError.value = "";
+  modalOpen.value = true;
+  modalLoading.value = true;
+  try {
+    const res = await fetchUserPlaylists();
+    modalPlaylists.value = res.playlists || [];
+  } catch {
+    modalError.value = "Unable to load playlists.";
+    modalPlaylists.value = [];
+  } finally {
+    modalLoading.value = false;
+  }
+}
+
+async function handleSelectPlaylist(playlist) {
+  if (!modalTrack.value?.audio) return;
+  try {
+    await addTrackToPlaylist(playlist.id, modalTrack.value.audio, modalTrack.value.feed_url);
+    closeModal();
+  } catch (e) {
+    const msg = e.message?.toLowerCase() ?? "";
+    modalError.value = msg.includes("unique") || msg.includes("already") || msg.includes("409")
+      ? "Track is already in this playlist."
+      : "Could not add track.";
+  }
+}
+
+async function handleCreatePlaylist({ title, description }) {
+  if (!title || !modalTrack.value?.audio) return;
+  try {
+    const playlist = await createPlaylist(title, description);
+    await addTrackToPlaylist(playlist.id, modalTrack.value.audio, modalTrack.value.feed_url);
+    closeModal();
+  } catch {
+    modalError.value = "Could not create playlist.";
+  }
+}
+
+function closeModal() {
+  modalOpen.value = false;
+  modalTrack.value = null;
+  modalError.value = "";
+}
 </script>
 
 <template>
@@ -346,7 +402,7 @@ function closePlaylist() {
                 :key="track.id"
                 class="track-row"
               >
-                <UserTrack :track="track" />
+                <UserTrack :track="track" @add-to-playlist="handleAddToPlaylist" />
                 <div class="track-actions">
                   <button
                     class="track-action-btn"
@@ -382,6 +438,17 @@ function closePlaylist() {
     <div v-else class="loading-state">
       <p>Loading profile...</p>
     </div>
+
+    <AddToPlaylistModal
+      v-if="modalOpen"
+      :track="modalTrack"
+      :playlists="modalPlaylists"
+      :loading="modalLoading"
+      :error="modalError"
+      @close="closeModal"
+      @select-playlist="handleSelectPlaylist"
+      @create-playlist="handleCreatePlaylist"
+    />
 
     <MiniPlayer :showReverse="false" />
   </div>
