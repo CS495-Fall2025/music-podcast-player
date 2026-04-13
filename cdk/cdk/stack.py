@@ -380,6 +380,29 @@ class RSSMusicPlayerStack(Stack):
         if CURRENT_STAGE == Stage.PRODUCTION:
             allowed_domain = FULL_DOMAIN_NAME
 
+        environment = {
+            "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{allowed_domain}",
+            "RSS_PLAYER_ENVIRONMENT": "production",
+            "RSS_PLAYER_DB_SERVICE_URL": db_service_api.url,
+            "RSS_PLAYER_API_ROOT": API_SERVICE_PREFIX,
+            "PODCAST_INDEX_KEY_ROUTE": "/rss-music-player/podcast-index-api/key",
+            "PODCAST_INDEX_SECRET_ROUTE": "/rss-music-player/podcast-index-api/secret",
+            "SECRET_KEY_ROUTE": "/rss-music-player/jwt/key",
+            "RSS_PLAYER_API_TOKENS_PER_REFILL": json.dumps({
+                "global": {"overall": 6000, "podcast_index": 90},
+                "public": {"overall": 5500, "podcast_index": 60},
+                "user": {"overall": 60, "podcast_index": 15},
+            }),
+            "RSS_PLAYER_TOKEN_REFILL_SECONDS": "60",
+            "RSS_PLAYER_TOKEN_PENALTY": json.dumps({
+                "podcast_index": 15,
+            }),
+            "RSS_PLAYER_SES_FROM_EMAIL": "no-reply@musicpodcastplayer.com",
+        }
+
+        if CURRENT_STAGE == Stage.DEVELOPMENT:
+            environment["RSS_PLAYER_DISABLE_EMAIL_VERIFY"] = "true"
+
         function = _lambda.Function(
             self,
             "RSSMusicPlayerApiServiceFunction",
@@ -388,25 +411,7 @@ class RSSMusicPlayerStack(Stack):
             handler="lambda_handler.handler",
             memory_size=512,
             architecture=_lambda.Architecture.ARM_64,
-            environment={
-                "RSS_PLAYER_ALLOWED_ORIGINS": f"https://{allowed_domain}",
-                "RSS_PLAYER_ENVIRONMENT": "production",
-                "RSS_PLAYER_DB_SERVICE_URL": db_service_api.url,
-                "RSS_PLAYER_API_ROOT": API_SERVICE_PREFIX,
-                "PODCAST_INDEX_KEY_ROUTE": "/rss-music-player/podcast-index-api/key",
-                "PODCAST_INDEX_SECRET_ROUTE": "/rss-music-player/podcast-index-api/secret",
-                "SECRET_KEY_ROUTE": "/rss-music-player/jwt/key",
-                "RSS_PLAYER_API_TOKENS_PER_REFILL": json.dumps({
-                    "global": {"overall": 6000, "podcast_index": 90},
-                    "public": {"overall": 5500, "podcast_index": 60},
-                    "user": {"overall": 60, "podcast_index": 15},
-                }),
-                "RSS_PLAYER_TOKEN_REFILL_SECONDS": "60",
-                "RSS_PLAYER_TOKEN_PENALTY": json.dumps({
-                    "podcast_index": 15,
-                }),
-                "RSS_PLAYER_SES_FROM_EMAIL": "no-reply@musicpodcastplayer.com",
-            },
+            environment=environment,
             timeout=Duration.seconds(12),
         )
 
