@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from sqlalchemy import String, ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -15,7 +16,7 @@ class PlaylistTrack(Base):
 
     track_url: Mapped[str] = mapped_column(String, nullable=False)
 
-    feed_url: Mapped[str] = mapped_column(String, nullable=True)
+    feed_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     position: Mapped[int] = mapped_column(nullable=False)
 

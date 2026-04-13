@@ -26,12 +26,15 @@ def add_track_to_playlist(
             session.query(PlaylistTrack).filter_by(playlist_id=playlist_id).count()
         ) + 1
 
-        track = PlaylistTrack(
-            playlist_id=playlist_id,
-            track_url=track_url,
-            feed_url=feed_url,
-            position=next_position,
-        )
+        track_kwargs = {
+            "playlist_id": playlist_id,
+            "track_url": track_url,
+            "position": next_position,
+        }
+        if feed_url is not None:
+            track_kwargs["feed_url"] = feed_url
+
+        track = PlaylistTrack(**track_kwargs)
 
         try:
             session.add(track)

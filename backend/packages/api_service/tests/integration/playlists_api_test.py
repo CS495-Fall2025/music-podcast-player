@@ -193,7 +193,7 @@ def test_get_playlist_success(mock_get_feed, auth_client, user, custom_responses
         language="en",
         pub_date="",
         last_build_date="",
-        items=[{"enclosure_url": "http://example.com/ep1.mp3", "title": "Ep 1"}],
+        items=[],
         value_items=[{}],
     )
 
@@ -211,7 +211,8 @@ def test_get_playlist_success(mock_get_feed, auth_client, user, custom_responses
                     {
                         "id": 1,
                         "playlist_id": 5,
-                        "track_url": "http://example.com/feed.rss",
+                        "track_url": "http://example.com/ep1.mp3",
+                        "feed_url": "http://example.com/feed.rss",
                         "position": 1,
                         "added_at": "2026-01-01T00:00:00",
                     }
