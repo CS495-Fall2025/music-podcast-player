@@ -128,9 +128,10 @@ def get_public_user_playlists(username):
     try:
         result = db_service.get_playlists_by_username(username)
         return {"playlists": result, "username": username}, 200
-    except db_errors.InternalAPINotFoundError:
-        return get_error_response(RequestError.NOT_FOUND)
-    except db_errors.InternalAPIForbiddenError:
+    except (
+        db_errors.InternalAPINotFoundError,
+        db_errors.InternalAPIForbiddenError,
+    ):
         return get_error_response(RequestError.NOT_FOUND)
 
 
@@ -139,13 +140,7 @@ def get_public_user_playlists(username):
 
 @PLAYLISTS_BP.get("/public/<int:id>")
 def get_public_playlist(id):
-    try:
-        playlist = db_service.get_playlist(playlist_id=id)
-    except db_errors.InternalAPINotFoundError:
-        return get_error_response(RequestError.NOT_FOUND)
-
-    playlist["tracks"] = _enrich_tracks(playlist.get("tracks", []))
-    return playlist, 200
+    return _get_playlist_with_enriched_tracks(id)
 
 
 # Get playlist by ID (with enriched track metadata)
@@ -154,8 +149,12 @@ def get_public_playlist(id):
 @PLAYLISTS_BP.get("/<int:id>")
 @login_required
 def get_playlist(id):
+    return _get_playlist_with_enriched_tracks(id)
+
+
+def _get_playlist_with_enriched_tracks(playlist_id: int):
     try:
-        playlist = db_service.get_playlist(playlist_id=id)
+        playlist = db_service.get_playlist(playlist_id=playlist_id)
     except db_errors.InternalAPINotFoundError:
         return get_error_response(RequestError.NOT_FOUND)
 

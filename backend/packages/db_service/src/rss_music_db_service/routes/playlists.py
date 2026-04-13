@@ -29,7 +29,7 @@ from rss_music_db_service.errors import (
     PlaylistNotFoundError,
     TrackAlreadyExistsError,
 )
-from fastapi import status, APIRouter, Request, Response
+from fastapi import status, APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from rss_music_db_service.playlists import (
@@ -51,7 +51,7 @@ logger = get_logger(__name__)
 
 
 @playlists.post("/create", status_code=status.HTTP_201_CREATED)
-async def create_playlist(request: Request, response: Response):
+async def create_playlist(request: Request):
     log_request(
         logger,
         "info",
@@ -89,7 +89,7 @@ async def create_playlist(request: Request, response: Response):
 
 
 @playlists.put("/{id}")
-async def update_playlist_route(id: int, request: Request, response: Response):
+async def update_playlist_route(id: int, request: Request):
     log_request(
         logger,
         "info",
@@ -122,7 +122,7 @@ async def update_playlist_route(id: int, request: Request, response: Response):
 
 
 @playlists.delete("/{id}")
-async def delete_playlist_route(id: int, request: Request, response: Response):
+async def delete_playlist_route(id: int, request: Request):
     log_request(
         logger,
         "info",
@@ -222,7 +222,7 @@ async def get_playlist_route(id: int):
 
 
 @playlists.post("/{id}/tracks/add", status_code=status.HTTP_201_CREATED)
-async def add_track_route(id: int, request: Request, response: Response):
+async def add_track_route(id: int, request: Request):
     log_request(
         logger,
         "info",
@@ -260,7 +260,7 @@ async def add_track_route(id: int, request: Request, response: Response):
 
 
 @playlists.delete("/{id}/tracks/remove")
-async def remove_track_route(id: int, request: Request, response: Response):
+async def remove_track_route(id: int, request: Request):
     log_request(
         logger,
         "info",
@@ -288,7 +288,7 @@ async def remove_track_route(id: int, request: Request, response: Response):
 
 
 @playlists.patch("/{id}/tracks/reorder")
-async def reorder_track_route(id: int, request: Request, response: Response):
+async def reorder_track_route(id: int, request: Request):
     log_request(
         logger,
         "info",
