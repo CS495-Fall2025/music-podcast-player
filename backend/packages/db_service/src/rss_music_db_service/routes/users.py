@@ -8,6 +8,7 @@ import rss_music_db_service_schemas.users.responses as db_user_responses
 from rss_music_db_service import errors
 from rss_music_db_service.users import (
     create,
+    delete,
     exists,
     login,
     verification,
@@ -259,6 +260,49 @@ async def set_email_verification_code(request: Request, response: Response):
     )
 
     return db_user_responses.OperationSuccessResponse().dump(response_data)
+
+
+@users.delete("/{user_id}")
+async def delete_user(user_id: int):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Delete user request received",
+        route=f"/users/{user_id}",
+    )
+
+    deleted = delete.delete_user(user_id)
+
+    if not deleted:
+        log_request(
+            logger,
+            "warn",
+            "response_sent",
+            "Response sent",
+            route=f"/users/{user_id}",
+            status_code=404,
+        )
+        return JSONResponse(
+            status_code=404,
+            content=ErrorResponse().dump(
+                {
+                    "error": ErrorType.NOT_FOUND,
+                    "message": "User was not found",
+                }
+            ),
+        )
+
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route=f"/users/{user_id}",
+        status_code=200,
+    )
+
+    return db_user_responses.OperationSuccessResponse().dump({"success": True})
 
 
 @users.post("/verify-email")

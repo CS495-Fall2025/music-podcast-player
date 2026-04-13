@@ -50,6 +50,15 @@ def check_user_exists(id: int) -> bool:
     return response_data["exists"]
 
 
+def delete_user(id: int) -> None:
+    request = _create_delete_user_request(id)
+
+    response = _send_request(request)
+
+    if not response.status_code == 200:
+        _handle_error(response)
+
+
 # Returns user_id, username, email_verified on success, None for invalid credentials.
 def try_user_login(username: str, password: str) -> tuple[int, str, bool] | None:
     request = _create_user_login_request(username, password)
@@ -174,6 +183,15 @@ def _create_user_exists_request(id: int) -> requests.PreparedRequest:
         }
     )
     request = requests.Request("POST", url, json=request_data)
+
+    return request.prepare()
+
+
+def _create_delete_user_request(id: int) -> requests.PreparedRequest:
+    service_url = current_app.config["DB_SERVICE_URL"]
+    url = urljoin(service_url, f"users/{id}")
+
+    request = requests.Request("DELETE", url)
 
     return request.prepare()
 
