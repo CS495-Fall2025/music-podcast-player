@@ -499,8 +499,8 @@ def _create_get_playlist_request(playlist_id: int) -> requests.PreparedRequest:
     return request.prepare()
 
 
-def add_track_to_playlist(playlist_id: int, user_id: int, track_url: str) -> dict:
-    request = _create_add_track_request(playlist_id, user_id, track_url)
+def add_track_to_playlist(playlist_id: int, user_id: int, track_url: str, feed_url: str = None) -> dict:
+    request = _create_add_track_request(playlist_id, user_id, track_url, feed_url)
     response = _send_request(request)
 
     if not response.status_code == 201:
@@ -510,13 +510,13 @@ def add_track_to_playlist(playlist_id: int, user_id: int, track_url: str) -> dic
 
 
 def _create_add_track_request(
-    playlist_id: int, user_id: int, track_url: str
+    playlist_id: int, user_id: int, track_url: str, feed_url: str = None
 ) -> requests.PreparedRequest:
     service_url = current_app.config["DB_SERVICE_URL"]
     url = urljoin(service_url, f"playlists/{playlist_id}/tracks/add")
 
     request_data = track_requests.AddTrackToPlaylistRequest().dump(
-        {"track_url": track_url, "created_by_user_id": user_id}
+        {"track_url": track_url, "feed_url": feed_url, "created_by_user_id": user_id}
     )
     request = requests.Request("POST", url, json=request_data)
     return request.prepare()

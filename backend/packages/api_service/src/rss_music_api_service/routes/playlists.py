@@ -167,29 +167,37 @@ def _enrich_tracks(tracks: list) -> list:
     enriched = []
     for track in tracks:
         track_url = track.get("track_url", "")
+        feed_url = track.get("feed_url") or ""
         metadata = {
             "title": None,
-            "audio": None,
+            "audio": track_url,
             "artist": None,
             "description": None,
             "image": None,
             "value": None,
         }
-        try:
-            feed = LinkFunctions.get_feed_by_url(track_url)
-            metadata["title"] = feed.title
-            metadata["artist"] = feed.artist
-            metadata["description"] = feed.description
-            metadata["image"] = feed.art_url or None
-            if feed.items:
-                audio = feed.items[0].get("enclosure_url") or None
-                metadata["audio"] = audio
-            if feed.value_items and feed.value_items[0]:
-                metadata["value"] = feed.value_items[0]
-        except ExternalAPIError:
-            pass
-        except Exception:
-            pass
+        if feed_url:
+            try:
+                feed = LinkFunctions.get_feed_by_url(feed_url)
+                episode = next(
+                    (item for item in feed.items if item.get("enclosure_url") == track_url),
+                    None,
+                )
+                if episode:
+                    metadata["title"] = episode.get("title")
+                    metadata["artist"] = episode.get("artist") or feed.artist
+                    metadata["description"] = episode.get("description")
+                    metadata["image"] = episode.get("image") or feed.art_url or None
+                else:
+                    metadata["title"] = feed.title
+                    metadata["artist"] = feed.artist
+                    metadata["image"] = feed.art_url or None
+                if feed.value_items and feed.value_items[0]:
+                    metadata["value"] = feed.value_items[0]
+            except ExternalAPIError:
+                pass
+            except Exception:
+                pass
         enriched.append({**track, **metadata})
     return enriched
 
@@ -215,6 +223,7 @@ def add_track(id):
             playlist_id=id,
             user_id=user_id,
             track_url=request_data["track_url"],
+            feed_url=request_data.get("feed_url"),
         )
         return result, 201
     except db_errors.InternalAPINotFoundError:

@@ -8,7 +8,7 @@ logger = get_logger(__name__)
 
 
 def add_track_to_playlist(
-    playlist_id: int, user_id: int, track_url: str
+    playlist_id: int, user_id: int, track_url: str, feed_url: str = None
 ) -> PlaylistTrack:
     with make_session() as session:
         playlist = (
@@ -29,6 +29,7 @@ def add_track_to_playlist(
         track = PlaylistTrack(
             playlist_id=playlist_id,
             track_url=track_url,
+            feed_url=feed_url,
             position=next_position,
         )
 
@@ -42,6 +43,7 @@ def add_track_to_playlist(
                 "id": track.id,
                 "playlist_id": track.playlist_id,
                 "track_url": track.track_url,
+                "feed_url": track.feed_url,
                 "position": track.position,
                 "added_at": track.added_at,
             }

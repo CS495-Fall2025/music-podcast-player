@@ -19,6 +19,7 @@ def get_playlist_by_id(playlist_id: int) -> dict:
                 "id": t.id,
                 "playlist_id": t.playlist_id,
                 "track_url": t.track_url,
+                "feed_url": t.feed_url,
                 "position": t.position,
                 "added_at": t.added_at,
             }

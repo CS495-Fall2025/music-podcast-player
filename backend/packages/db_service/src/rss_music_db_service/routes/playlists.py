@@ -240,6 +240,7 @@ async def add_track_route(id: int, request: Request, response: Response):
             playlist_id=id,
             user_id=result["created_by_user_id"],
             track_url=result["track_url"],
+            feed_url=result.get("feed_url"),
         )
         return track_data
     except PlaylistNotFoundError as err:

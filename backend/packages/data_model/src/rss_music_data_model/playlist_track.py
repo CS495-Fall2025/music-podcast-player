@@ -15,6 +15,8 @@ class PlaylistTrack(Base):
 
     track_url: Mapped[str] = mapped_column(String, nullable=False)
 
+    feed_url: Mapped[str] = mapped_column(String, nullable=True)
+
     position: Mapped[int] = mapped_column(nullable=False)
 
     added_at: Mapped[datetime] = mapped_column(
