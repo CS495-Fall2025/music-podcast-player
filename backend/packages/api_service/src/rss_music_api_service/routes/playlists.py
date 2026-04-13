@@ -180,7 +180,11 @@ def _enrich_tracks(tracks: list) -> list:
             try:
                 feed = LinkFunctions.get_feed_by_url(feed_url)
                 episode = next(
-                    (item for item in feed.items if item.get("enclosure_url") == track_url),
+                    (
+                        item
+                        for item in feed.items
+                        if item.get("enclosure_url") == track_url
+                    ),
                     None,
                 )
                 if episode:

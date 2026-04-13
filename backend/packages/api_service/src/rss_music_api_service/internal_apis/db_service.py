@@ -522,7 +522,9 @@ def _create_get_playlist_request(playlist_id: int) -> requests.PreparedRequest:
     return request.prepare()
 
 
-def add_track_to_playlist(playlist_id: int, user_id: int, track_url: str, feed_url: str = None) -> dict:
+def add_track_to_playlist(
+    playlist_id: int, user_id: int, track_url: str, feed_url: str = None
+) -> dict:
     request = _create_add_track_request(playlist_id, user_id, track_url, feed_url)
     response = _send_request(request)
 

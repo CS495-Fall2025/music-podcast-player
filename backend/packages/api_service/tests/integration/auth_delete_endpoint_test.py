@@ -10,7 +10,9 @@ def test_delete_without_auth_returns_unauthorized(client) -> None:
     assert response.status_code == 401
 
 
-def test_delete_with_valid_auth_deletes_user(auth_client, user, custom_responses) -> None:
+def test_delete_with_valid_auth_deletes_user(
+    auth_client, user, custom_responses
+) -> None:
     """DELETE /auth/me with valid auth deletes user and returns 200."""
     custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/users/{user.id}"] = (
         ConstantResponse(status_code=200, json_data={"success": True})
