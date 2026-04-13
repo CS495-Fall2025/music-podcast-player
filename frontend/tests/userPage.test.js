@@ -369,8 +369,6 @@ describe("UserPage", () => {
     });
 
     it("converts empty description back to default text after save", async () => {
-      const playlistApi = await import("../src/utils/playlistApi.js");
-
       const wrapper = mount(UserPage, {
         global: {
           stubs: {
