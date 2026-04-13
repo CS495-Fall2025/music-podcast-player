@@ -1,0 +1,174 @@
+/* StatusPage styling */
+.status-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.status-content {
+  max-width: 400px;
+}
+
+.status-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  width: 5rem;
+  height: 5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.status-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.status-message {
+  color: #666;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.action-button {
+  margin: 1rem;
+  border-radius: var(--border-radius);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--lighter-orange);
+  color: var(--dark-text);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  border: var(--border-thick) #d89461b4;
+  transition:
+    background-color var(--transition-standard),
+    color var(--transition-standard),
+    border-color var(--transition-standard),
+    transform var(--transition-fast);
+}
+
+.action-button:hover {
+  background-color: var(--lighter-orange);
+  border-color: var(--orange);
+  transform: scale(1.05);
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.skeleton-box {
+  height: 60px;
+  background: #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Tablet and small screens */
+@media (max-width: 768px) {
+  .status-wrapper {
+    min-height: 250px;
+    padding: 1.5rem;
+  }
+
+  .status-title {
+    font-size: 1.1rem;
+  }
+
+  .status-message {
+    font-size: 0.95rem;
+  }
+
+  .status-icon {
+    font-size: 2.5rem;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 480px) {
+  .status-wrapper {
+    min-height: 200px;
+    padding: 1rem;
+  }
+
+  .status-content {
+    max-width: 100%;
+  }
+
+  .status-title {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .status-message {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .status-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .action-button {
+    margin: 0.75rem;
+    padding: 0.75em 1.5em;
+    font-size: 0.95em;
+    min-width: 120px;
+    min-height: 44px;
+  }
+
+  .action-button:active {
+    transform: scale(0.98);
+  }
+
+  .spinner {
+    width: 35px;
+    height: 35px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+  }
+
+  .skeleton-box {
+    height: 50px;
+  }
+}

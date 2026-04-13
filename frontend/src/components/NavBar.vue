@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar">
     <div class="nav-left">
-      <div class="brand">RSS Music Player</div>
+      <div class="brand">Music Podcast Player</div>
 
       <button
         class="navbar-toggle"
@@ -12,11 +12,18 @@
       </button>
 
       <div :class="['nav-links', { 'is-open': isOpen }]">
-        <router-link to="/" class="nav-link">Home</router-link>
-        <router-link to="/" class="nav-link">About</router-link>
-        <router-link to="/" class="nav-link">Contact</router-link>
-        <router-link to="/search" class="nav-link">Search Feeds</router-link>
-        <router-link to="/" class="nav-link">Input Feed</router-link>
+        <router-link to="/" class="nav-link" @click="closeMenu"
+          >About</router-link
+        >
+        <router-link to="/contact" class="nav-link" @click="closeMenu"
+          >Contact</router-link
+        >
+        <router-link to="/search" class="nav-link" @click="closeMenu"
+          >Search</router-link
+        >
+        <router-link to="/input" class="nav-link" @click="closeMenu"
+          >Input Feed</router-link
+        >
         <template v-if="includeDevPages">
           <!-- No dev pages currently. -->
         </template>
@@ -57,48 +64,19 @@
     </div>
   </nav>
 
-  <div v-if="satDripModalOpen" class="sat-drip-modal-overlay">
-    <div class="sat-drip-modal">
-      <h2 class="sat-drip-title">Sat Drip Settings</h2>
-
-      <div class="sat-drip-field">
-        <label for="sat-rate">Sats per minute</label>
-        <input
-          id="sat-rate"
-          v-model.number="satDripRate"
-          class="sat-drip-input"
-          type="number"
-          min="0"
-        />
-      </div>
-
-      <div class="sat-drip-toggle-row">
-        <label for="sat-drip-enabled">Enable Sat Dripping</label>
-        <label class="sat-toggle">
-          <input
-            id="sat-drip-enabled"
-            v-model="satDripEnabled"
-            type="checkbox"
-          />
-          <span class="sat-toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="sat-drip-actions">
-        <button class="sat-drip-save" @click="saveSatDripSettings">Save</button>
-      </div>
-    </div>
-  </div>
+  <SatDripModal v-if="satDripModalOpen" @close="satDripModalOpen = false" />
 </template>
 
 <script setup>
 import useNavbar from "../controllers/navBar.js";
+import useSatDripping from "../controllers/satDripping.js";
 import DripIndicator from "./DripIndicator.vue";
-import { ref } from "vue";
+import SatDripModal from "./SatDripModal.vue";
 
 const {
   isOpen,
   dropdownOpen,
+  satDripModalOpen,
   dropdownRef,
   handleLogin,
   handleSignup,
@@ -106,13 +84,12 @@ const {
   isAuthenticated,
   currentUser,
 } = useNavbar();
-const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
-const satDripModalOpen = ref(false);
-const satDripRate = ref(0);
-const satDripEnabled = ref(false);
+useSatDripping();
 
-function saveSatDripSettings() {
-  satDripModalOpen.value = false;
+const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
+
+function closeMenu() {
+  isOpen.value = false;
 }
 </script>
 
@@ -289,6 +266,14 @@ function saveSatDripSettings() {
 .sat-drip-title {
   margin: 0 0 1rem 0;
   color: var(--light-orange);
+}
+
+.sat-drip-wallet-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  color: var(--light-blue);
 }
 
 .sat-drip-field {

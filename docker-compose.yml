@@ -35,6 +35,7 @@ services:
           "podcast_index": 15
         }
       RSS_PLAYER_TOKEN_TABLE_NAME: RateLimitTokens
+      RSS_PLAYER_DISABLE_EMAIL_VERIFY: true
       AWS_ACCESS_KEY_ID: dummy
       AWS_SECRET_ACCESS_KEY: dummy
       AWS_DEFAULT_REGION: us-east-1
@@ -50,7 +51,7 @@ services:
     ports:
       - "5001:5001"
     environment:
-      DATABASE_URL: postgresql://postgres:dev-db-password@database:5432
+      DATABASE_URL: postgresql://rssmusicplayerapp:dev-db-service-password@database:5432/postgres
     depends_on:
       migrations:
         condition: service_completed_successfully
@@ -62,6 +63,7 @@ services:
       dockerfile: ../docker/local_dev/Dockerfile.migration-handler
     environment:
       DATABASE_URL: postgresql://postgres:dev-db-password@database:5432
+      DB_SERVICE_ROLE_PASSWORD: dev-db-service-password
     depends_on:
       database:
         condition: service_healthy
