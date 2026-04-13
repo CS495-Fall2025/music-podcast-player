@@ -243,13 +243,18 @@ async function handleAddToPlaylist(track) {
 async function handleSelectPlaylist(playlist) {
   if (!modalTrack.value?.audio) return;
   try {
-    await addTrackToPlaylist(playlist.id, modalTrack.value.audio, modalTrack.value.feed_url);
+    await addTrackToPlaylist(
+      playlist.id,
+      modalTrack.value.audio,
+      modalTrack.value.feed_url,
+    );
     closeModal();
   } catch (e) {
     const msg = e.message?.toLowerCase() ?? "";
-    modalError.value = msg.includes("unique") || msg.includes("already") || msg.includes("409")
-      ? "Track is already in this playlist."
-      : "Could not add track.";
+    modalError.value =
+      msg.includes("unique") || msg.includes("already") || msg.includes("409")
+        ? "Track is already in this playlist."
+        : "Could not add track.";
   }
 }
 
@@ -257,7 +262,11 @@ async function handleCreatePlaylist({ title, description }) {
   if (!title || !modalTrack.value?.audio) return;
   try {
     const playlist = await createPlaylist(title, description);
-    await addTrackToPlaylist(playlist.id, modalTrack.value.audio, modalTrack.value.feed_url);
+    await addTrackToPlaylist(
+      playlist.id,
+      modalTrack.value.audio,
+      modalTrack.value.feed_url,
+    );
     closeModal();
   } catch {
     modalError.value = "Could not create playlist.";
@@ -314,7 +323,10 @@ const editDescription = ref("");
 function startEditPlaylist(playlist) {
   editingPlaylistId.value = playlist.id;
   editTitle.value = playlist.title;
-  editDescription.value = playlist.description === "No description added yet." ? "" : playlist.description;
+  editDescription.value =
+    playlist.description === "No description added yet."
+      ? ""
+      : playlist.description;
 }
 
 function cancelEditPlaylist() {
@@ -331,7 +343,8 @@ async function saveEditPlaylist(playlist) {
     const p = playlists.value.find((x) => x.id === playlist.id);
     if (p) {
       p.title = title;
-      p.description = editDescription.value.trim() || "No description added yet.";
+      p.description =
+        editDescription.value.trim() || "No description added yet.";
     }
     cancelEditPlaylist();
   } catch {
@@ -350,17 +363,31 @@ async function saveEditPlaylist(playlist) {
             type="button"
             aria-label="Profile options"
             @click.stop="profileMenuOpen = !profileMenuOpen"
-          >⋯</button>
+          >
+            ⋯
+          </button>
           <div v-if="profileMenuOpen" class="profile-menu-dropdown">
-            <button class="profile-menu-item" type="button" @click="shareProfile">
+            <button
+              class="profile-menu-item"
+              type="button"
+              @click="shareProfile"
+            >
               Share profile
             </button>
-            <button class="profile-menu-item profile-menu-item--danger" type="button" @click="deleteProfile">
+            <button
+              class="profile-menu-item profile-menu-item--danger"
+              type="button"
+              @click="deleteProfile"
+            >
               Delete profile
             </button>
           </div>
         </div>
-        <div v-if="profileMenuOpen" class="menu-backdrop" @click="profileMenuOpen = false" />
+        <div
+          v-if="profileMenuOpen"
+          class="menu-backdrop"
+          @click="profileMenuOpen = false"
+        />
 
         <section class="profile-hero">
           <div class="profile-avatar" aria-hidden="true">
@@ -438,7 +465,9 @@ async function saveEditPlaylist(playlist) {
               :class="{
                 'playlist-item--active': selectedPlaylistId === playlist.id,
               }"
-              @click="editingPlaylistId !== playlist.id && openPlaylist(playlist)"
+              @click="
+                editingPlaylistId !== playlist.id && openPlaylist(playlist)
+              "
             >
               <template v-if="editingPlaylistId === playlist.id">
                 <div class="playlist-edit-form" @click.stop>
@@ -455,8 +484,20 @@ async function saveEditPlaylist(playlist) {
                     rows="2"
                   ></textarea>
                   <div class="playlist-edit-actions">
-                    <button class="playlist-edit-save" type="button" @click.stop="saveEditPlaylist(playlist)">Save</button>
-                    <button class="playlist-edit-cancel" type="button" @click.stop="cancelEditPlaylist">Cancel</button>
+                    <button
+                      class="playlist-edit-save"
+                      type="button"
+                      @click.stop="saveEditPlaylist(playlist)"
+                    >
+                      Save
+                    </button>
+                    <button
+                      class="playlist-edit-cancel"
+                      type="button"
+                      @click.stop="cancelEditPlaylist"
+                    >
+                      Cancel
+                    </button>
                   </div>
                 </div>
               </template>
@@ -470,14 +511,18 @@ async function saveEditPlaylist(playlist) {
                       @click.stop="startEditPlaylist(playlist)"
                       :aria-label="`Edit playlist ${playlist.title}`"
                       title="Edit playlist"
-                    >✎</button>
+                    >
+                      ✎
+                    </button>
                     <button
                       class="playlist-delete-btn"
                       :disabled="deletingPlaylistId === playlist.id"
                       @click.stop="deletePlaylistFromProfile(playlist)"
                       :aria-label="`Delete playlist ${playlist.title}`"
                       title="Delete playlist"
-                    >✕</button>
+                    >
+                      ✕
+                    </button>
                   </div>
                 </div>
                 <p class="playlist-description">{{ playlist.description }}</p>
@@ -518,7 +563,10 @@ async function saveEditPlaylist(playlist) {
                 :key="track.id"
                 class="track-row"
               >
-                <UserTrack :track="track" @add-to-playlist="handleAddToPlaylist" />
+                <UserTrack
+                  :track="track"
+                  @add-to-playlist="handleAddToPlaylist"
+                />
                 <div class="track-actions">
                   <button
                     class="track-action-btn"

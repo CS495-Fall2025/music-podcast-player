@@ -1,7 +1,11 @@
 import Track from "../components/UserTrack.vue";
 import AddToPlaylistModal from "../components/AddToPlaylistModal.vue";
 import { feed, feedTracks } from "./localFeedStore.js";
-import { fetchUserPlaylists, createPlaylist, addTrackToPlaylist } from "../utils/playlistApi.js";
+import {
+  fetchUserPlaylists,
+  createPlaylist,
+  addTrackToPlaylist,
+} from "../utils/playlistApi.js";
 
 export default {
   name: "UserFeed",
@@ -38,13 +42,20 @@ export default {
     async handleSelectPlaylist(playlist) {
       if (!this.selectedTrack?.audio) return;
       try {
-        await addTrackToPlaylist(playlist.id, this.selectedTrack.audio, this.selectedTrack.feed_url);
+        await addTrackToPlaylist(
+          playlist.id,
+          this.selectedTrack.audio,
+          this.selectedTrack.feed_url,
+        );
         this.closeModal();
       } catch (e) {
         const msg = e.message?.toLowerCase() ?? "";
-        this.error = msg.includes("unique") || msg.includes("already") || msg.includes("409")
-          ? "Track is already in this playlist."
-          : "Could not add track.";
+        this.error =
+          msg.includes("unique") ||
+          msg.includes("already") ||
+          msg.includes("409")
+            ? "Track is already in this playlist."
+            : "Could not add track.";
       }
     },
 
@@ -56,7 +67,11 @@ export default {
       if (!this.selectedTrack?.audio) return;
       try {
         const playlist = await createPlaylist(title, description);
-        await addTrackToPlaylist(playlist.id, this.selectedTrack.audio, this.selectedTrack.feed_url);
+        await addTrackToPlaylist(
+          playlist.id,
+          this.selectedTrack.audio,
+          this.selectedTrack.feed_url,
+        );
         this.closeModal();
       } catch {
         this.error = "Could not create playlist.";

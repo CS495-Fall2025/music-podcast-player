@@ -1,13 +1,16 @@
 <template>
   <div class="modal-overlay" @click.self="$emit('close')">
     <div class="modal-card" role="dialog" aria-modal="true">
-
       <div class="modal-header">
         <h2 class="modal-title">Add to playlist</h2>
-        <button class="modal-close" type="button" @click="$emit('close')">✕</button>
+        <button class="modal-close" type="button" @click="$emit('close')">
+          ✕
+        </button>
       </div>
 
-      <p v-if="track" class="modal-track-name">{{ track.title || "Unknown track" }}</p>
+      <p v-if="track" class="modal-track-name">
+        {{ track.title || "Unknown track" }}
+      </p>
 
       <div v-if="loading" class="modal-message">Loading playlists...</div>
 
@@ -42,10 +45,11 @@
             placeholder="Description (optional)"
             rows="3"
           ></textarea>
-          <button class="create-btn" type="button" @click="create">Create + Add</button>
+          <button class="create-btn" type="button" @click="create">
+            Create + Add
+          </button>
         </div>
       </template>
-
     </div>
   </div>
 </template>

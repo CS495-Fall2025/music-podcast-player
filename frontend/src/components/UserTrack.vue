@@ -140,7 +140,9 @@
   display: grid;
   place-items: center;
   padding: 0;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
 }
 
 .add-playlist-btn:hover {
