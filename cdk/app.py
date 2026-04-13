@@ -15,3 +15,11 @@ app = cdk.App()
 RSSMusicPlayerStack(app, "RSSMusicPlayerStack")
 
 app.synth()
+
+print(
+    "\033[91m"
+    "REMINDER: If you are manually deploying this template, run the script to rotate "
+    "the database secret after deployment completes! It will be used in the "
+    "CloudFormation template and migration function environment variables."
+    "\033[0m"
+)
