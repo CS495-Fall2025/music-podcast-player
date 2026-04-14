@@ -48,8 +48,6 @@
   min-width: 0;
   width: auto;
   max-width: 50%;
-  /* flex: 0 0 auto; */
-  /* overflow: hidden; */
 }
 
 .track-title {
@@ -60,7 +58,6 @@
   white-space: nowrap;
 }
 
-.track:hover .track-title,
 .track.active .track-title {
   text-overflow: clip;
   white-space: normal;
@@ -82,7 +79,6 @@
   white-space: nowrap;
 }
 
-.track:hover .track-artist,
 .track.active .track-artist {
   text-overflow: clip;
   white-space: normal;
@@ -108,7 +104,6 @@
   overflow: hidden;
 }
 
-.track:hover .track-description,
 .track.active .track-description {
   line-clamp: 3;
   -webkit-line-clamp: unset;
