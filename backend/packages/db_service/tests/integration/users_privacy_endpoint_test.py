@@ -7,7 +7,7 @@ def _setup_db(db_session):
     return engine
 
 
-def test_get_privacy_returns_true_by_default(client, db_session):
+def test_get_privacy_returns_false_by_default(client, db_session):
     user = User(username="alice", email="alice@example.com", password=b"password123")
     db_session.add(user)
     db_session.commit()
@@ -16,7 +16,7 @@ def test_get_privacy_returns_true_by_default(client, db_session):
     response = client.get(f"/users/{user.id}/privacy")
 
     assert response.status_code == 200
-    assert response.json()["profile_public"] is True
+    assert response.json()["profile_public"] is False
 
 
 def test_get_privacy_returns_false_when_private(client, db_session):

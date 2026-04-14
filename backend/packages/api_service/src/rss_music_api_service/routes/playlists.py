@@ -127,7 +127,12 @@ def update_privacy():
 def get_public_user_playlists(username):
     try:
         result = db_service.get_playlists_by_username(username)
-        return {"playlists": result, "username": username}, 200
+        return {
+            "playlists": [
+                _strip_public_playlist_fields(playlist) for playlist in result
+            ],
+            "username": username,
+        }, 200
     except (
         db_errors.InternalAPINotFoundError,
         db_errors.InternalAPIForbiddenError,
@@ -140,7 +145,7 @@ def get_public_user_playlists(username):
 
 @PLAYLISTS_BP.get("/public/<int:id>")
 def get_public_playlist(id):
-    return _get_playlist_with_enriched_tracks(id)
+    return _get_playlist_with_enriched_tracks(id, require_public=True)
 
 
 # Get playlist by ID (with enriched track metadata)
@@ -152,14 +157,27 @@ def get_playlist(id):
     return _get_playlist_with_enriched_tracks(id)
 
 
-def _get_playlist_with_enriched_tracks(playlist_id: int):
+def _get_playlist_with_enriched_tracks(playlist_id: int, require_public: bool = False):
     try:
         playlist = db_service.get_playlist(playlist_id=playlist_id)
+        if require_public and not db_service.get_user_privacy(
+            playlist["created_by_user_id"]
+        ):
+            return get_error_response(RequestError.NOT_FOUND)
     except db_errors.InternalAPINotFoundError:
         return get_error_response(RequestError.NOT_FOUND)
 
+    if require_public:
+        playlist = _strip_public_playlist_fields(playlist)
+
     playlist["tracks"] = _enrich_tracks(playlist.get("tracks", []))
     return playlist, 200
+
+
+def _strip_public_playlist_fields(playlist: dict) -> dict:
+    public_playlist = dict(playlist)
+    public_playlist.pop("created_by_user_id", None)
+    return public_playlist
 
 
 def _enrich_tracks(tracks: list) -> list:

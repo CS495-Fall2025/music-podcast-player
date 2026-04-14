@@ -1,4 +1,4 @@
-from rss_music_data_model import Playlist, User, make_session
+from rss_music_data_model import User, make_session
 from rss_music_db_service.logging_config import get_logger, log_request
 
 logger = get_logger(__name__)
@@ -10,11 +10,6 @@ def delete_user(user_id: int) -> bool:
 
         if not user:
             return False
-
-        playlists = session.query(Playlist).filter_by(created_by_user_id=user_id).all()
-
-        for playlist in playlists:
-            session.delete(playlist)
 
         session.delete(user)
         session.commit()

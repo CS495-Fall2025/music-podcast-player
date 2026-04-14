@@ -24,16 +24,21 @@ const totalTracks = ref(0);
 const isLoadingPlaylists = ref(true);
 const playlistError = ref("");
 
-const profilePublic = ref(true);
+const profilePublic = ref(false);
+const isLoadingPrivacy = ref(true);
 
 async function loadPrivacy() {
   const config = await loadConfig();
-  const response = await fetch(`${config.backendUrl}/playlists/me/privacy`, {
-    credentials: "include",
-  });
-  if (response.ok) {
-    const data = await response.json();
-    profilePublic.value = data.profile_public;
+  try {
+    const response = await fetch(`${config.backendUrl}/playlists/me/privacy`, {
+      credentials: "include",
+    });
+    if (response.ok) {
+      const data = await response.json();
+      profilePublic.value = data.profile_public;
+    }
+  } finally {
+    isLoadingPrivacy.value = false;
   }
 }
 
@@ -407,8 +412,14 @@ async function saveEditPlaylist(playlist) {
                 <button
                   class="toggle-switch"
                   :class="{ 'toggle-switch--on': profilePublic }"
+                  :disabled="isLoadingPrivacy"
                   @click="togglePrivacy"
-                  :aria-label="'Make profile public'"
+                  :aria-label="
+                    profilePublic
+                      ? 'Make profile private'
+                      : 'Make profile public'
+                  "
+                  :aria-pressed="profilePublic"
                 >
                   <span class="toggle-knob" />
                 </button>

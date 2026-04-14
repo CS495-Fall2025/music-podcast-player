@@ -12,7 +12,9 @@ class PlaylistTrack(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    playlist_id: Mapped[int] = mapped_column(ForeignKey("playlists.id"))
+    playlist_id: Mapped[int] = mapped_column(
+        ForeignKey("playlists.id", ondelete="CASCADE")
+    )
 
     track_url: Mapped[str] = mapped_column(String, nullable=False)
 

@@ -246,6 +246,58 @@ def test_get_playlist_not_found(auth_client, custom_responses):
     assert response.json["error"] == "NotFound"
 
 
+def test_get_public_playlist_hides_owner_id(client, user, custom_responses):
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/5"] = (
+        ConstantResponse(
+            status_code=200,
+            json_data={
+                "id": 5,
+                "title": "Shared Playlist",
+                "description": "Road tunes",
+                "track_count": 0,
+                "created_by_user_id": user.id,
+                "created_at": "2026-01-01T00:00:00",
+                "tracks": [],
+            },
+        )
+    )
+    custom_responses[
+        f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/users/{user.id}/privacy"
+    ] = ConstantResponse(status_code=200, json_data={"profile_public": True})
+
+    response = client.get("/playlists/public/5")
+
+    assert response.status_code == 200
+    assert "created_by_user_id" not in response.json
+
+
+def test_get_public_playlist_returns_not_found_when_owner_private(
+    client, user, custom_responses
+):
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/5"] = (
+        ConstantResponse(
+            status_code=200,
+            json_data={
+                "id": 5,
+                "title": "Private Playlist",
+                "description": "Hidden tunes",
+                "track_count": 0,
+                "created_by_user_id": user.id,
+                "created_at": "2026-01-01T00:00:00",
+                "tracks": [],
+            },
+        )
+    )
+    custom_responses[
+        f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/users/{user.id}/privacy"
+    ] = ConstantResponse(status_code=200, json_data={"profile_public": False})
+
+    response = client.get("/playlists/public/5")
+
+    assert response.status_code == 404
+    assert response.json["error"] == "NotFound"
+
+
 def test_get_playlist_requires_auth(client, custom_responses):
     response = client.get("/playlists/5")
     assert response.status_code == 401

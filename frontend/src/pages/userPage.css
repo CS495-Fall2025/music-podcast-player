@@ -207,7 +207,7 @@
   height: 22px;
   border-radius: 11px;
   border: none;
-  background: rgba(39, 59, 79, 0.2);
+  background: rgba(35, 100, 170, 0.28);
   cursor: pointer;
   transition: background 0.2s ease;
   padding: 0;
@@ -216,7 +216,12 @@
 }
 
 .toggle-switch--on {
-  background: var(--primary-blue, #2364aa);
+  background: var(--orange, #f08a24);
+}
+
+.toggle-switch:disabled {
+  cursor: wait;
+  opacity: 0.75;
 }
 
 .toggle-knob {

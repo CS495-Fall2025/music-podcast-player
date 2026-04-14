@@ -22,7 +22,7 @@ class Playlist(Base):
     track_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     created_by_user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id"), nullable=False
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -37,4 +37,5 @@ class Playlist(Base):
         backref="playlist",
         order_by="PlaylistTrack.position",
         cascade="all, delete-orphan",
+        passive_deletes=True,
     )
