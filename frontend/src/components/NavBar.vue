@@ -89,7 +89,6 @@ const {
 useSatDripping();
 
 const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
-const satDripModalOpen = ref(false);
 
 function closeMenu() {
   isOpen.value = false;
