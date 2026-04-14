@@ -27,6 +27,11 @@ def send_password_reset_code(email: str, code: str) -> None:
 
 
 def _send_email(to_email: str, subject: str, body: str) -> None:
+    if current_app.config.get("DISABLE_EMAIL_VERIFY", False):
+        return
+
+    print(current_app.config.get("DISABLE_EMAIL_VERIFY"))
+
     source_email = current_app.config.get("SES_FROM_EMAIL")
 
     if not source_email:

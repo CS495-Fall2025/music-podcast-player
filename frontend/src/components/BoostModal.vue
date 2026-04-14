@@ -16,12 +16,7 @@
           <label>Amount (sats)</label>
           <input type="number" min="0" step="100" v-model="sats" />
 
-          <div>
-            <span>{{ priceMessage }}</span>
-            <span v-if="usdEquivalent > 0">
-              ${{ usdEquivalent.toFixed(2) }} USD
-            </span>
-          </div>
+          <SatUsd :satCount="sats" />
 
           <p class="error-message" v-if="satsError">{{ satsError }}</p>
 
@@ -54,6 +49,7 @@
 
 <script setup>
 import { useBoostModal } from "../controllers/boostModal.js";
+import SatUsd from "../components/SatUsd.vue";
 
 const {
   isOpen,
@@ -62,8 +58,6 @@ const {
   satsError,
   recipients,
   walletConnected,
-  priceMessage,
-  usdEquivalent,
   openModal,
   closeModal,
   onConnectWallet,

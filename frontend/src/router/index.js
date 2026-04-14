@@ -9,9 +9,16 @@ import ForgotPasswordPage from "../pages/ForgotPasswordPage.vue";
 import ResetPasswordPage from "../pages/ResetPasswordPage.vue";
 import { isAuthenticated } from "../auth/authService";
 import UserProfilePage from "../pages/UserPage.vue";
+import { clearError } from "../controllers/statusStore.js";
 
 const routes = [
-  { path: "/", component: InputFeedPage },
+  { path: "/", redirect: "/search" },
+
+  {
+    path: "/input",
+    component: InputFeedPage,
+    meta: { requiresAuth: false },
+  },
 
   {
     path: "/search",
@@ -77,9 +84,12 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
+  // Clear any persistent errors when navigating to new route
+  clearError();
+
   if (to.meta.requiresAuth && !isAuthenticated()) {
-    // redirect unauthenticated users to home
-    return "/";
+    // redirect unauthenticated users to home(search page)
+    return "/search";
   }
 });
 
