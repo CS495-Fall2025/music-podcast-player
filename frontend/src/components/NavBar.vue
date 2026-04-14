@@ -103,7 +103,6 @@ import useNavbar from "../controllers/navBar.js";
 import { ref } from "vue";
 import { satDripRate, satDripEnabled } from "../controllers/localFeedStore.js";
 import DripIndicator from "./DripIndicator.vue";
-import { ref } from "vue";
 
 const {
   isOpen,
