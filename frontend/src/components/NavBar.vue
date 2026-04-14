@@ -69,8 +69,6 @@
 
 <script setup>
 import useNavbar from "../controllers/navBar.js";
-import { ref } from "vue";
-import { satDripRate, satDripEnabled } from "../controllers/localFeedStore.js";
 import DripIndicator from "./DripIndicator.vue";
 import useSatDripping from "../controllers/satDripping.js";
 import SatDripModal from "./SatDripModal.vue";
@@ -89,10 +87,6 @@ const {
 useSatDripping();
 
 const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
-
-function closeMenu() {
-  isOpen.value = false;
-}
 
 function closeMenu() {
   isOpen.value = false;
