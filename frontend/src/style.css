@@ -1,0 +1,316 @@
+/* ========================================
+   CSS VARIABLES
+   ======================================== */
+
+:root {
+  /* Colors */
+  --primary-blue: #2364aa;
+  --light-blue: #f0faff;
+  --dark-navy: #273b4f;
+  --orange: #e18845;
+  --light-orange: #ffb780;
+  --lighter-orange: #fdc397;
+  --cream: #ffefe4;
+  --white: #ffffff;
+  --dark-text: #1a1a1a;
+  --light-text: #f0f0f0;
+  --error-red: #fc766a;
+  --disabled-bg: #f0f0f0;
+  --disabled-text: #999;
+  --border-color: #d0d0d0;
+  --hover-blue: #b1d4e4;
+  --active-blue: #8bbed5;
+  --dark-blue: #053750;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Border */
+  --border-radius: 8px;
+  --border-radius-sm: 4px;
+  --border-radius-lg: 10px;
+  --border-standard: 1.5px solid var(--dark-text);
+  --border-thick: 2px solid;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  --shadow-navbar: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  /* Transitions */
+  --transition-fast: 0.1s ease;
+  --transition-standard: 0.25s ease;
+  --transition-slow: 0.3s ease;
+
+  /* Typography */
+  --font-system: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-helvetica: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  /* Layout */
+  --max-width: 1200px;
+  --player-height: clamp(64px, 8vh, 96px);
+  --modal-z: 25;
+  --navbar-z: 20;
+  --dropdown-z: 25;
+  --player-z: 15;
+}
+
+/* ========================================
+   ROOT & GLOBAL STYLES
+   ======================================== */
+
+:root {
+  font-family: var(--font-system);
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: var(--white);
+  background-color: var(--primary-blue);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  margin: 0;
+
+  height: 100dvh;
+
+  overflow: hidden;
+  -webkit-overflow-scrolling: touch;
+
+  background-color: var(--body-background);
+
+  padding: 0;
+}
+
+/* ========================================
+   TYPOGRAPHY
+   ======================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  /*  border-radius: var(--border-radius);
+  border: var(--border-standard); */
+  font-weight: 500;
+  /*  background-color: var(--h-background);
+  color: var(--h-text);
+  display: inline-block; */
+  line-height: 1.2;
+  /*  padding: 0.5em 1em; */
+  margin: 0 0 0.6rem 0;
+}
+
+h1 {
+  font-size: 3.2em;
+  /*  line-height: 1.1;
+  padding: 0.3em 0.6em;
+  color: #7c2929; */
+  margin: 0;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 4vw, 2.4rem);
+  /*  padding: 0.4em 0.8em; */
+  margin-bottom: 0.8rem;
+}
+
+h3 {
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  line-height: 1.3;
+}
+
+h4,
+h5,
+h6 {
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  line-height: 1.4;
+  /*  padding: 0.6em 1.2em; */
+  margin-bottom: 0.5rem;
+}
+
+p {
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  line-height: 1.6;
+  margin: 0 0 var(--spacing-md) 0;
+  /* max-width: 65ch; */
+}
+
+/* ========================================
+   LINKS
+   ======================================== */
+
+a {
+  color: var(--orange);
+  text-decoration: underline;
+  transition: color var(--transition-standard);
+  cursor: pointer;
+}
+
+a:hover {
+  color: var(--lighter-orange);
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+button {
+  border-radius: var(--border-radius);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--lighter-orange);
+  color: var(--dark-text);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  border: var(--border-thick) #d89461b4;
+  transition:
+    background-color var(--transition-standard),
+    color var(--transition-standard),
+    border-color var(--transition-standard),
+    transform var(--transition-fast);
+}
+
+button:hover {
+  background-color: var(--lighter-orange);
+  border-color: var(--orange);
+  transform: scale(1.05);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--disabled-bg);
+  color: var(--disabled-text);
+}
+
+.submit-button {
+  margin: 16px;
+}
+
+/* ========================================
+   LISTS
+   ======================================== */
+
+ul,
+ol {
+  padding-left: var(--spacing-lg);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+li {
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.6;
+}
+
+/* ========================================
+   LAYOUT COMPONENTS
+   ======================================== */
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+  width: 100%;
+}
+
+.card {
+  padding: clamp(1rem, 4vw, 2rem);
+  border-radius: var(--border-radius);
+  border: var(--border-standard);
+  background-color: var(--white);
+  margin-bottom: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ========================================
+   FORMS & INPUTS
+   ======================================== */
+
+.input-div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.input-label {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+.error-message {
+  color: var(--error-red);
+}
+
+/* ========================================
+   MEDIA QUERIES
+   ======================================== */
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: var(--white);
+    --text: #213547;
+    --body-background: var(--light-blue);
+
+    --h-background: var(--white);
+    --h-text: var(--dark-text);
+
+    --track-background: var(--white);
+
+    --player-background: var(--dark-navy);
+
+    --nav-bg: var(--dark-navy);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: var(--light-text);
+    background-color: var(--dark-navy);
+    --text: var(--light-text);
+    --body-background: var(--dark-navy);
+
+    --h-background: var(--dark-navy);
+    --h-text: var(--dark-text);
+
+    --track-background: var(--dark-blue);
+
+    --player-background: #131d28;
+
+    --nav-bg: #131d28;
+  }
+}

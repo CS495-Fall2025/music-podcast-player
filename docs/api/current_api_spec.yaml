@@ -1,0 +1,87 @@
+openapi: 3.0.0
+info:
+  title: RSS Music Backend API
+  version: 1.0.0
+  description: Current OpenAPI spec for RSS Music Backend
+
+servers:
+  - url: http://localhost:5000
+
+paths:
+  /search/feeds:
+    get:
+      summary: Search music feeds
+      description: Returns a list of music feeds matching the query.
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search term
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 25
+          description: Number of results to return
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: Start index for pagination
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  feeds:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                        art_url:
+                          type: string
+                        title:
+                          type: string
+                        artist:
+                          type: string
+        '400':
+          description: Invalid argument
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '503':
+          description: External API unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 503
+                  error:
+                    type: string
+                  message:
+                    type: string

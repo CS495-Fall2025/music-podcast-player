@@ -1,0 +1,164 @@
+.signup-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  justify-content: center;
+  align-items: center;
+  min-height: 0;
+  background: linear-gradient(135deg, var(--dark-navy) 0%, #131d28 100%);
+  padding: var(--spacing-md);
+  overflow-y: auto !important;
+}
+
+.signup-card {
+  background: var(--white);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 450px;
+  margin: auto;
+}
+
+.signup-card h1 {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+  color: var(--dark-text);
+  font-size: 1.8rem;
+}
+
+.signup-card form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.signup-card .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.signup-card label {
+  margin-bottom: var(--spacing-sm);
+  color: var(--dark-text);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.signup-card input {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 1rem;
+  transition: border-color var(--transition-standard);
+}
+
+.signup-card input:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(35, 100, 170, 0.1);
+}
+
+.signup-card input:disabled {
+  background-color: var(--disabled-bg);
+  cursor: not-allowed;
+}
+
+.signup-card .hint {
+  font-size: 0.8rem;
+  color: var(--disabled-text);
+  margin-top: var(--spacing-xs);
+}
+
+.signup-card .hint.error {
+  color: var(--error-red);
+}
+
+.signup-card .hint.success {
+  color: #3a3;
+}
+
+.signup-card .password-requirements {
+  font-size: 0.85rem;
+  color: var(--disabled-text);
+  margin-top: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.signup-card .password-requirements div {
+  transition: color var(--transition-standard);
+}
+
+.signup-card .password-requirements div.met {
+  color: #3a3;
+  font-weight: 500;
+}
+
+.signup-card .error-message {
+  background-color: rgba(252, 118, 106, 0.1);
+  color: var(--error-red);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.9rem;
+  border-left: 4px solid var(--error-red);
+}
+
+.signup-card .success-message {
+  background-color: rgba(58, 170, 58, 0.1);
+  color: #3a3;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.9rem;
+  border-left: 4px solid #3a3;
+}
+
+.signup-card .submit-button {
+  padding: var(--spacing-sm);
+  background: linear-gradient(
+    -45deg,
+    var(--dark-blue) 0%,
+    var(--primary-blue) 70%
+  );
+  color: var(--white);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform var(--transition-standard),
+    box-shadow var(--transition-standard);
+  margin-top: var(--spacing-sm);
+}
+
+.signup-card .submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(35, 100, 170, 0.4);
+}
+
+.signup-card .submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.signup-card .login-link {
+  text-align: center;
+  margin-top: var(--spacing-lg);
+  color: var(--dark-text);
+  font-size: 0.95rem;
+}
+
+.signup-card .login-link a {
+  color: var(--primary-blue);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color var(--transition-standard);
+}
+
+.signup-card .login-link a:hover {
+  color: var(--orange);
+  text-decoration: underline;
+}

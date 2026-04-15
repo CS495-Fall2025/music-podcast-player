@@ -1,0 +1,36 @@
+name: Continuous Deployment Builds
+
+on:
+  workflow_call:
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    container:
+      image: node:24-alpine
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install
+      - run: mv build.env .env
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/dist
+          retention-days: 1
+  build-backend-api-service:
+    uses: ./.github/workflows/build-backend.yml
+    with:
+      package-name: api-service
+  build-backend-db-service:
+    uses: ./.github/workflows/build-backend.yml
+    with:
+      package-name: db-service
+  build-backend-migration-handler:
+    uses: ./.github/workflows/build-backend.yml
+    with:
+      package-name: migration-handler 
+
