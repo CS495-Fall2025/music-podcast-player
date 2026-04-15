@@ -15,6 +15,7 @@
 </template>
 
 <style scoped>
+/* --- Base Container --- */
 .track {
   display: flex;
   align-items: center;
@@ -30,16 +31,29 @@
     background-color 0.2s ease;
 }
 
-.track:hover,
-.track.active {
-  background-color: var(--hover-blue);
-  color: var(--dark-blue);
-  transform: scale(1.015);
+/* --- Hover & Active States --- */
+@media (hover: hover) and (pointer: fine) {
+  .track:hover {
+    background-color: var(--hover-blue);
+    color: var(--dark-blue);
+    transform: scale(1.015);
+  }
 }
 
 .track.active {
   background-color: var(--active-blue);
+  color: var(--dark-blue);
+  transform: scale(1.015);
   border-left: 4px solid var(--dark-blue);
+}
+
+/* --- Track Image & Layout --- */
+.track-image {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: var(--border-radius-sm);
+  object-fit: cover;
 }
 
 .track-info {
@@ -50,48 +64,39 @@
   max-width: 50%;
 }
 
-.track-title {
-  font-size: 1rem;
-  font-weight: 600;
+/* --- Typography: Shared Truncation --- */
+.track-title,
+.track-artist,
+.track-number {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
 
-.track.active .track-title {
-  text-overflow: clip;
-  white-space: normal;
+/* --- Typography: Specifics --- */
+.track-title {
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .track-artist {
   font-size: 0.8rem;
   opacity: 0.75;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
 }
 
 .track-number {
   font-size: 0.75rem;
   opacity: 0.65;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
 }
 
+/* --- Typography: Active State Overrides --- */
+.track.active .track-title,
 .track.active .track-artist {
   text-overflow: clip;
   white-space: normal;
 }
 
-.track-image {
-  width: 64px;
-  height: 64px;
-  flex-shrink: 0;
-  border-radius: var(--border-radius-sm);
-  object-fit: cover;
-}
-
+/* --- Description --- */
 .track-description {
   flex: 1;
   min-width: 0;
