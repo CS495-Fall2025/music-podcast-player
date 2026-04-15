@@ -24,6 +24,27 @@
         <router-link to="/input" class="nav-link" @click="closeMenu"
           >Input Feed</router-link
         >
+        <div v-if="isOpen" class="nav-dropdown" ref="dropdownRef">
+        <button
+          class="dropdown-toggle"
+          @click.stop="dropdownOpen = !dropdownOpen"
+        >
+          Account ▾
+        </button>
+
+        <div v-if="dropdownOpen" class="dropdown-menu">
+          <template v-if="isAuthenticated">
+            <button class="dropdown-item" @click="$router.push('/user')">
+              Profile
+            </button>
+            <button class="dropdown-item" @click="handleLogout">Logout</button>
+          </template>
+          <template v-else>
+            <button class="dropdown-item" @click="handleLogin">Login</button>
+            <button class="dropdown-item" @click="handleSignup">Sign Up</button>
+          </template>
+        </div>
+      </div>
         <template v-if="includeDevPages">
           <!-- No dev pages currently. -->
         </template>
@@ -40,7 +61,7 @@
         Sat Drip
       </button>
 
-      <div class="nav-dropdown" ref="dropdownRef">
+      <div class="nav-dropdown desktop-dropdown" ref="dropdownRef">
         <button
           class="dropdown-toggle"
           @click.stop="dropdownOpen = !dropdownOpen"
@@ -493,6 +514,9 @@ function closeMenu() {
   .dropdown-item:hover {
     background-color: var(--light-orange);
     color: var(--dark-text);
+  }
+  .desktop-dropdown{
+    display: none !important;
   }
 }
 </style>
