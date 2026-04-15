@@ -3,6 +3,9 @@
 <script setup>
 import BoostModal from "./BoostModal.vue";
 import { useMiniPlayer } from "../controllers/miniplayer.js";
+import { ref } from "vue";
+
+const volume = ref(1);
 
 const {
   isPlaying,
@@ -21,6 +24,7 @@ const {
   shuffleIcon,
   reverseIcon,
   repeatIcon,
+  volumeIcon,
   togglePlay,
   toggleReverse,
   skipToNextTrack,
@@ -133,6 +137,18 @@ const {
         <img :src="stepIcon" alt="Skip" class="play-icon" />
       </button>
       <BoostModal />
+
+      <div class="volume-control">
+        <div class="volume-icon" v-html="volumeIcon"></div>
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          v-model="volume"
+          @input="audioRef.volume = volume"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -309,9 +325,33 @@ const {
   fill: currentColor;
 }
 
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--light-text);
+  margin-left: 8px;
+}
+
+.volume-control input[type="range"] {
+  width: clamp(60px, 8vw, 100px); /* Keeps it responsive on desktop */
+  accent-color: var(--light-orange);
+  cursor: pointer;
+}
+
+.volume-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2em;
+  height: 2em;
+  fill: currentColor;
+}
+
 @media (max-width: 768px) {
   .track-thumbnail,
-  .track-info p {
+  .track-info p,
+  .volume-control {
     display: none;
   }
 

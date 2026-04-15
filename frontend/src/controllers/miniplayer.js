@@ -8,6 +8,7 @@ import stepIcon from "../assets/images/step-icon.svg";
 import shuffleIcon from "../assets/images/random-icon.svg";
 import repeatIcon from "../assets/images/undo-arrow-icon.svg";
 import reverseIcon from "../assets/images/reverse-icon.svg";
+import volumeIcon from "../assets/images/volume-icon.svg?raw";
 
 export function useMiniPlayer() {
   const isPlaying = ref(false);
@@ -220,6 +221,7 @@ export function useMiniPlayer() {
     shuffleIcon,
     repeatIcon,
     reverseIcon,
+    volumeIcon,
 
     // methods
     togglePlay,
