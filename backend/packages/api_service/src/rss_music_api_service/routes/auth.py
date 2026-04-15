@@ -451,6 +451,25 @@ def post_logout() -> tuple:
     return response
 
 
+@AUTH_BP.delete("/me")
+@login_required
+def delete_current_user() -> tuple:
+    user_id = int(get_current_user_id())
+
+    try:
+        db_service.delete_user(user_id)
+    except db_errors.InternalAPINotFoundError:
+        return get_error_response(RequestError.NOT_FOUND)
+
+    session.clear()
+
+    response = flask.make_response({"success": True}, 200)
+    response.set_cookie("access_token", "", httponly=True, max_age=0)
+    response.set_cookie("refresh_token", "", httponly=True, max_age=0)
+
+    return response
+
+
 @AUTH_BP.post("/verify-email")
 def post_verify_email() -> tuple:
     try:

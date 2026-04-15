@@ -4,6 +4,13 @@
 import BoostModal from "./BoostModal.vue";
 import { useMiniPlayer } from "../controllers/miniplayer.js";
 
+defineProps({
+  showReverse: {
+    type: Boolean,
+    default: true,
+  },
+});
+
 const {
   isPlaying,
   ready,
@@ -89,6 +96,7 @@ const {
         <img :src="shuffleIcon" alt="Shuffle" class="play-icon" />
       </button>
       <button
+        v-if="showReverse"
         class="media-button reverse-button"
         :class="{ 'is-disabled': !isReverse }"
         @click="toggleReverse"
