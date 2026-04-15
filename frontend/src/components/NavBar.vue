@@ -25,26 +25,30 @@
           >Input Feed</router-link
         >
         <div v-if="isOpen" class="nav-dropdown" ref="dropdownRef">
-        <button
-          class="dropdown-toggle"
-          @click.stop="dropdownOpen = !dropdownOpen"
-        >
-          Account ▾
-        </button>
+          <button
+            class="dropdown-toggle"
+            @click.stop="dropdownOpen = !dropdownOpen"
+          >
+            Account ▾
+          </button>
 
-        <div v-if="dropdownOpen" class="dropdown-menu">
-          <template v-if="isAuthenticated">
-            <button class="dropdown-item" @click="$router.push('/user')">
-              Profile
-            </button>
-            <button class="dropdown-item" @click="handleLogout">Logout</button>
-          </template>
-          <template v-else>
-            <button class="dropdown-item" @click="handleLogin">Login</button>
-            <button class="dropdown-item" @click="handleSignup">Sign Up</button>
-          </template>
+          <div v-if="dropdownOpen" class="dropdown-menu">
+            <template v-if="isAuthenticated">
+              <button class="dropdown-item" @click="$router.push('/user')">
+                Profile
+              </button>
+              <button class="dropdown-item" @click="handleLogout">
+                Logout
+              </button>
+            </template>
+            <template v-else>
+              <button class="dropdown-item" @click="handleLogin">Login</button>
+              <button class="dropdown-item" @click="handleSignup">
+                Sign Up
+              </button>
+            </template>
+          </div>
         </div>
-      </div>
         <template v-if="includeDevPages">
           <!-- No dev pages currently. -->
         </template>
@@ -520,7 +524,7 @@ function closeMenu() {
     font-size: 0.75rem;
   }
 
-  .desktop-dropdown{
+  .desktop-dropdown {
     display: none !important;
   }
 }
