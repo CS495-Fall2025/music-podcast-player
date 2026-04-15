@@ -17,8 +17,7 @@ const {
   feedTracks,
   playIcon,
   pauseIcon,
-  skipIcon,
-  rewindIcon,
+  stepIcon,
   shuffleIcon,
   reverseIcon,
   repeatIcon,
@@ -107,7 +106,12 @@ const {
         @click="skipToPreviousTrack"
         :disabled="!ready"
       >
-        <img :src="rewindIcon" alt="Rewind" class="play-icon" />
+        <img
+          :src="stepIcon"
+          alt="Rewind"
+          class="play-icon"
+          :style="'transform: rotate(180deg);'"
+        />
       </button>
       <button
         class="media-button play-button"
@@ -126,8 +130,7 @@ const {
         vmodel="ready"
         :disabled="!ready"
       >
-        <img :src="skipIcon" alt="Skip" class="play-icon" />
-        <!-- Skip Icon -->
+        <img :src="stepIcon" alt="Skip" class="play-icon" />
       </button>
       <BoostModal />
     </div>
