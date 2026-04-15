@@ -515,6 +515,11 @@ function closeMenu() {
     background-color: var(--light-orange);
     color: var(--dark-text);
   }
+
+  .brand {
+    font-size: 0.75rem;
+  }
+
   .desktop-dropdown{
     display: none !important;
   }
