@@ -4,7 +4,7 @@
 import { ref, watch, onBeforeUnmount } from "vue";
 import BoostModal from "./BoostModal.vue";
 import { useMiniPlayer } from "../controllers/miniplayer.js";
-import { satDripEnabled, satDripRate } from "../controllers/localFeedStore.js";
+import { drippingState } from "../controllers/drippingState.js";
 
 const {
   isPlaying,
@@ -87,8 +87,8 @@ function showContributionPopup(totalSats) {
 
 function handleDripTick() {
   if (
-    !satDripEnabled.value ||
-    Number(satDripRate.value) <= 0 ||
+    !drippingState.enabled ||
+    drippingState.dripRatePerMinute <= 0 ||
     !isPlaying.value ||
     !currentTrack.value
   ) {
@@ -96,7 +96,7 @@ function handleDripTick() {
   }
 
   activeDripMs += DRIP_TICK_MS;
-  satsAccumulated += Number(satDripRate.value) / 60;
+  satsAccumulated += drippingState.dripRatePerMinute / 60;
 
   if (activeDripMs >= DRIP_SUMMARY_INTERVAL_MS) {
     showContributionPopup(Math.round(satsAccumulated));
@@ -107,8 +107,8 @@ function handleDripTick() {
 
 function updateDripTimer() {
   const shouldTrackDripping =
-    satDripEnabled.value &&
-    Number(satDripRate.value) > 0 &&
+    drippingState.enabled &&
+    drippingState.dripRatePerMinute > 0 &&
     isPlaying.value &&
     !!currentTrack.value;
 
@@ -123,25 +123,31 @@ function updateDripTimer() {
 
 watch([isPlaying, currentTrack], updateDripTimer, { immediate: true });
 
-watch(satDripEnabled, (enabled) => {
-  if (!enabled) {
-    clearDripTimer();
-    resetContributionInterval();
-    return;
-  }
+watch(
+  () => drippingState.enabled,
+  (enabled) => {
+    if (!enabled) {
+      clearDripTimer();
+      resetContributionInterval();
+      return;
+    }
 
-  updateDripTimer();
-});
+    updateDripTimer();
+  },
+);
 
-watch(satDripRate, (newRate) => {
-  if (Number(newRate) <= 0) {
-    clearDripTimer();
-    resetContributionInterval();
-    return;
-  }
+watch(
+  () => drippingState.dripRatePerMinute,
+  (newRate) => {
+    if (newRate <= 0) {
+      clearDripTimer();
+      resetContributionInterval();
+      return;
+    }
 
-  updateDripTimer();
-});
+    updateDripTimer();
+  },
+);
 
 onBeforeUnmount(() => {
   clearDripTimer();

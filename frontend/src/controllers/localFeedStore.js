@@ -12,7 +12,3 @@ export const currentTrack = ref("");
 
 // Populate with feeds found using the backend.
 export const searchedFeeds = reactive([]);
-
-// Sat Drip settings
-export const satDripRate = ref(0);
-export const satDripEnabled = ref(false);
