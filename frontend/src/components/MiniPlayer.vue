@@ -3,9 +3,7 @@
 <script setup>
 import BoostModal from "./BoostModal.vue";
 import { useMiniPlayer } from "../controllers/miniplayer.js";
-import { ref } from "vue";
-
-const volume = ref(1);
+import { currentVolume } from "../controllers/localFeedStore.js";
 
 const {
   isPlaying,
@@ -145,8 +143,8 @@ const {
           min="0"
           max="1"
           step="0.01"
-          v-model="volume"
-          @input="audioRef.volume = volume"
+          v-model="currentVolume"
+          @input="audioRef.volume = currentVolume"
         />
       </div>
     </div>
