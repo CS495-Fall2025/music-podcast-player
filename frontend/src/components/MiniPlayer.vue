@@ -5,7 +5,6 @@ import BoostModal from "./BoostModal.vue";
 import { useMiniPlayer } from "../controllers/miniplayer.js";
 import { currentVolume } from "../controllers/localFeedStore.js";
 
-
 defineProps({
   showReverse: {
     type: Boolean,
