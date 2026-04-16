@@ -288,7 +288,7 @@ onBeforeUnmount(() => {
 .player-box {
   background-color: var(--player-background);
   position: relative;
-  
+
   padding: clamp(8px, 1.5vh, 16px);
   padding-bottom: calc(clamp(8px, 1.5vh, 16px) + env(safe-area-inset-bottom));
 
