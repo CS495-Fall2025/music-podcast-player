@@ -4,11 +4,11 @@ import { drippingState } from "../controllers/drippingState.js";
 
 import playIcon from "../assets/images/play-icon.svg";
 import pauseIcon from "../assets/images/pause-icon.svg";
-import skipIcon from "../assets/images/forward-icon.svg";
-import rewindIcon from "../assets/images/backward-icon.svg";
+import stepIcon from "../assets/images/step-icon.svg";
 import shuffleIcon from "../assets/images/random-icon.svg";
 import repeatIcon from "../assets/images/undo-arrow-icon.svg";
 import reverseIcon from "../assets/images/reverse-icon.svg";
+import volumeIcon from "../assets/images/volume-icon.svg?raw";
 
 export function useMiniPlayer() {
   const isPlaying = ref(false);
@@ -230,11 +230,11 @@ export function useMiniPlayer() {
     // icons
     playIcon,
     pauseIcon,
-    skipIcon,
-    rewindIcon,
+    stepIcon,
     shuffleIcon,
     repeatIcon,
     reverseIcon,
+    volumeIcon,
 
     // methods
     togglePlay,

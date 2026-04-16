@@ -11,6 +11,7 @@ import { isAuthenticated } from "../auth/authService";
 import UserProfilePage from "../pages/UserPage.vue";
 import PublicUserPage from "../pages/PublicUserPage.vue";
 import { clearError } from "../controllers/statusStore.js";
+import { resetCurrentFeed } from "../controllers/localFeedStore.js";
 
 const routes = [
   { path: "/", redirect: "/search" },
@@ -93,6 +94,7 @@ const router = createRouter({
 router.beforeEach((to) => {
   // Clear any persistent errors when navigating to new route
   clearError();
+  resetCurrentFeed();
 
   if (to.meta.requiresAuth && !isAuthenticated()) {
     // redirect unauthenticated users to home(search page)
