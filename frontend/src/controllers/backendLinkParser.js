@@ -4,6 +4,7 @@ import { setLoading, setError, clearError } from "./statusStore.js";
 
 export async function requestLinkedFeeds(url) {
   const config = await loadConfig();
+
   setLoading(true);
 
   try {
@@ -67,7 +68,7 @@ export async function requestLinkedFeeds(url) {
     }
 
     clearError();
-    parseResponse(data);
+    parseResponse(data, url);
     return true;
   } catch {
     setError(
@@ -83,7 +84,7 @@ export async function requestLinkedFeeds(url) {
   }
 }
 
-function parseResponse(response) {
+function parseResponse(response, sourceUrl) {
   const feeds =
     response.feeds ??
     (response.feed
@@ -115,6 +116,7 @@ function parseResponse(response) {
         artist: item.artist || feedItem.artist,
         description: item.description,
         audio: item.enclosure_url,
+        feed_url: sourceUrl,
         image: item.image || feedItem.art_url,
         value: valueObject,
       };

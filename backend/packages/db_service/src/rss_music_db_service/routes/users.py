@@ -8,10 +8,12 @@ import rss_music_db_service_schemas.users.responses as db_user_responses
 from rss_music_db_service import errors
 from rss_music_db_service.users import (
     create,
+    delete,
     exists,
     login,
     verification,
     password_reset,
+    privacy,
 )
 from rss_music_db_service.basic_validation import validate_json
 from rss_music_db_service.logging_config import log_request, get_logger
@@ -260,6 +262,49 @@ async def set_email_verification_code(request: Request, response: Response):
     return db_user_responses.OperationSuccessResponse().dump(response_data)
 
 
+@users.delete("/{user_id}")
+async def delete_user(user_id: int):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Delete user request received",
+        route=f"/users/{user_id}",
+    )
+
+    deleted = delete.delete_user(user_id)
+
+    if not deleted:
+        log_request(
+            logger,
+            "warn",
+            "response_sent",
+            "Response sent",
+            route=f"/users/{user_id}",
+            status_code=404,
+        )
+        return JSONResponse(
+            status_code=404,
+            content=ErrorResponse().dump(
+                {
+                    "error": ErrorType.NOT_FOUND,
+                    "message": "User was not found",
+                }
+            ),
+        )
+
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route=f"/users/{user_id}",
+        status_code=200,
+    )
+
+    return db_user_responses.OperationSuccessResponse().dump({"success": True})
+
+
 @users.post("/verify-email")
 async def verify_email(request: Request, response: Response):
     log_request(
@@ -389,3 +434,63 @@ async def reset_user_password(request: Request, response: Response):
     )
 
     return db_user_responses.OperationSuccessResponse().dump(response_data)
+
+
+@users.get("/{user_id}/privacy")
+async def get_user_privacy(user_id: int):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Get user privacy request received",
+        route=f"/users/{user_id}/privacy",
+    )
+    profile_public = privacy.get_profile_public(user_id)
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route=f"/users/{user_id}/privacy",
+        status_code=200,
+    )
+    return {"profile_public": profile_public}
+
+
+@users.patch("/{user_id}/privacy")
+async def update_user_privacy(user_id: int, request: Request):
+    log_request(
+        logger,
+        "info",
+        "request_received",
+        "Update user privacy request received",
+        route=f"/users/{user_id}/privacy",
+    )
+    body = await request.json()
+    profile_public = body.get("profile_public")
+    if not isinstance(profile_public, bool):
+        log_request(
+            logger,
+            "warn",
+            "response_sent",
+            "Response sent",
+            route=f"/users/{user_id}/privacy",
+            status_code=400,
+        )
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": "InvalidArgument",
+                "message": "profile_public must be a boolean",
+            },
+        )
+    privacy.set_profile_public(user_id, profile_public)
+    log_request(
+        logger,
+        "info",
+        "response_sent",
+        "Response sent",
+        route=f"/users/{user_id}/privacy",
+        status_code=200,
+    )
+    return {"profile_public": profile_public}

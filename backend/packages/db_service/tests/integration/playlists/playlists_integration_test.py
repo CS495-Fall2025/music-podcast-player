@@ -1,4 +1,4 @@
-from rss_music_data_model import User, Playlist
+from rss_music_data_model import User, Playlist, PlaylistTrack
 
 
 def test_create_playlist_integration(client, db_session):
@@ -118,3 +118,210 @@ def test_update_playlist_not_found(client, db_session):
     assert response.status_code == 404
     assert response.json()["error"] == "NotFound"
     assert "not found" in response.json()["message"].lower()
+
+
+# --- Track operation tests ---
+
+
+def _make_user_and_playlist(db_session):
+    user = User(username="trackuser", email="track@example.com", password=b"pw")
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    playlist = Playlist(title="Track Test Playlist", created_by_user_id=user.id)
+    db_session.add(playlist)
+    db_session.commit()
+    db_session.refresh(playlist)
+
+    return user, playlist
+
+
+def test_add_track_success(client, db_session):
+    user, playlist = _make_user_and_playlist(db_session)
+
+    response = client.post(
+        f"/playlists/{playlist.id}/tracks/add",
+        json={
+            "track_url": "http://example.com/feed.rss",
+            "created_by_user_id": user.id,
+        },
+    )
+
+    assert response.status_code == 201
+    data = response.json()
+    assert data["track_url"] == "http://example.com/feed.rss"
+    assert data["position"] == 1
+
+    track = db_session.query(PlaylistTrack).filter_by(playlist_id=playlist.id).first()
+    assert track is not None
+
+    db_session.refresh(playlist)
+    assert playlist.track_count == 1
+
+
+def test_add_track_playlist_not_found(client, db_session):
+    response = client.post(
+        "/playlists/9999/tracks/add",
+        json={"track_url": "http://example.com/feed.rss", "created_by_user_id": 1},
+    )
+
+    assert response.status_code == 404
+    assert response.json()["error"] == "NotFound"
+
+
+def test_add_track_unauthorized(client, db_session):
+    """User B cannot add tracks to User A's playlist."""
+    user, playlist = _make_user_and_playlist(db_session)
+
+    response = client.post(
+        f"/playlists/{playlist.id}/tracks/add",
+        json={
+            "track_url": "http://example.com/feed.rss",
+            "created_by_user_id": user.id + 999,
+        },
+    )
+
+    assert response.status_code == 404
+
+
+def test_add_track_duplicate_returns_conflict(client, db_session):
+    user, playlist = _make_user_and_playlist(db_session)
+
+    payload = {
+        "track_url": "http://example.com/feed.rss",
+        "created_by_user_id": user.id,
+    }
+    client.post(f"/playlists/{playlist.id}/tracks/add", json=payload)
+    response = client.post(f"/playlists/{playlist.id}/tracks/add", json=payload)
+
+    assert response.status_code == 409
+
+
+def test_remove_track_success(client, db_session):
+    user, playlist = _make_user_and_playlist(db_session)
+
+    client.post(
+        f"/playlists/{playlist.id}/tracks/add",
+        json={
+            "track_url": "http://example.com/feed.rss",
+            "created_by_user_id": user.id,
+        },
+    )
+
+    response = client.request(
+        "DELETE",
+        f"/playlists/{playlist.id}/tracks/remove",
+        json={
+            "track_url": "http://example.com/feed.rss",
+            "created_by_user_id": user.id,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Track removed"
+
+    track = db_session.query(PlaylistTrack).filter_by(playlist_id=playlist.id).first()
+    assert track is None
+
+
+def test_remove_track_not_found(client, db_session):
+    user, playlist = _make_user_and_playlist(db_session)
+
+    response = client.request(
+        "DELETE",
+        f"/playlists/{playlist.id}/tracks/remove",
+        json={
+            "track_url": "http://example.com/missing.rss",
+            "created_by_user_id": user.id,
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["error"] == "NotFound"
+
+
+def test_get_playlist_by_id_success(client, db_session):
+    user, playlist = _make_user_and_playlist(db_session)
+
+    client.post(
+        f"/playlists/{playlist.id}/tracks/add",
+        json={
+            "track_url": "http://example.com/feed.rss",
+            "created_by_user_id": user.id,
+        },
+    )
+
+    response = client.get(f"/playlists/{playlist.id}")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == playlist.id
+    assert data["title"] == "Track Test Playlist"
+    assert len(data["tracks"]) == 1
+    assert data["tracks"][0]["track_url"] == "http://example.com/feed.rss"
+    assert data["tracks"][0]["position"] == 1
+
+
+def test_get_playlist_by_id_not_found(client, db_session):
+    response = client.get("/playlists/9999")
+
+    assert response.status_code == 404
+    assert response.json()["error"] == "NotFound"
+
+
+def test_reorder_track_success(client, db_session):
+    user, playlist = _make_user_and_playlist(db_session)
+
+    for url in [
+        "http://example.com/a.rss",
+        "http://example.com/b.rss",
+        "http://example.com/c.rss",
+    ]:
+        client.post(
+            f"/playlists/{playlist.id}/tracks/add",
+            json={"track_url": url, "created_by_user_id": user.id},
+        )
+
+    # Move track at position 1 to position 3
+    response = client.patch(
+        f"/playlists/{playlist.id}/tracks/reorder",
+        json={
+            "track_url": "http://example.com/a.rss",
+            "new_position": 3,
+            "created_by_user_id": user.id,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["position"] == 3
+
+    # Confirm the other tracks shifted up
+    b = (
+        db_session.query(PlaylistTrack)
+        .filter_by(playlist_id=playlist.id, track_url="http://example.com/b.rss")
+        .first()
+    )
+    c = (
+        db_session.query(PlaylistTrack)
+        .filter_by(playlist_id=playlist.id, track_url="http://example.com/c.rss")
+        .first()
+    )
+    assert b.position == 1
+    assert c.position == 2
+
+
+def test_reorder_track_not_found(client, db_session):
+    user, playlist = _make_user_and_playlist(db_session)
+
+    response = client.patch(
+        f"/playlists/{playlist.id}/tracks/reorder",
+        json={
+            "track_url": "http://example.com/missing.rss",
+            "new_position": 1,
+            "created_by_user_id": user.id,
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["error"] == "NotFound"

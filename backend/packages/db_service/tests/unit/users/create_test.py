@@ -32,6 +32,12 @@ def test_makes_user_with_hashed_and_salted_password() -> None:
     assert expected_hash == actual_hash
 
 
+def test_makes_user_private_by_default() -> None:
+    user = create._make_user("username", "email@domain.com", "password")
+
+    assert user.profile_public is False
+
+
 @pytest.mark.parametrize(
     "error",
     [

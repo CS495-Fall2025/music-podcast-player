@@ -113,7 +113,7 @@ onBeforeUnmount(() => {
 
         <SearchHistory v-if="showHistory" @select="handleHistorySelect" />
       </div>
-      <span class="error-message" v-if="!canSubmit"
+      <span class="error-message" v-if="!canSubmit && query.length > 0"
         >Search query has incorrect length or is using disallowed
         characters.</span
       >
@@ -143,6 +143,7 @@ onBeforeUnmount(() => {
 .input-wrap input {
   padding-right: 36px;
   box-sizing: border-box;
+  font-size: 16px;
 }
 
 .history-button {
