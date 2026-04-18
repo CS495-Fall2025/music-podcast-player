@@ -18,13 +18,14 @@ We use the following types of cookies:
 - **Essential Cookies** — These cookies are necessary for the Service to function
 properly. They enable basic features like page navigation and access to secure areas.
 
-- **Preference Cookies** — These cookies allow the Service to remember choices you make
-(such as your language or region) and provide enhanced, personalized features.
+- **Preference Cookies** — These cookies allow the Service to remember choices you make,
+such as your feed search history, and provide enhanced, personalized features when you
+explicitly enable them.
 
 We do **not** use the following types of cookies:
 
-- **Analytics Cookies** — These cookies help us understand how visitors interact with
-the Service by collecting and reporting information anonymously.
+- **Analytics Cookies** — These cookies collect data on how visitors interact with the
+Service by collecting and reporting information anonymously.
 
 - **Marketing Cookies** — These cookies are used to track visitors across websites to
 display relevant advertisements.
@@ -47,24 +48,20 @@ browser's settings.
 
 ## Cookie Consent (GDPR)
 
-If you are located in the European Economic Area, we will request your consent before
-placing non-essential cookies on your device, in accordance with the General Data
-Protection Regulation (GDPR) and the ePrivacy Directive.
-
-You can withdraw your consent at any time by adjusting your cookie preferences or
-contacting us at contactemail@fillinlater.com.
-
-((Can we have a feature that does this and not ask users to contact us?))
+We only use non-essential cookies when you explicitly enable some optional features. For
+instance, by enabling feed search history. You may disable these features at any time,
+at which point these cookies will no longer be used. Essential cookies, such as those
+used when you log in, do not require consent.
 
 ## Changes to This Cookie Policy
 
 We may update this Cookie Policy from time to time to reflect changes in technology,
-regulation, or our business practices. Any changes will be posted on this page with an
-updated "Last Updated" date.
+regulation, or our practices. Any changes will be posted on this page with an updated
+"Last Updated" date.
 
 ## Contact Us
 
 If you have any questions about this Cookie Policy, please contact us:
 
 - By email: contactemail@fillinlater.com
-- By visiting: https://musicpodcastplayer.com
+- By visiting: https://musicpodcastplayer.com/contact

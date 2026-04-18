@@ -15,11 +15,10 @@ Service.
 We may collect the following types of information:
 
 - Email address
-- Cookies and tracking data
+- Cookies
 
-We collect this information when you voluntarily provide it to us, when you use our Service, or through automated technologies.
-
-((Clarify this section further.))
+We collect this information when you voluntarily provide it to us, when you use our
+Service, or through automated technologies.
 
 ## How We Use Your Information
 
@@ -27,17 +26,15 @@ We may use the information we collect for various purposes, including to:
 
 - Provide, operate, and maintain our Service
 - Improve, personalize, and expand our Service
-- Understand and analyze how you use our Service ((Do we need this?))
 - Develop new services, features, and functionality
-- Communicate with you for customer service and updates ((Clarify, no customers?))
-- Find and prevent fraud ((Do we need this?))
+- Communicate with you
 - Comply with legal obligations
 
-## Cookies and Tracking Technologies
+## Cookies
 
-We use cookies and similar tracking technologies to track activity on our Service and
-hold certain information. Cookies are files with a small amount of data which may
-include an anonymous unique identifier.
+We use cookies and similar technologies to support features such as connecting your
+Bitcoin Lightning Wallet and search history, only if you choose to explicitly enable
+these features.
 
 You can instruct your browser to refuse all cookies or to indicate when a cookie is
 being sent. However, if you do not accept cookies, you may not be able to use some
@@ -71,7 +68,9 @@ You have the following rights:
 - **Right to Rectification** — You have the right to request that we correct any
 information you believe is inaccurate or complete information you believe is incomplete.
 - **Right to Erasure** — You have the right to request that we erase your personal data,
-under certain conditions.
+under certain conditions. You may delete your account at any time, at which point your
+email address and any associated account information will be permanently removed, unless
+we are required to retain it in order to fulfill our legal obligations.
 - **Right to Restrict Processing** — You have the right to request that we restrict the
 processing of your personal data, under certain conditions.
 - **Right to Data Portability** — You have the right to request that we transfer the
@@ -113,8 +112,8 @@ home page.
 - Users can change their personal information by contacting us at
 contactemail@fillinlater.com.
 
-We honor Do Not Track signals and do not track, plant cookies, or use advertising when
-a Do Not Track browser mechanism is in place.
+We do not use marketing/analytics cookies or cross-site tracking, and we do not track
+users on third-party websites.
 
 ## Changes to This Privacy Policy
 

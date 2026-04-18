@@ -29,7 +29,7 @@ the exclusive property of Music Podcast Player. The Service is protected by copy
 trademark, and other laws. Our trademarks may not be used in connection with any product
 or service without our prior written consent.
 
-((Look into this further.))
+((We need to update this part when we know the plans for copyright/licensing.))
 
 ## User Content
 
@@ -46,10 +46,10 @@ Upon termination, your right to use the Service will cease immediately.
 
 ## Limitation of Liability
 
-In no event shall Music Podcast Player, nor its directors, employees, partners, agents,
-suppliers, or affiliates, be liable for any indirect, incidental, special,
-consequential, or punitive damages, including without limitation, loss of profits, data,
-use, goodwill, or other intangible losses, resulting from:
+In no event shall the individuals operating Music Podcast Player be liable for any
+indirect, incidental, special, consequential, or punitive damages, including without
+limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting
+from:
 
 - Your access to or use of (or inability to access or use) the Service
 - Any conduct or content of any third party on the Service
@@ -63,17 +63,14 @@ without warranties of any kind, whether express or implied, including, but not l
 to, implied warranties of merchantability, fitness for a particular purpose,
 non-infringement, or course of performance.
 
-## Governing Law (EU Users)
-
-For users in the European Union, these Terms shall be governed by and construed in
-accordance with applicable EU laws. Nothing in these Terms shall affect your statutory
-rights as a consumer under applicable EU consumer protection legislation.
-
-## Governing Law
+## Governing Law and Jurisdiction
 
 These Terms shall be governed and construed in accordance with the laws of the
-jurisdiction in which Music Podcast Player operates, without regard to its conflict of
-law provisions.
+State of Indiana, without regard to its conflict of law provisions.
+
+Users in the European Union may benefit from mandatory provisions of consumer protection
+laws in your country of residence. Nothing in these Terms shall affect your statutory
+rights as a consumer under applicable EU consumer protection legislation.
 
 ## Changes to Terms
 
@@ -89,4 +86,4 @@ agree to be bound by the revised terms.
 If you have any questions about these Terms of Service, please contact us:
 
 - By email: contactemail@fillinlater.com
-- By visiting: https://musicpodcastplayer.com
+- By visiting: https://musicpodcastplayer.com/contact
