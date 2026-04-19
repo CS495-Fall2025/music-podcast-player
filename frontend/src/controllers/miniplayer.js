@@ -1,5 +1,9 @@
 import { ref, watch } from "vue";
-import { currentTrack, feedTracks } from "../controllers/localFeedStore.js";
+import {
+  currentTrack,
+  feedTracks,
+  currentVolume,
+} from "../controllers/localFeedStore.js";
 import { drippingState } from "../controllers/drippingState.js";
 
 import playIcon from "../assets/images/play-icon.svg";
@@ -98,6 +102,7 @@ export function useMiniPlayer() {
         .play()
         .then(() => (isPlaying.value = true))
         .catch(() => (isPlaying.value = false));
+      audioRef.value.volume = currentVolume.value;
     }
   });
 
