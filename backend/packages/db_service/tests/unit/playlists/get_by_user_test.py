@@ -17,7 +17,7 @@ def test_get_playlists_by_user_success(mock_make_session) -> None:
         Playlist(id=1, title="List 1", created_by_user_id=1),
         Playlist(id=2, title="List 2", created_by_user_id=1),
     ]
-    mock_session.query(Playlist).filter_by().all.return_value = expected_list
+    mock_session.query(Playlist).options().filter_by().all.return_value = expected_list
 
     result = get_by_user.get_playlists_by_user(user_id=1)
 

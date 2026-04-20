@@ -43,7 +43,7 @@ export function onUserFormSubmit(event) {
     event.target.reset();
     addSearch(data.get("query"));
     requestFeeds(data.get("query"));
-    console.log(data.get("query"));
+    // console.log(data.get("query"));
     //router.push("/view");
   }
 }

@@ -33,6 +33,7 @@ def _make_user(username: str, email: str, password: str) -> User:
         email=email,
         password=salt_and_hash_password,
         email_verified=True,
+        profile_public=False,
     )
 
 

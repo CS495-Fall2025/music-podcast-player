@@ -1,9 +1,14 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, LargeBinary, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from rss_music_data_model.base import Base
+
+
+if TYPE_CHECKING:
+    from rss_music_data_model.playlist import Playlist
 
 
 USERNAME_MAX_LENGTH = 30
@@ -24,6 +29,10 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(EMAIL_MAX_LENGTH), unique=True)
     password: Mapped[bytes] = mapped_column(LargeBinary(PASSWORD_LENGTH))
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    profile_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    playlists: Mapped[list["Playlist"]] = relationship(
+        "Playlist", cascade="all, delete-orphan", passive_deletes=True
+    )
     email_verification_code: Mapped[str | None] = mapped_column(
         String(CODE_LENGTH), nullable=True
     )
