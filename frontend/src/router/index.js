@@ -11,9 +11,18 @@ import { isAuthenticated } from "../auth/authService";
 import UserProfilePage from "../pages/UserPage.vue";
 import ContactPage from "../pages/ContactPage.vue";
 import AboutPage from "../pages/AboutPage.vue";
+import PublicUserPage from "../pages/PublicUserPage.vue";
+import { clearError } from "../controllers/statusStore.js";
+import { resetCurrentFeed } from "../controllers/localFeedStore.js";
 
 const routes = [
-  { path: "/", component: InputFeedPage },
+  { path: "/", redirect: "/search" },
+
+  {
+    path: "/input",
+    component: InputFeedPage,
+    meta: { requiresAuth: false },
+  },
 
   {
     path: "/about",
@@ -82,6 +91,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
 
+  {
+    path: "/user/:username",
+    component: PublicUserPage,
+    meta: { requiresAuth: false },
+  },
+
   ...(import.meta.env.VITE_INCLUDE_DEV_FEATURES !== "yes" ? [] : []),
 ];
 
@@ -91,9 +106,13 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
+  // Clear any persistent errors when navigating to new route
+  clearError();
+  resetCurrentFeed();
+
   if (to.meta.requiresAuth && !isAuthenticated()) {
-    // redirect unauthenticated users to home
-    return "/";
+    // redirect unauthenticated users to home(search page)
+    return "/search";
   }
 });
 

@@ -1,35 +1,63 @@
 import { ref, watch } from "vue";
-import { currentTrack, feedTracks } from "../controllers/localFeedStore.js";
+import {
+  currentTrack,
+  feedTracks,
+  currentVolume,
+} from "../controllers/localFeedStore.js";
+import { drippingState } from "../controllers/drippingState.js";
 
 import playIcon from "../assets/images/play-icon.svg";
 import pauseIcon from "../assets/images/pause-icon.svg";
-import skipIcon from "../assets/images/forward-icon.svg";
-import rewindIcon from "../assets/images/backward-icon.svg";
+import stepIcon from "../assets/images/step-icon.svg";
 import shuffleIcon from "../assets/images/random-icon.svg";
 import repeatIcon from "../assets/images/undo-arrow-icon.svg";
 import reverseIcon from "../assets/images/reverse-icon.svg";
+import volumeIcon from "../assets/images/volume-icon.svg?raw";
 
 export function useMiniPlayer() {
+  // --- State Variables ---
   const isPlaying = ref(false);
   const ready = ref(false);
   const audioRef = ref(null);
   const currentTime = ref(0);
   const duration = ref(0);
+
+  // --- Playback Modes ---
   const repeat = ref(false);
   const isShuffle = ref(false);
   const isReverse = ref(false);
+
+  // --- Shuffle & Navigation State ---
   const shuffleOrder = ref([]);
   const shuffleIndex = ref(-1);
   const prevClickTimeout = ref(null);
-  const DOUBLE_CLICK_DELAY = 800;
+  const DOUBLE_CLICK_DELAY = 800; // Time window (ms) to detect a double-click for the previous button
 
+  // --- Helpers ---
+
+  // Extracts a unique identifier for a given track to handle comparisons
+  const getTrackKey = (track) => {
+    if (!track) return null;
+    return track.id ?? track.track_url ?? track.audio ?? null;
+  };
+
+  // Finds the index of the currently playing track within the feed list
   const getCurrentIndex = () => {
+    const key = getTrackKey(currentTrack.value);
+    if (key !== null) {
+      const keyedIndex = feedTracks.findIndex(
+        (track) => getTrackKey(track) === key,
+      );
+      if (keyedIndex !== -1) return keyedIndex;
+    }
+
     if (!currentTrack.value || !currentTrack.value.audio) return -1;
     return feedTracks.findIndex(
       (track) => track.audio === currentTrack.value.audio,
     );
   };
 
+  // Generates a randomized array of track indices, excluding the currently playing track
   const buildShuffleOrder = () => {
     if (!feedTracks.length) return [];
     const currentIndex = getCurrentIndex();
@@ -45,12 +73,15 @@ export function useMiniPlayer() {
       [indices[i], indices[j]] = [indices[j], indices[i]];
     }
 
+    // Add the current track back to the end of the shuffled list
     indices.push(currentIndex);
     return indices;
   };
 
+  // --- Core Player Methods ---
+
+  // Toggles shuffle mode on and off, generating a new order if turned on
   const toggleShuffle = () => {
-    // Not shuffling
     if (!isShuffle.value) {
       const order = buildShuffleOrder();
       if (!order.length) return;
@@ -58,34 +89,63 @@ export function useMiniPlayer() {
       shuffleOrder.value = order;
       shuffleIndex.value = -1;
       isShuffle.value = true;
-    }
-    // Shuffling
-    else {
+    } else {
       isShuffle.value = false;
       shuffleOrder.value = [];
       shuffleIndex.value = -1;
     }
   };
 
-  // Toggles isReverse.value and reverses feedTracks
+  // Toggles reverse mode and directly reverses the main track array
   const toggleReverse = () => {
     isReverse.value = !isReverse.value;
     feedTracks.reverse();
   };
 
+  // --- Watchers ---
+
+  // Reset player playback states whenever a new track is loaded
   watch(currentTrack, () => {
     isPlaying.value = false;
     ready.value = false;
   });
 
+  // Autoplay the track once the audio element signals it is ready
   watch(ready, (val) => {
     if (val && audioRef.value) {
       audioRef.value
         .play()
         .then(() => (isPlaying.value = true))
         .catch(() => (isPlaying.value = false));
+      audioRef.value.volume = currentVolume.value;
     }
   });
+
+  // Sync the 'dripping' (streaming value/payments) state with the current playback status
+  watch(isPlaying, (newIsPlaying) => {
+    if (drippingState.enabled) {
+      if (currentTrack.value.value.length === 0) {
+        return;
+      }
+      drippingState.active = newIsPlaying;
+    }
+  });
+
+  // Handle edge cases where dripping is enabled mid-playback
+  watch(
+    () => drippingState.enabled,
+    (newEnabled) => {
+      if (!isPlaying.value) {
+        return;
+      }
+      const canDrip = currentTrack.value.value.length > 0;
+      if (newEnabled && canDrip && isPlaying.value) {
+        drippingState.active = true;
+      }
+    },
+  );
+
+  // --- Playback Controls ---
 
   const togglePlay = () => {
     const audio = audioRef.value;
@@ -97,6 +157,7 @@ export function useMiniPlayer() {
     isPlaying.value = !isPlaying.value;
   };
 
+  // Resets the current song to the beginning and ensures it is playing
   const restartSong = () => {
     const audio = audioRef.value;
     if (!audio) return;
@@ -109,13 +170,13 @@ export function useMiniPlayer() {
   const skipToNextTrack = () => {
     if (!feedTracks.length) return;
 
-    // Not shuffling
+    // Standard linear skip
     if (!isShuffle.value || !shuffleOrder.value.length) {
       const i = getCurrentIndex();
       if (i === -1) return;
       currentTrack.value = feedTracks[(i + 1) % feedTracks.length];
     }
-    // Shuffling
+    // Shuffled skip
     else {
       shuffleIndex.value = (shuffleIndex.value + 1) % shuffleOrder.value.length;
       currentTrack.value = feedTracks[shuffleOrder.value[shuffleIndex.value]];
@@ -126,19 +187,18 @@ export function useMiniPlayer() {
     repeat.value = false;
   };
 
+  // Implements double-click logic: Single click restarts the song, double-click goes to previous track
   const skipToPreviousTrack = () => {
     if (prevClickTimeout.value) {
       clearTimeout(prevClickTimeout.value);
       prevClickTimeout.value = null;
 
-      // Not shuffling
+      // Double click detected: Skip backwards
       if (!isShuffle.value) {
         const i = getCurrentIndex();
         if (i > 0) currentTrack.value = feedTracks[i - 1];
         else restartSong();
-      }
-      // Shuffling
-      else {
+      } else {
         if (shuffleIndex.value > 0) {
           shuffleIndex.value--;
           currentTrack.value =
@@ -152,12 +212,14 @@ export function useMiniPlayer() {
       return;
     }
 
+    // Single click detected: Restart current song
     prevClickTimeout.value = setTimeout(() => {
       restartSong();
       prevClickTimeout.value = null;
     }, DOUBLE_CLICK_DELAY);
   };
 
+  // Keeps the UI progress bar synced with the HTML audio element's internal clock
   const onTimeUpdate = () => {
     if (!audioRef.value) return;
     currentTime.value = audioRef.value.currentTime;
@@ -167,11 +229,14 @@ export function useMiniPlayer() {
     }
   };
 
+  // Formats raw seconds into a standard "MM:SS" layout
   const formatTime = (time) => {
     const m = Math.floor(time / 60);
     const s = Math.floor(time % 60);
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
+
+  // --- Audio Event Listeners ---
 
   const repeatTrack = () => (repeat.value = !repeat.value);
   const onCanPlay = () => (ready.value = true);
@@ -193,11 +258,11 @@ export function useMiniPlayer() {
     // icons
     playIcon,
     pauseIcon,
-    skipIcon,
-    rewindIcon,
+    stepIcon,
     shuffleIcon,
     repeatIcon,
     reverseIcon,
+    volumeIcon,
 
     // methods
     togglePlay,

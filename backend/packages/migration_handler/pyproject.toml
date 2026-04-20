@@ -13,9 +13,7 @@ dev = [
 	"pytest>=8.4,<9.0",
 	"ruff>=0.13,<1.0",
 ]
-lambda = [
-	"boto3>=1.42,<2.0",
-]
+lambda = []
 
 
 [dependency-groups]
@@ -23,9 +21,7 @@ dev = [
 	"pytest>=8.4,<9.0",
 	"ruff>=0.13,<1.0",
 ]
-lambda = [
-	"boto3>=1.42,<2.0",
-]
+lambda = []
 
 
 [build-system]

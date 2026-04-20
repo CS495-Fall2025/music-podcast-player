@@ -10,7 +10,23 @@
       <div class="feed-artist">{{ feedArtist }}</div>
     </div>
 
-    <Track v-for="(item, index) in feedTracks" :key="index" :track="item" />
+    <Track
+      v-for="(item, index) in feedTracks"
+      :key="index"
+      :track="item"
+      @add-to-playlist="handleAddToPlaylist"
+    />
+
+    <AddToPlaylistModal
+      v-if="modalOpen"
+      :track="selectedTrack"
+      :playlists="playlists"
+      :loading="loading"
+      :error="error"
+      @close="closeModal"
+      @select-playlist="handleSelectPlaylist"
+      @create-playlist="handleCreatePlaylist"
+    />
   </div>
 </template>
 
@@ -19,7 +35,6 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-
   min-height: 0;
 
   overflow-x: hidden;
@@ -27,8 +42,12 @@
   align-items: stretch;
 
   padding-top: 5px;
-  padding-bottom: 20px;
   gap: 0.5rem;
+
+  /* padding-bottom: var(--player-height, 150px); */
+  padding-bottom: calc(
+    var(--player-height) + env(safe-area-inset-bottom) + 130px
+  );
 }
 
 .feed-info {

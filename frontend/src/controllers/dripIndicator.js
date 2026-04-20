@@ -9,8 +9,14 @@ export default {
     };
   },
   computed: {
-    isDripping() {
+    drippingEnabled() {
       return drippingState.enabled;
+    },
+    isDripping() {
+      return drippingState.active;
+    },
+    totalSats() {
+      return Math.floor(drippingState.totalFractionalSats);
     },
   },
 };

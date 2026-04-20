@@ -12,3 +12,11 @@ export const currentTrack = ref("");
 
 // Populate with feeds found using the backend.
 export const searchedFeeds = reactive([]);
+
+export const currentVolume = ref(1);
+
+export function resetCurrentFeed() {
+  currentTrack.value = "";
+  feed.length = reactive([]);
+  feedTracks.length = reactive([]);
+}

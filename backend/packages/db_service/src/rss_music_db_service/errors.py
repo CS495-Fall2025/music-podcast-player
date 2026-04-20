@@ -6,3 +6,11 @@ class NotUniqueError(ValueError):
 
 class UserNotFoundError(Exception):
     pass
+
+
+class PlaylistNotFoundError(Exception):
+    pass
+
+
+class TrackAlreadyExistsError(Exception):
+    pass

@@ -1,11 +1,14 @@
 .signup-container {
   display: flex;
+  flex-direction: column;
+  flex: 1;
+
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  min-height: 0;
   background: linear-gradient(135deg, var(--dark-navy) 0%, #131d28 100%);
   padding: var(--spacing-md);
-  overflow-y: auto;
+  overflow-y: auto !important;
 }
 
 .signup-card {

@@ -1,8 +1,10 @@
-import { currentTrack } from "./localFeedStore.js";
+import { currentTrack, feedTracks } from "./localFeedStore.js";
 import { sanitizeText } from "./textSanitizer.js";
 
 export default {
   name: "userTrack",
+
+  emits: ["add-to-playlist"],
 
   props: {
     track: {
@@ -14,7 +16,22 @@ export default {
   methods: {
     // Sets the currentTrack variable to this track.
     selectTrack() {
-      currentTrack.value = this.track;
+      const selected = this.track;
+      const matched = feedTracks.find((track) => {
+        if (selected?.id && track?.id) return track.id === selected.id;
+        if (selected?.track_url && track?.track_url) {
+          return track.track_url === selected.track_url;
+        }
+        if (selected?.audio && track?.audio)
+          return track.audio === selected.audio;
+        return false;
+      });
+
+      currentTrack.value = matched || selected;
+    },
+
+    addToPlaylist() {
+      this.$emit("add-to-playlist", this.track);
     },
   },
 
@@ -30,23 +47,33 @@ export default {
         }
       );
     },
+    // Returns True if this is the currently playing track, false if not.
+    isActive() {
+      return currentTrack.value === this.track;
+    },
     // Returns the track's image, if there's no image, returns placeholder.
     trackImage() {
       return this.trackObj.image || "/src/assets/images/default-image.jpg";
     },
-    // Returns the track's artist, if there's no artist, returns placeholder.
+    // Returns the track's artist, if there's no artist, returns empty.
     trackArtist() {
-      return this.trackObj.artist || "Track artist not found";
+      if (this.trackObj.artist === "Unknown") return "";
+      return this.trackObj.artist;
     },
-    // Returns the track's title, if there's no title, returns placeholder.
+    // Returns the track's title, if there's no title, returns empty.
     trackTitle() {
-      return this.trackObj.title || "Track title not found";
+      if (this.trackObj.title === "Unknown") return "";
+      return this.trackObj.title;
     },
-    // Returns the track's (sanitized) description, if there's no description, returns placeholder.
+    // Returns the track's (sanitized) description, if there's no description, returns empty.
     trackDescription() {
-      return (
-        sanitizeText(this.trackObj.description) || "Track description not found"
-      );
+      if (this.trackObj.description === "Unknown") return "";
+      return sanitizeText(this.trackObj.description);
+    },
+    trackNumber() {
+      if (this.trackObj.trackNumber)
+        return "Track " + this.trackObj.trackNumber;
+      return "";
     },
   },
 };
