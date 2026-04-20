@@ -88,12 +88,10 @@ describe("AboutPage", () => {
   describe("saveContent", () => {
     beforeEach(() => { mockIsAdmin.value = true; });
 
-    it("calls putPageContent with sanitized html", async () => {
+    it("calls putPageContent with edited content", async () => {
       const { putPageContent } = await import("../src/controllers/pageContentApi");
-      const { sanitizeText } = await import("../src/controllers/textSanitizer");
       wrapper.vm.editContent = "<p>New</p>";
       await wrapper.vm.saveContent();
-      expect(sanitizeText).toHaveBeenCalled();
       expect(putPageContent).toHaveBeenCalledWith("about", "<p>New</p>");
     });
 
@@ -104,11 +102,11 @@ describe("AboutPage", () => {
       expect(wrapper.vm.isEditing).toBe(false);
     });
 
-    it("sanitizes xss content before saving", async () => {
-      const { sanitizeText } = await import("../src/controllers/textSanitizer");
-      wrapper.vm.editContent = "xss-payload";
+    it("sends raw content to API for server-side sanitization", async () => {
+      const { putPageContent } = await import("../src/controllers/pageContentApi");
+      wrapper.vm.editContent = "<script>alert('xss')</script>";
       await wrapper.vm.saveContent();
-      expect(sanitizeText).toHaveBeenCalled();
+      expect(putPageContent).toHaveBeenCalledWith("about", "<script>alert('xss')</script>");
     });
 
     it("shows saveError when putPageContent rejects", async () => {
