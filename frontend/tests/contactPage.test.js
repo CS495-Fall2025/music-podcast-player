@@ -49,13 +49,17 @@ describe("ContactPage", () => {
 
   describe("onMounted", () => {
     it("loads content from the API on mount", async () => {
-      const { getPageContent } = await import("../src/controllers/pageContentApi");
+      const { getPageContent } = await import(
+        "../src/controllers/pageContentApi"
+      );
       expect(getPageContent).toHaveBeenCalledWith("contact");
       expect(wrapper.vm.savedContent).toBe("<h1>Contact</h1>");
     });
 
     it("shows load error when API call fails", async () => {
-      const { getPageContent } = await import("../src/controllers/pageContentApi");
+      const { getPageContent } = await import(
+        "../src/controllers/pageContentApi"
+      );
       getPageContent.mockRejectedValueOnce(new Error("Network error"));
       const w = mount(ContactPage);
       await flushPromises();
@@ -78,7 +82,9 @@ describe("ContactPage", () => {
   });
 
   describe("startEditing", () => {
-    beforeEach(() => { mockIsAdmin.value = true; });
+    beforeEach(() => {
+      mockIsAdmin.value = true;
+    });
 
     it("changes isEditing to true when edit button is clicked", async () => {
       await wrapper.vm.$nextTick();
@@ -106,10 +112,14 @@ describe("ContactPage", () => {
   });
 
   describe("saveContent", () => {
-    beforeEach(() => { mockIsAdmin.value = true; });
+    beforeEach(() => {
+      mockIsAdmin.value = true;
+    });
 
     it("saves edited content to savedContent", async () => {
-      const { putPageContent } = await import("../src/controllers/pageContentApi");
+      const { putPageContent } = await import(
+        "../src/controllers/pageContentApi"
+      );
       const newContent = "<h1>Updated Contact Info</h1>";
       putPageContent.mockResolvedValueOnce(newContent);
       wrapper.vm.editContent = newContent;
@@ -125,10 +135,15 @@ describe("ContactPage", () => {
     });
 
     it("sends raw content to API for server-side sanitization", async () => {
-      const { putPageContent } = await import("../src/controllers/pageContentApi");
+      const { putPageContent } = await import(
+        "../src/controllers/pageContentApi"
+      );
       wrapper.vm.editContent = "<script>alert('xss')</script>";
       await wrapper.vm.saveContent();
-      expect(putPageContent).toHaveBeenCalledWith("contact", "<script>alert('xss')</script>");
+      expect(putPageContent).toHaveBeenCalledWith(
+        "contact",
+        "<script>alert('xss')</script>",
+      );
     });
 
     it("hides textarea and shows content after saving", async () => {
@@ -141,7 +156,9 @@ describe("ContactPage", () => {
     });
 
     it("shows saveError when putPageContent rejects", async () => {
-      const { putPageContent } = await import("../src/controllers/pageContentApi");
+      const { putPageContent } = await import(
+        "../src/controllers/pageContentApi"
+      );
       putPageContent.mockRejectedValueOnce(new Error("Save failed"));
       wrapper.vm.isEditing = true;
       wrapper.vm.editContent = "content";
@@ -152,7 +169,9 @@ describe("ContactPage", () => {
   });
 
   describe("cancelEditing", () => {
-    beforeEach(() => { mockIsAdmin.value = true; });
+    beforeEach(() => {
+      mockIsAdmin.value = true;
+    });
 
     it("sets isEditing to false when cancel is clicked", async () => {
       wrapper.vm.isEditing = true;
@@ -180,7 +199,9 @@ describe("ContactPage", () => {
   });
 
   describe("UI interactions", () => {
-    beforeEach(() => { mockIsAdmin.value = true; });
+    beforeEach(() => {
+      mockIsAdmin.value = true;
+    });
 
     it("shows edit button when admin", async () => {
       await wrapper.vm.$nextTick();

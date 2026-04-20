@@ -18,8 +18,22 @@ from rss_music_api_service.services.page_content_service import (
 PAGES_BP = Blueprint("pages", __name__, url_prefix="/pages")
 
 ALLOWED_TAGS = [
-    "p", "br", "a", "strong", "b", "em", "i",
-    "ul", "ol", "li", "h1", "h2", "h3", "h4", "h5", "h6",
+    "p",
+    "br",
+    "a",
+    "strong",
+    "b",
+    "em",
+    "i",
+    "ul",
+    "ol",
+    "li",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
 ]
 ALLOWED_ATTRS = {"a": ["href", "target"]}
 
@@ -47,7 +61,9 @@ def put_page(page: str):
         return get_error_response(RequestError.INVALID_FORMAT)
 
     raw_html: str = body["html"]
-    clean_html = bleach.clean(raw_html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
+    clean_html = bleach.clean(
+        raw_html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True
+    )
 
     try:
         result = put_page_content(page, clean_html)

@@ -42,7 +42,7 @@ onMounted(async () => {
   try {
     const html = await getPageContent("about");
     savedContent.value = html;
-  } catch (e) {
+  } catch {
     loadError.value = "Failed to load page content.";
   }
 });
@@ -65,7 +65,9 @@ onMounted(async () => {
       ></textarea>
       <div v-if="saveError" class="save-error">{{ saveError }}</div>
       <div class="content-control-buttons">
-        <button @click="saveContent" :disabled="isSaving">{{ isSaving ? 'Saving...' : 'Save' }}</button>
+        <button @click="saveContent" :disabled="isSaving">
+          {{ isSaving ? "Saving..." : "Save" }}
+        </button>
         <button @click="cancelEdit" :disabled="isSaving">Cancel</button>
       </div>
     </div>

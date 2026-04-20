@@ -35,13 +35,17 @@ describe("AboutPage", () => {
 
   describe("onMounted", () => {
     it("loads content from the API on mount", async () => {
-      const { getPageContent } = await import("../src/controllers/pageContentApi");
+      const { getPageContent } = await import(
+        "../src/controllers/pageContentApi"
+      );
       expect(getPageContent).toHaveBeenCalledWith("about");
       expect(wrapper.vm.savedContent).toBe("<h1>About</h1>");
     });
 
     it("shows load error when API call fails", async () => {
-      const { getPageContent } = await import("../src/controllers/pageContentApi");
+      const { getPageContent } = await import(
+        "../src/controllers/pageContentApi"
+      );
       getPageContent.mockRejectedValueOnce(new Error("Network error"));
       const w = mount(AboutPage);
       await flushPromises();
@@ -64,7 +68,9 @@ describe("AboutPage", () => {
   });
 
   describe("startEditing", () => {
-    beforeEach(() => { mockIsAdmin.value = true; });
+    beforeEach(() => {
+      mockIsAdmin.value = true;
+    });
 
     it("sets isEditing to true when edit button is clicked", async () => {
       await wrapper.vm.$nextTick();
@@ -86,10 +92,14 @@ describe("AboutPage", () => {
   });
 
   describe("saveContent", () => {
-    beforeEach(() => { mockIsAdmin.value = true; });
+    beforeEach(() => {
+      mockIsAdmin.value = true;
+    });
 
     it("calls putPageContent with edited content", async () => {
-      const { putPageContent } = await import("../src/controllers/pageContentApi");
+      const { putPageContent } = await import(
+        "../src/controllers/pageContentApi"
+      );
       wrapper.vm.editContent = "<p>New</p>";
       await wrapper.vm.saveContent();
       expect(putPageContent).toHaveBeenCalledWith("about", "<p>New</p>");
@@ -103,14 +113,21 @@ describe("AboutPage", () => {
     });
 
     it("sends raw content to API for server-side sanitization", async () => {
-      const { putPageContent } = await import("../src/controllers/pageContentApi");
+      const { putPageContent } = await import(
+        "../src/controllers/pageContentApi"
+      );
       wrapper.vm.editContent = "<script>alert('xss')</script>";
       await wrapper.vm.saveContent();
-      expect(putPageContent).toHaveBeenCalledWith("about", "<script>alert('xss')</script>");
+      expect(putPageContent).toHaveBeenCalledWith(
+        "about",
+        "<script>alert('xss')</script>",
+      );
     });
 
     it("shows saveError when putPageContent rejects", async () => {
-      const { putPageContent } = await import("../src/controllers/pageContentApi");
+      const { putPageContent } = await import(
+        "../src/controllers/pageContentApi"
+      );
       putPageContent.mockRejectedValueOnce(new Error("Save failed"));
       wrapper.vm.isEditing = true;
       wrapper.vm.editContent = "content";
@@ -121,7 +138,9 @@ describe("AboutPage", () => {
   });
 
   describe("cancelEdit", () => {
-    beforeEach(() => { mockIsAdmin.value = true; });
+    beforeEach(() => {
+      mockIsAdmin.value = true;
+    });
 
     it("sets isEditing to false", async () => {
       wrapper.vm.isEditing = true;

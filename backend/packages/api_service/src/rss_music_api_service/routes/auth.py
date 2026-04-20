@@ -248,7 +248,9 @@ def post_login() -> tuple:
         }, 401
 
     try:
-        user_id, username, email_verified, is_admin = login.authenticate_user(username, password)
+        user_id, username, email_verified, is_admin = login.authenticate_user(
+            username, password
+        )
     except login.InvalidCredentialsError:
         return {
             "code": 401,

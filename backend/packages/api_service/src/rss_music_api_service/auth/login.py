@@ -72,7 +72,9 @@ def generate_jwt(
     return token
 
 
-def generate_tokens(user_id: int, username: str, secret_key: str, is_admin: bool = False) -> dict:
+def generate_tokens(
+    user_id: int, username: str, secret_key: str, is_admin: bool = False
+) -> dict:
     """
     Generate both access and refresh tokens for a user.
 
@@ -80,7 +82,12 @@ def generate_tokens(user_id: int, username: str, secret_key: str, is_admin: bool
         Dictionary with 'access_token' (1 hour) and 'refresh_token' (7 days)
     """
     access_token = generate_jwt(
-        user_id, username, secret_key, expires_in_hours=1, token_type=TokenType.ACCESS, is_admin=is_admin
+        user_id,
+        username,
+        secret_key,
+        expires_in_hours=1,
+        token_type=TokenType.ACCESS,
+        is_admin=is_admin,
     )
     refresh_token = generate_jwt(
         user_id,

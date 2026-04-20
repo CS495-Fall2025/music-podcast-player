@@ -3,7 +3,6 @@ import os
 
 import boto3
 import pytest
-from unittest import mock
 
 from rss_music_api_service.auth import pkce
 
@@ -103,20 +102,20 @@ class TestPutPage:
 
     def test_put_requires_admin(self, client, user, custom_responses, s3_bucket):
         # Log in as non-admin user
-        custom_responses[
-            f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/users/login"
-        ] = ConstantResponse(
-            status_code=200,
-            json_data={
-                "username": user.username,
-                "id": user.id,
-                "email_verified": True,
-                "is_admin": False,
-            },
+        custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/users/login"] = (
+            ConstantResponse(
+                status_code=200,
+                json_data={
+                    "username": user.username,
+                    "id": user.id,
+                    "email_verified": True,
+                    "is_admin": False,
+                },
+            )
         )
-        custom_responses[
-            f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/users/exists"
-        ] = ConstantResponse(status_code=200, json_data={"exists": "true"})
+        custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/users/exists"] = (
+            ConstantResponse(status_code=200, json_data={"exists": "true"})
+        )
 
         verifier = "test_challenge"
         challenge = pkce.generate_code_challenge(verifier)
@@ -129,9 +128,7 @@ class TestPutPage:
                 "code_verifier": verifier,
             },
         )
-        del custom_responses[
-            f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/users/login"
-        ]
+        del custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/users/login"]
 
         response = client.put("/pages/about", json={"html": "<p>content</p>"})
         assert response.status_code == 403
