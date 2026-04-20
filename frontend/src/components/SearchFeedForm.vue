@@ -81,6 +81,7 @@ onBeforeUnmount(() => {
       <label for="query-input" class="input-label">
        SEARCH
       </label>
+      <h2 class="podcast-subheader">Powered by the PodcastIndex</h2>
       <div class="input-row" ref="historyWrapper">
         <div class="input-wrap">
           <input
@@ -139,10 +140,24 @@ onBeforeUnmount(() => {
 }
 
 .input-label {
-  align-self: flex-start;
+  align-self: center;
   font-size: 50px;
   flex-wrap: wrap;
   color: inherit;
+  color: var(--light-orange);
+  margin-bottom: 16px;
+  letter-spacing: 3px;
+  padding-left: 2%;
+}
+
+.podcast-subheader {
+  align-self: center;
+  flex-wrap: wrap;
+  color: inherit;
+  text-align: center;
+  padding-left: 2%;
+  font-size: 16px;
+  padding-bottom: 5%;
 }
 
 .input-row {
