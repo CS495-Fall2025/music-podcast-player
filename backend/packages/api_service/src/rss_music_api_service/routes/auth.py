@@ -248,7 +248,7 @@ def post_login() -> tuple:
         }, 401
 
     try:
-        user_id, username, email_verified = login.authenticate_user(username, password)
+        user_id, username, email_verified, is_admin = login.authenticate_user(username, password)
     except login.InvalidCredentialsError:
         return {
             "code": 401,
@@ -273,7 +273,7 @@ def post_login() -> tuple:
         }, 403
 
     secret_key = current_app.config.get("SECRET_KEY", "dev-secret-key")
-    tokens = login.generate_tokens(user_id, username, secret_key)
+    tokens = login.generate_tokens(user_id, username, secret_key, is_admin=is_admin)
 
     session.pop("code_challenge", None)
     session.pop("code_verifier_expected", None)
@@ -349,6 +349,7 @@ def post_verify() -> tuple:
             "id": payload.get("sub"),
             "username": payload.get("name"),
             "email": payload.get("email"),
+            "is_admin": payload.get("is_admin", False),
         }
 
         return {"valid": True, "user": user_info}, 200

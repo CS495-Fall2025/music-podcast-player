@@ -26,7 +26,7 @@ class UserNotFoundError(Exception):
     pass
 
 
-def authenticate_user(username: str, password: str) -> tuple[int, str, bool]:
+def authenticate_user(username: str, password: str) -> tuple[int, str, bool, bool]:
     result = db_service.try_user_login(username, password)
 
     if result is None:
@@ -41,6 +41,7 @@ def generate_jwt(
     secret_key: str,
     expires_in_hours: int = 1,
     token_type: TokenType = TokenType.ACCESS,
+    is_admin: bool = False,
 ) -> str:
     """
     Generate a JWT token for a user.
@@ -64,13 +65,14 @@ def generate_jwt(
         "iat": now,
         "exp": expires_at,
         "type": token_type.value,
+        "is_admin": is_admin,
     }
 
     token = jwt.encode(payload, secret_key, algorithm="HS256")
     return token
 
 
-def generate_tokens(user_id: int, username: str, secret_key: str) -> dict:
+def generate_tokens(user_id: int, username: str, secret_key: str, is_admin: bool = False) -> dict:
     """
     Generate both access and refresh tokens for a user.
 
@@ -78,7 +80,7 @@ def generate_tokens(user_id: int, username: str, secret_key: str) -> dict:
         Dictionary with 'access_token' (1 hour) and 'refresh_token' (7 days)
     """
     access_token = generate_jwt(
-        user_id, username, secret_key, expires_in_hours=1, token_type=TokenType.ACCESS
+        user_id, username, secret_key, expires_in_hours=1, token_type=TokenType.ACCESS, is_admin=is_admin
     )
     refresh_token = generate_jwt(
         user_id,
@@ -86,6 +88,7 @@ def generate_tokens(user_id: int, username: str, secret_key: str) -> dict:
         secret_key,
         expires_in_hours=168,
         token_type=TokenType.REFRESH,
+        is_admin=is_admin,
     )
 
     return {
