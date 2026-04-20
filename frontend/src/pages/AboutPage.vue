@@ -1,53 +1,60 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { sanitizeText } from "../controllers/textSanitizer";
+import { getPageContent, putPageContent } from "../controllers/pageContentApi";
+import { useAuth } from "../auth/authStore";
+
+const { currentUserIsAdmin } = useAuth();
 
 const isEditing = ref(false);
 const savedContent = ref("");
 const editContent = ref("");
-const isAdmin = ref(false);
+const loadError = ref("");
+const saveError = ref("");
+const isSaving = ref(false);
 
 const startEditing = () => {
   editContent.value = savedContent.value;
+  saveError.value = "";
   isEditing.value = true;
 };
 
-const checkAdmin = () => {
-  // const { currentUser } = useAuth();
-  // Line above should check actual user role,
-  // but for testing just setting to admin.
-  const testUser = "admin";
-  if (testUser == "admin") {
-    isAdmin.value = true;
+const saveContent = async () => {
+  isSaving.value = true;
+  saveError.value = "";
+  try {
+    const confirmed = await putPageContent("about", editContent.value);
+    savedContent.value = confirmed;
+    isEditing.value = false;
+  } catch (e) {
+    saveError.value = e.message ?? "Failed to save content.";
+  } finally {
+    isSaving.value = false;
   }
-  return isAdmin.value;
-};
-
-const saveContent = () => {
-  savedContent.value = sanitizeText(editContent.value);
-  isEditing.value = false;
 };
 
 const cancelEdit = () => {
   isEditing.value = false;
   editContent.value = "";
+  saveError.value = "";
 };
 
-onMounted(() => {
-  checkAdmin();
+onMounted(async () => {
+  try {
+    const html = await getPageContent("about");
+    savedContent.value = html;
+  } catch (e) {
+    loadError.value = "Failed to load page content.";
+  }
 });
-
-// hardcoded for now, should check backend database for html string
-savedContent.value =
-  "<h1>Welcome to the About Page</h1><p>This is some <strong>editable</strong> content. Click the edit button to modify it.</p>";
 </script>
 <template>
   <div class="about-container">
-    <div class="edit-button" v-if="isAdmin">
+    <div v-if="loadError" class="load-error">{{ loadError }}</div>
+    <div class="edit-button" v-if="currentUserIsAdmin">
       <button v-if="!isEditing" @click="startEditing">Edit</button>
     </div>
     <div v-if="!isEditing" class="about-content">
-      <div v-html="sanitizeText(savedContent)"></div>
+      <div v-html="savedContent"></div>
     </div>
     <div v-else class="about-edit-container">
       <textarea
@@ -56,9 +63,10 @@ savedContent.value =
         placeholder="Edit the content here..."
         rows="15"
       ></textarea>
+      <div v-if="saveError" class="save-error">{{ saveError }}</div>
       <div class="content-control-buttons">
-        <button @click="saveContent">Save</button>
-        <button @click="cancelEdit">Cancel</button>
+        <button @click="saveContent" :disabled="isSaving">{{ isSaving ? 'Saving...' : 'Save' }}</button>
+        <button @click="cancelEdit" :disabled="isSaving">Cancel</button>
       </div>
     </div>
   </div>

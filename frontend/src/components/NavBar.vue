@@ -12,7 +12,7 @@
       </button>
 
       <div :class="['nav-links', { 'is-open': isOpen }]">
-        <router-link to="/" class="nav-link" @click="closeMenu"
+        <router-link to="/about" class="nav-link" @click="closeMenu"
           >About</router-link
         >
         <router-link to="/contact" class="nav-link" @click="closeMenu"

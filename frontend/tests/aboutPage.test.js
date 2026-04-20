@@ -1,5 +1,6 @@
-import { mount } from "@vue/test-utils";
+import { mount, flushPromises } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { ref, computed } from "vue";
 
 import AboutPage from "../src/pages/AboutPage.vue";
 
@@ -7,189 +8,155 @@ vi.mock("../src/controllers/textSanitizer", () => ({
   sanitizeText: vi.fn((text) => text),
 }));
 
+vi.mock("../src/controllers/pageContentApi", () => ({
+  getPageContent: vi.fn(() => Promise.resolve("<h1>About</h1>")),
+  putPageContent: vi.fn((page, html) => Promise.resolve(html)),
+}));
+
+const mockIsAdmin = ref(false);
+vi.mock("../src/auth/authStore", () => ({
+  useAuth: () => ({
+    currentUserIsAdmin: computed(() => mockIsAdmin.value),
+  }),
+}));
+
 describe("AboutPage", () => {
   let wrapper;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    mockIsAdmin.value = false;
     wrapper = mount(AboutPage);
+    await flushPromises();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
+  describe("onMounted", () => {
+    it("loads content from the API on mount", async () => {
+      const { getPageContent } = await import("../src/controllers/pageContentApi");
+      expect(getPageContent).toHaveBeenCalledWith("about");
+      expect(wrapper.vm.savedContent).toBe("<h1>About</h1>");
+    });
+
+    it("shows load error when API call fails", async () => {
+      const { getPageContent } = await import("../src/controllers/pageContentApi");
+      getPageContent.mockRejectedValueOnce(new Error("Network error"));
+      const w = mount(AboutPage);
+      await flushPromises();
+      expect(w.vm.loadError).toBeTruthy();
+    });
+  });
+
+  describe("admin visibility", () => {
+    it("hides edit button when user is not admin", async () => {
+      mockIsAdmin.value = false;
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find(".edit-button button").exists()).toBe(false);
+    });
+
+    it("shows edit button when user is admin", async () => {
+      mockIsAdmin.value = true;
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find(".edit-button button").exists()).toBe(true);
+    });
+  });
+
   describe("startEditing", () => {
-    it("changes isEditing to true when edit button is clicked", async () => {
-      expect(wrapper.vm.isEditing).toBe(false);
+    beforeEach(() => { mockIsAdmin.value = true; });
 
-      const editButton = wrapper.find(".edit-button button");
-      await editButton.trigger("click");
-
+    it("sets isEditing to true when edit button is clicked", async () => {
+      await wrapper.vm.$nextTick();
+      await wrapper.find(".edit-button button").trigger("click");
       expect(wrapper.vm.isEditing).toBe(true);
     });
 
-    it("copies savedContent to editContent when starting to edit", async () => {
-      wrapper.vm.savedContent = "Test content for editing";
-
+    it("copies savedContent to editContent", async () => {
+      wrapper.vm.savedContent = "Existing content";
       await wrapper.vm.startEditing();
-
-      expect(wrapper.vm.editContent).toBe(wrapper.vm.savedContent);
-      expect(wrapper.vm.editContent).toBe("Test content for editing");
+      expect(wrapper.vm.editContent).toBe("Existing content");
     });
 
-    it("preserves savedContent value when starting edit", async () => {
-      const originalContent = wrapper.vm.savedContent;
-
+    it("preserves savedContent when starting edit", async () => {
+      const original = wrapper.vm.savedContent;
       await wrapper.vm.startEditing();
-
-      expect(wrapper.vm.savedContent).toBe(originalContent);
+      expect(wrapper.vm.savedContent).toBe(original);
     });
   });
 
   describe("saveContent", () => {
-    it("saves edited content to savedContent", async () => {
-      const newContent = "Updated content for the about page";
-      wrapper.vm.editContent = newContent;
+    beforeEach(() => { mockIsAdmin.value = true; });
 
+    it("calls putPageContent with sanitized html", async () => {
+      const { putPageContent } = await import("../src/controllers/pageContentApi");
+      const { sanitizeText } = await import("../src/controllers/textSanitizer");
+      wrapper.vm.editContent = "<p>New</p>";
       await wrapper.vm.saveContent();
-
-      expect(wrapper.vm.savedContent).toBe(newContent);
+      expect(sanitizeText).toHaveBeenCalled();
+      expect(putPageContent).toHaveBeenCalledWith("about", "<p>New</p>");
     });
 
     it("sets isEditing to false after saving", async () => {
       wrapper.vm.isEditing = true;
-      wrapper.vm.editContent = "New content";
-
+      wrapper.vm.editContent = "content";
       await wrapper.vm.saveContent();
-
       expect(wrapper.vm.isEditing).toBe(false);
     });
 
-    it("sanitizes content before saving", async () => {
+    it("sanitizes xss content before saving", async () => {
       const { sanitizeText } = await import("../src/controllers/textSanitizer");
-
-      wrapper.vm.editContent = "<script>alert('xss')</script>";
-
+      wrapper.vm.editContent = "xss-payload";
       await wrapper.vm.saveContent();
-
       expect(sanitizeText).toHaveBeenCalled();
     });
 
-    it("clears editContent value after saving", async () => {
+    it("shows saveError when putPageContent rejects", async () => {
+      const { putPageContent } = await import("../src/controllers/pageContentApi");
+      putPageContent.mockRejectedValueOnce(new Error("Save failed"));
       wrapper.vm.isEditing = true;
-      wrapper.vm.editContent = "Some content";
-
+      wrapper.vm.editContent = "content";
       await wrapper.vm.saveContent();
-      expect(wrapper.vm.isEditing).toBe(false);
-    });
-  });
-
-  describe("checkAdmin", () => {
-    it("returns true when user is admin", () => {
-      const result = wrapper.vm.checkAdmin();
-
-      expect(result).toBe(true);
-      expect(wrapper.vm.isAdmin).toBe(true);
-    });
-
-    // this is failing because the admin value is hardcoded.
-    // test needs to be updated once backend is connected.
-    // it("sets isAdmin to true when checkAdmin is called if user is admin", () => {
-    //   expect(wrapper.vm.isAdmin).toBe(false);
-
-    //   wrapper.vm.checkAdmin();
-
-    //   expect(wrapper.vm.isAdmin).toBe(true);
-    // });
-
-    it("shows edit button only when isAdmin is true", async () => {
-      wrapper.vm.isAdmin = false;
-      await wrapper.vm.$nextTick();
-
-      let editButton = wrapper.find(".edit-button button");
-      expect(editButton.exists()).toBe(false);
-
-      wrapper.vm.checkAdmin();
-      await wrapper.vm.$nextTick();
-
-      editButton = wrapper.find(".edit-button button");
-      expect(editButton.exists()).toBe(true);
+      expect(wrapper.vm.saveError).toBeTruthy();
+      expect(wrapper.vm.isEditing).toBe(true);
     });
   });
 
   describe("cancelEdit", () => {
-    it("sets isEditing to false when cancel is clicked", async () => {
+    beforeEach(() => { mockIsAdmin.value = true; });
+
+    it("sets isEditing to false", async () => {
       wrapper.vm.isEditing = true;
       await wrapper.vm.$nextTick();
-
-      const cancelButton = wrapper.findAll(
-        ".content-control-buttons button",
-      )[1];
-      await cancelButton.trigger("click");
-
+      const cancelBtn = wrapper.findAll(".content-control-buttons button")[1];
+      await cancelBtn.trigger("click");
       expect(wrapper.vm.isEditing).toBe(false);
     });
 
-    it("clears editContent when canceling", () => {
-      wrapper.vm.editContent = "Some edited content";
-
+    it("clears editContent", () => {
+      wrapper.vm.editContent = "Something";
       wrapper.vm.cancelEdit();
-
       expect(wrapper.vm.editContent).toBe("");
     });
   });
 
   describe("UI interactions", () => {
-    it("shows edit button when admin", async () => {
-      wrapper.vm.checkAdmin();
-      await wrapper.vm.$nextTick();
-
-      const editButton = wrapper.find(".edit-button button");
-      expect(editButton.exists()).toBe(true);
-    });
-
-    it("shows textarea when in editing mode", async () => {
+    it("shows textarea when editing", async () => {
       wrapper.vm.isEditing = true;
       await wrapper.vm.$nextTick();
-
-      const textarea = wrapper.find(".editor");
-      expect(textarea.exists()).toBe(true);
+      expect(wrapper.find(".editor").exists()).toBe(true);
     });
 
-    it("shows about content when not editing", async () => {
+    it("shows about-content when not editing", async () => {
       wrapper.vm.isEditing = false;
       await wrapper.vm.$nextTick();
-
-      const aboutContent = wrapper.find(".about-content");
-      expect(aboutContent.exists()).toBe(true);
+      expect(wrapper.find(".about-content").exists()).toBe(true);
     });
 
-    it("hides about content when editing", async () => {
+    it("hides about-content when editing", async () => {
       wrapper.vm.isEditing = true;
       await wrapper.vm.$nextTick();
-
-      const aboutContent = wrapper.find(".about-content");
-      expect(aboutContent.exists()).toBe(false);
-    });
-  });
-
-  describe("end-to-end editing flow", () => {
-    it("allows admin to edit and save content", async () => {
-      const originalContent = wrapper.vm.savedContent;
-      const newContent = "This is completely new content";
-
-      const isAdmin = wrapper.vm.checkAdmin();
-      expect(isAdmin).toBe(true);
-
-      await wrapper.vm.startEditing();
-      expect(wrapper.vm.isEditing).toBe(true);
-      expect(wrapper.vm.editContent).toBe(originalContent);
-
-      wrapper.vm.editContent = newContent;
-
-      await wrapper.vm.saveContent();
-      expect(wrapper.vm.savedContent).toBe(newContent);
-      expect(wrapper.vm.isEditing).toBe(false);
+      expect(wrapper.find(".about-content").exists()).toBe(false);
     });
   });
 });
