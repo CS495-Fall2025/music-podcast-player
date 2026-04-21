@@ -78,9 +78,7 @@ onBeforeUnmount(() => {
         >Search query has incorrect length or is using disallowed
         characters.</span
       >
-      <label for="query-input" class="input-label">
-       SEARCH
-      </label>
+      <label for="query-input" class="input-label"> SEARCH </label>
       <h2 class="podcast-subheader">Powered by the PodcastIndex</h2>
       <div class="input-row" ref="historyWrapper">
         <div class="input-wrap">
