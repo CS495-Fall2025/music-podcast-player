@@ -94,8 +94,8 @@
 
 <script setup>
 import useNavbar from "../controllers/navBar.js";
-import useSatDripping from "../controllers/satDripping.js";
 import DripIndicator from "./DripIndicator.vue";
+import useSatDripping from "../controllers/satDripping.js";
 import SatDripModal from "./SatDripModal.vue";
 
 const {
