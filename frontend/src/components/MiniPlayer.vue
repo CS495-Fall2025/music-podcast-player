@@ -7,6 +7,7 @@ import { useMiniPlayer } from "../controllers/miniplayer.js";
 import { drippingState } from "../controllers/drippingState.js";
 
 const volume = ref(1);
+import { currentVolume } from "../controllers/localFeedStore.js";
 
 defineProps({
   showReverse: {
@@ -276,8 +277,8 @@ onBeforeUnmount(() => {
           min="0"
           max="1"
           step="0.01"
-          v-model="volume"
-          @input="audioRef.volume = volume"
+          v-model="currentVolume"
+          @input="audioRef.volume = currentVolume"
         />
       </div>
     </div>
@@ -306,10 +307,6 @@ onBeforeUnmount(() => {
 
   height: auto;
   min-height: min-content;
-  padding: clamp(8px, 1.5vh, 16px);
-  padding-bottom: calc(clamp(8px, 1.5vh, 16px) + env(safe-area-inset-bottom));
-
-  background-color: var(--player-background);
   border-top: 2px solid var(--orange);
 }
 

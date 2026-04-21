@@ -181,8 +181,15 @@ def _strip_public_playlist_fields(playlist: dict) -> dict:
 
 
 def _enrich_tracks(tracks: list) -> list:
+    if not isinstance(tracks, list):
+        return []
+
+    feed_cache = {}
     enriched = []
     for track in tracks:
+        if not isinstance(track, dict):
+            continue
+
         track_url = track.get("track_url", "")
         feed_url = track.get("feed_url") or ""
         metadata = {
@@ -195,7 +202,16 @@ def _enrich_tracks(tracks: list) -> list:
         }
         if feed_url:
             try:
-                feed = LinkFunctions.get_feed_by_url(feed_url)
+                if feed_url in feed_cache:
+                    feed = feed_cache[feed_url]
+                else:
+                    feed = LinkFunctions.get_feed_by_url(feed_url)
+                    feed_cache[feed_url] = feed
+
+                if feed is None:
+                    enriched.append({**track, **metadata})
+                    continue
+
                 episode = next(
                     (
                         item
@@ -216,8 +232,10 @@ def _enrich_tracks(tracks: list) -> list:
                 if feed.value_items and feed.value_items[0]:
                     metadata["value"] = feed.value_items[0]
             except ExternalAPIError:
+                feed_cache[feed_url] = None
                 pass
             except Exception:
+                feed_cache[feed_url] = None
                 pass
         enriched.append({**track, **metadata})
     return enriched
