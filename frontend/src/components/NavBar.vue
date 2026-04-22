@@ -40,6 +40,13 @@
         Sat Drip
       </button>
 
+      <button
+        class="total-contribution-button"
+        @click="totalContributionModalOpen = true"
+      >
+        Total Contributions
+      </button>
+
       <div class="nav-dropdown" ref="dropdownRef">
         <button
           class="dropdown-toggle"
@@ -65,6 +72,27 @@
   </nav>
 
   <SatDripModal v-if="satDripModalOpen" @close="satDripModalOpen = false" />
+  <div
+    v-if="totalContributionModalOpen"
+    class="total-contribution-modal-overlay"
+  >
+    <div class="total-contribution-modal">
+      <h2 class="total-contribution-title">Total Contributions</h2>
+
+      <p class="total-contribution-value">
+        {{ Math.floor(drippingState.totalFractionalSats) }} sats
+      </p>
+
+      <div class="total-contribution-actions">
+        <button
+          class="total-contribution-close"
+          @click="closeTotalContributionModal"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -72,6 +100,8 @@ import useNavbar from "../controllers/navBar.js";
 import useSatDripping from "../controllers/satDripping.js";
 import DripIndicator from "./DripIndicator.vue";
 import SatDripModal from "./SatDripModal.vue";
+import { ref } from "vue";
+import { drippingState } from "../controllers/drippingState.js";
 
 const {
   isOpen,
@@ -87,9 +117,14 @@ const {
 useSatDripping();
 
 const includeDevPages = import.meta.env.VITE_INCLUDE_DEV_FEATURES === "yes";
+const totalContributionModalOpen = ref(false);
 
 function closeMenu() {
   isOpen.value = false;
+}
+
+function closeTotalContributionModal() {
+  totalContributionModalOpen.value = false;
 }
 </script>
 
