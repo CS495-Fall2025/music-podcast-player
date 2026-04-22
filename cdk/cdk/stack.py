@@ -44,10 +44,11 @@ API_SERVICE_PREFIX = "/api/v1"
 DATABASE_MASTER_USERNAME = "rssmusicplayer"
 
 # Production variables
-DOMAIN_NAME = "musicpodcastplayer.com"
-RECORD_NAME = "www"
-FULL_DOMAIN_NAME = f"{RECORD_NAME}.{DOMAIN_NAME}"
-R53_ZONE_ID = "Z03967792358UTKV7JWJU"
+if CURRENT_STAGE == Stage.PRODUCTION:
+    DOMAIN_NAME = os.environ["MPP_DOMAIN_NAME"]
+    RECORD_NAME = os.environ["MPP_RECORD_NAME"]
+    FULL_DOMAIN_NAME = f"{RECORD_NAME}.{DOMAIN_NAME}"
+    R53_ZONE_ID = os.environ["MPP_R53_ZONE_ID"]
 
 
 class RSSMusicPlayerStack(Stack):
@@ -397,11 +398,13 @@ class RSSMusicPlayerStack(Stack):
             "RSS_PLAYER_TOKEN_PENALTY": json.dumps({
                 "podcast_index": 15,
             }),
-            "RSS_PLAYER_SES_FROM_EMAIL": "no-reply@musicpodcastplayer.com",
         }
 
         if CURRENT_STAGE == Stage.DEVELOPMENT:
             environment["RSS_PLAYER_DISABLE_EMAIL_VERIFY"] = "true"
+        elif CURRENT_STAGE == Stage.PRODUCTION:
+            environment["RSS_PLAYER_SES_FROM_EMAIL"] = os.environ["MPP_NOREPLY_EMAIL"]
+
 
         function = _lambda.Function(
             self,
