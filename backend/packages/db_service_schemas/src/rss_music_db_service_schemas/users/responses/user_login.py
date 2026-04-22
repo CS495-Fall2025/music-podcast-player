@@ -10,3 +10,4 @@ class UserLoginResponse(Schema):
     )
     id = fields.Int(required=True, validate=validate.Range(min=0))
     email_verified = fields.Bool(required=True)
+    is_admin = fields.Bool(load_default=False)

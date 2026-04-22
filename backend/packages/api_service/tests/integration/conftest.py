@@ -118,6 +118,7 @@ def auth_client(client, user, custom_responses):
                 "username": user.username,
                 "id": user.id,
                 "email_verified": True,
+                "is_admin": False,
             },
         )
     )
