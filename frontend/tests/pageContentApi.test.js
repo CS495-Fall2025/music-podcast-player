@@ -57,7 +57,10 @@ describe("pageContentApi", () => {
         json: async () => ({ page: "about", html: "<p>Updated</p>" }),
       });
 
-      const result = await pageContentApi.putPageContent("about", "<p>Updated</p>");
+      const result = await pageContentApi.putPageContent(
+        "about",
+        "<p>Updated</p>",
+      );
 
       expect(result).toBe("<p>Updated</p>");
       expect(fetchMock).toHaveBeenCalledWith(
@@ -65,7 +68,9 @@ describe("pageContentApi", () => {
         expect.objectContaining({
           method: "PUT",
           credentials: "include",
-          headers: expect.objectContaining({ "Content-Type": "application/json" }),
+          headers: expect.objectContaining({
+            "Content-Type": "application/json",
+          }),
           body: JSON.stringify({ html: "<p>Updated</p>" }),
         }),
       );
