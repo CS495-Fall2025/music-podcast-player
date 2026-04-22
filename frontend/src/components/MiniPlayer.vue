@@ -6,7 +6,6 @@ import BoostModal from "./BoostModal.vue";
 import { useMiniPlayer } from "../controllers/miniplayer.js";
 import { drippingState } from "../controllers/drippingState.js";
 
-const volume = ref(1);
 import { currentVolume } from "../controllers/localFeedStore.js";
 
 defineProps({

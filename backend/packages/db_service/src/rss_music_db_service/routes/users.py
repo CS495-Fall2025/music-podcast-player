@@ -201,6 +201,7 @@ async def user_login(request: Request, response: Response):
         "username": user.username,
         "id": user.id,
         "email_verified": user.email_verified,
+        "is_admin": user.is_admin,
     }
 
     log_request(

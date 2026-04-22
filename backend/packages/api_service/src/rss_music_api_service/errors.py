@@ -12,6 +12,8 @@ class RequestError(Enum):
     INTERNAL_API_BAD_RESPONSE = auto()
     NOT_FOUND = auto()
     TOO_MANY_REQUESTS = auto()
+    FORBIDDEN = auto()
+    CONTENT_TOO_LARGE = auto()
 
 
 _ERROR_RESPONSE_VALUES = {
@@ -71,6 +73,16 @@ _ERROR_RESPONSE_VALUES = {
         "error": "TooManyRequests",
         "message": "The server is recieving too many requests right now to handle this one!",
         "code": 429,
+    },
+    RequestError.FORBIDDEN: {
+        "error": "Forbidden",
+        "message": "You do not have permission to perform this action",
+        "code": 403,
+    },
+    RequestError.CONTENT_TOO_LARGE: {
+        "error": "ContentTooLarge",
+        "message": "The submitted content exceeds the maximum allowed size",
+        "code": 413,
     },
 }
 
