@@ -219,11 +219,16 @@ onBeforeUnmount(() => {
         vmodel="ready"
         :disabled="!ready || !feedTracks.length"
       >
-        <img :src="shuffleIcon" alt="Shuffle" class="play-icon" />
+        <img
+          :src="shuffleIcon"
+          alt="Shuffle"
+          class="play-icon"
+          :style="'scale: 1.3;'"
+        />
       </button>
       <button
         v-if="showReverse"
-        class="media-button reverse-button"
+        class="media-button"
         :class="{ 'is-disabled': !isReverse }"
         @click="toggleReverse"
         vmodel="ready"
@@ -233,7 +238,7 @@ onBeforeUnmount(() => {
           :src="reverseIcon"
           alt="Reverse"
           class="play-icon"
-          :style="'transform: rotate(90deg);'"
+          :style="'transform: rotate(90deg);scale: 1.3;'"
         />
       </button>
       <button
