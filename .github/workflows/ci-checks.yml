@@ -72,3 +72,11 @@ jobs:
     uses: ./.github/workflows/ci-backend.yml
     with:
       package-path: backend/packages/dynamodb_tables
+  backend-editable-pages-ci:
+    uses: ./.github/workflows/ci-backend.yml
+    with:
+      package-path: backend/packages/editable_pages
+  backend-page-initializer-ci:
+    uses: ./.github/workflows/ci-backend.yml
+    with:
+      package-path: backend/packages/page_initializer
