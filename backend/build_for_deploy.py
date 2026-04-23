@@ -7,7 +7,7 @@ import subprocess
 BUILD_DIR = Path(__file__).parent / "builds"
 IMAGES_DIR = Path(__file__).parent / "docker" / "lambda"
 
-PACKAGE_NAMES = ["api-service", "db-service", "migration-handler"]
+PACKAGE_NAMES = ["api-service", "db-service", "migration-handler", "page-initializer"]
 
 
 def install_arm_emulation() -> bool:
