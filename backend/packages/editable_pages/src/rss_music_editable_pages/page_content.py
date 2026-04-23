@@ -17,6 +17,7 @@ PAGE_KEYS = {
 }
 
 MAX_CONTENT_BYTES = 64 * 1024  # 64 KB, small for speed/security
+DEFAULT_PAGE_VERSION = 0 
 
 
 class PageNotFoundError(Exception):
@@ -40,8 +41,7 @@ def _get_bucket() -> str:
     return os.environ["RSS_PLAYER_CMS_BUCKET"]
 
 
-def get_page_content(page: str) -> dict:
-    """Return {"html": "<...>"} for the given page name."""
+def _get_page_object(page: str) -> dict:
     if page not in PAGE_KEYS:
         raise PageNotFoundError(f"Unknown page: {page}")
 
@@ -54,16 +54,42 @@ def get_page_content(page: str) -> dict:
         return json.loads(body)
     except ClientError as e:
         if e.response["Error"]["Code"] == "NoSuchKey":
-            return {"html": ""}
+            return {
+                "html": "",
+                "version": DEFAULT_PAGE_VERSION,
+            }
         raise
 
 
-def put_page_content(page: str, html: str) -> dict:
+def get_page_content(page: str) -> str:
+    """Return the html for the given page name."""
+    page_obj = _get_page_object(page)
+
+    return page_obj["html"]
+
+
+def get_page_version(page: str) -> int:
+    """Return the version for the given page name."""
+    page_obj = _get_page_object(page)
+
+    return page_obj["version"]
+
+
+def put_page_content(page: str, html: str, version: int | None = None) -> dict:
     """Store sanitized HTML for the given page name. Returns {"html": <stored>}."""
     if page not in PAGE_KEYS:
         raise PageNotFoundError(f"Unknown page: {page}")
 
-    body = json.dumps({"html": html}).encode("utf-8")
+    page_version = version if version is not None else get_page_version(page)
+    body = json.dumps(
+        {
+            "html": html,
+            # We do not update the version unless explicitly told to, as it is used to
+            # determine when an update to a page in the code should override updates
+            # made by an admin.
+            "version": page_version,
+        }
+    ).encode("utf-8")
     if len(body) > MAX_CONTENT_BYTES:
         raise ContentTooLargeError("Content exceeds 64 KB limit")
 
@@ -77,4 +103,7 @@ def put_page_content(page: str, html: str) -> dict:
         ContentType="application/json",
     )
 
-    return {"html": html}
+    return {
+        "html": html,
+        "version": page_version,
+    }

@@ -42,7 +42,7 @@ ALLOWED_ATTRS = {"a": ["href", "target"]}
 def get_page(page: str):
     """Public endpoint — returns stored HTML for a page."""
     try:
-        data = get_page_content(page)
+        data = {"html": get_page_content(page)}
     except PageNotFoundError:
         return get_error_response(RequestError.NOT_FOUND)
 
