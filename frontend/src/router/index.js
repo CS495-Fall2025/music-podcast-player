@@ -12,6 +12,9 @@ import UserProfilePage from "../pages/UserPage.vue";
 import ContactPage from "../pages/ContactPage.vue";
 import AboutPage from "../pages/AboutPage.vue";
 import PublicUserPage from "../pages/PublicUserPage.vue";
+import TermsOfServicePage from "../pages/TermsOfServicePage.vue";
+import PrivacyPolicyPage from "../pages/PrivacyPolicyPage.vue";
+import CookiePolicyPage from "../pages/CookiePolicyPage.vue";
 import { clearError } from "../controllers/statusStore.js";
 import { resetCurrentFeed } from "../controllers/localFeedStore.js";
 
@@ -95,6 +98,24 @@ const routes = [
     path: "/user/:username",
     component: PublicUserPage,
     meta: { requiresAuth: false },
+  },
+  
+	{
+    path: "/terms",
+    component: TermsOfServicePage,
+    meta: { requiresAuth: false},
+  },
+  
+	{
+    path: "/privacy",
+    component: PrivacyPolicyPage,
+    meta: { requiresAuth: false },
+  },
+  
+	{
+    path: "/cookies",
+    component: CookiePolicyPage,
+    meta: { requiresAuth: false},
   },
 
   ...(import.meta.env.VITE_INCLUDE_DEV_FEATURES !== "yes" ? [] : []),

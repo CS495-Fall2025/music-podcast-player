@@ -1,12 +1,12 @@
 <template>
 	<nav class="footer">
-		<router-link to="/contact">
+		<router-link to="/terms">
 			Terms of Service
 		</router-link>
-		<router-link to="/contact">
+		<router-link to="/privacy">
 			Privacy Policy
 		</router-link>
-		<router-link to="/contact">
+		<router-link to="/cookies">
 			Cookie Policy
 		</router-link>
 	</nav>

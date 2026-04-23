@@ -11,6 +11,9 @@ from botocore.exceptions import ClientError
 PAGE_KEYS = {
     "about": "pages/about.json",
     "contact": "pages/contact.json",
+    "terms": "pages/terms.json",
+    "privacy": "pages/privacy.json",
+    "cookies": "pages/cookies.json",
 }
 
 MAX_CONTENT_BYTES = 64 * 1024  # 64 KB, small for speed/security
