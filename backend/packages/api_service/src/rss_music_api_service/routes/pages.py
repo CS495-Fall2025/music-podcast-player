@@ -8,7 +8,7 @@ from rss_music_api_service.auth.current_user import (
 )
 from rss_music_api_service.routes.auth import login_required
 from rss_music_api_service.errors import RequestError, get_error_response
-from rss_music_api_service.services.page_content_service import (
+from rss_music_editable_pages.page_content import (
     get_page_content,
     put_page_content,
     PageNotFoundError,

@@ -1,0 +1,31 @@
+[project]
+name = "rss-music-editable-pages"
+version = "0.1.0"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+	"boto3>=1.42,<2.0",
+	"bleach>=6.1,<7.0",
+]
+
+
+[project.optional-dependencies]
+dev = [
+	"ruff>=0.13,<1.0",
+]
+lambda = []
+
+
+[dependency-groups]
+dev = [
+	"ruff>=0.13,<1.0",
+]
+lambda = []
+
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
