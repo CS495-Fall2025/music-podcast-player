@@ -3,9 +3,7 @@
     <div class="modal-card" role="dialog" aria-modal="true">
       <div class="modal-header">
         <h2 class="modal-title">Add to playlist</h2>
-        <button class="modal-close" type="button" @click="close">
-          ✕
-        </button>
+        <button class="modal-close" type="button" @click="close">✕</button>
       </div>
 
       <p v-if="track" class="modal-track-name">
@@ -46,7 +44,12 @@
             placeholder="Description (optional)"
             rows="3"
           ></textarea>
-          <button class="create-btn" type="button" :disabled="submitting || !newTitle.trim()" @click="create">
+          <button
+            class="create-btn"
+            type="button"
+            :disabled="submitting || !newTitle.trim()"
+            @click="create"
+          >
             Create + Add
           </button>
         </div>

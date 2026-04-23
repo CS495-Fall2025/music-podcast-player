@@ -9,8 +9,19 @@ Usage:
 
 import os
 import sys
+from pathlib import Path
 
-from rss_music_data_model import User, initialize_engine, make_session
+try:
+    from rss_music_data_model import User, initialize_engine, make_session
+except ModuleNotFoundError as exc:
+    if exc.name != "rss_music_data_model":
+        raise
+
+    local_data_model_src = (
+        Path(__file__).resolve().parent / "packages" / "data_model" / "src"
+    )
+    sys.path.insert(0, str(local_data_model_src))
+    from rss_music_data_model import User, initialize_engine, make_session
 
 
 def promote_to_admin(email: str) -> None:
