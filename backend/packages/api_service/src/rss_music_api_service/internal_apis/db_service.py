@@ -60,8 +60,8 @@ def delete_user(id: int) -> None:
         _handle_error(response)
 
 
-# Returns user_id, username, email_verified on success, None for invalid credentials.
-def try_user_login(username: str, password: str) -> tuple[int, str, bool] | None:
+# Returns user_id, username, email_verified, is_admin on success, None for invalid credentials.
+def try_user_login(username: str, password: str) -> tuple[int, str, bool, bool] | None:
     request = _create_user_login_request(username, password)
 
     response = _send_request(request)
@@ -78,6 +78,7 @@ def try_user_login(username: str, password: str) -> tuple[int, str, bool] | None
         response_data["id"],
         response_data["username"],
         response_data["email_verified"],
+        response_data.get("is_admin", False),
     )
 
 

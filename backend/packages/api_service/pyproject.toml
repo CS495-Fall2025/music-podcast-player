@@ -13,6 +13,7 @@ dependencies = [
 	"structlog>=24.0,<25.0",
 	"rss-music-common-validators==0.1.0",
 	"rss-music-db-service-schemas==0.1.0",
+	"bleach>=6.1,<7.0",
 ]
 
 

@@ -29,6 +29,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(EMAIL_MAX_LENGTH), unique=True)
     password: Mapped[bytes] = mapped_column(LargeBinary(PASSWORD_LENGTH))
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     profile_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     playlists: Mapped[list["Playlist"]] = relationship(
         "Playlist", cascade="all, delete-orphan", passive_deletes=True

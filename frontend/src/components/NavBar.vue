@@ -12,7 +12,7 @@
       </button>
 
       <div :class="['nav-links', { 'is-open': isOpen }]">
-        <router-link to="/" class="nav-link" @click="closeMenu"
+        <router-link to="/about" class="nav-link" @click="closeMenu"
           >About</router-link
         >
         <router-link to="/contact" class="nav-link" @click="closeMenu"
@@ -94,8 +94,8 @@
 
 <script setup>
 import useNavbar from "../controllers/navBar.js";
-import useSatDripping from "../controllers/satDripping.js";
 import DripIndicator from "./DripIndicator.vue";
+import useSatDripping from "../controllers/satDripping.js";
 import SatDripModal from "./SatDripModal.vue";
 
 const {

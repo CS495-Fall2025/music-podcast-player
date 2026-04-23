@@ -76,6 +76,7 @@ class RSSMusicPlayerStack(Stack):
         distribution = self._make_public_distribution(frontend_bucket)
 
         ddb_table = self._make_dynamodb_table()
+        cms_bucket = self._make_cms_bucket()
 
         # For when we split the backend.
         db_service_function = self._make_db_service_function(
@@ -87,6 +88,7 @@ class RSSMusicPlayerStack(Stack):
             distribution.domain_name,
             db_service_api,
             ddb_table,
+            cms_bucket,
         )
         api_service_api = self._make_api_service_api(api_service_function)
         self._attach_api_service_to_distribution(api_service_api, distribution)
@@ -132,6 +134,22 @@ class RSSMusicPlayerStack(Stack):
             "RSSMusicPlayerFrontendBucketName",
             value=bucket.bucket_name,
             description="The name of the S3 bucket for the frontend",
+        )
+
+        return bucket
+
+    def _make_cms_bucket(self) -> s3.Bucket:
+        bucket = s3.Bucket(
+            self,
+            "RSSMusicPlayerCmsBucket",
+            removal_policy=RemovalPolicy.RETAIN,
+        )
+
+        CfnOutput(
+            self,
+            "RSSMusicPlayerCmsBucketName",
+            value=bucket.bucket_name,
+            description="The name of the S3 bucket for CMS page content",
         )
 
         return bucket
@@ -354,7 +372,7 @@ class RSSMusicPlayerStack(Stack):
         return api
 
     def _make_api_service_function(
-        self, frontend_domain, db_service_api, ddb_table
+        self, frontend_domain, db_service_api, ddb_table, cms_bucket
     ) -> _lambda.Function:
         # These are REFERENCES to keys that MUST be created manually. AWS doesn't
         # support creating SecureString parameters through the CDK, and we'd need to set
@@ -436,6 +454,9 @@ class RSSMusicPlayerStack(Stack):
                 resources=["*"],
             )
         )
+
+        cms_bucket.grant_read_write(function)
+        function.add_environment("RSS_PLAYER_CMS_BUCKET", cms_bucket.bucket_name)
 
         return function
 
