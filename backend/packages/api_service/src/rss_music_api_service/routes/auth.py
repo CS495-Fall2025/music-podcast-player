@@ -408,6 +408,7 @@ def post_refresh() -> tuple:
 
     user_id = payload.get("sub")
     username = payload.get("name")
+    is_admin = payload.get("is_admin", False)
 
     new_access_token = login.generate_jwt(
         user_id,
@@ -415,6 +416,7 @@ def post_refresh() -> tuple:
         secret_key,
         expires_in_hours=1,
         token_type=login.TokenType.ACCESS,
+        is_admin=is_admin,
     )
 
     is_production = current_app.config.get("SESSION_COOKIE_SECURE", True)
