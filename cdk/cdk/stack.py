@@ -78,6 +78,9 @@ class RSSMusicPlayerStack(Stack):
         ddb_table = self._make_dynamodb_table()
         cms_bucket = self._make_cms_bucket()
 
+        page_init_function = self._make_page_initializer_function(cms_bucket)
+        self._make_page_initializer_resource(page_init_function)
+
         # For when we split the backend.
         db_service_function = self._make_db_service_function(
             database, database_vpc, security_groups["function"]
@@ -118,8 +121,6 @@ class RSSMusicPlayerStack(Stack):
             search_endpoint_metric=search_endpoint_metric,
             feed_endpoint_metric=feed_endpoint_metric,
         )
-
-        #self._make_github_roles()
 
     def _make_frontend_bucket(self) -> s3.Bucket:
         bucket = s3.Bucket(
@@ -256,13 +257,15 @@ class RSSMusicPlayerStack(Stack):
             str(BACKEND_BUILD / "migration-handler-build.zip")
         )
 
-        db_cred = json.dumps({
-            "username": DATABASE_MASTER_USERNAME,
-            # Will be rotated immediately after (AUTOMATED) deployment to minimize risk
-            # of exposure from storing it in an environment variable and the
-            # cloudformation template.
-            "password": db_secret.unsafe_unwrap(),
-        })
+        db_cred = json.dumps(
+            {
+                "username": DATABASE_MASTER_USERNAME,
+                # Will be rotated immediately after (AUTOMATED) deployment to minimize risk
+                # of exposure from storing it in an environment variable and the
+                # cloudformation template.
+                "password": db_secret.unsafe_unwrap(),
+            }
+        )
 
         function = _lambda.Function(
             self,
@@ -309,13 +312,61 @@ class RSSMusicPlayerStack(Stack):
 
         return migration_resource
 
+    def _make_page_initializer_function(
+        self,
+        cms_bucket: s3.Bucket,
+    ) -> _lambda.Function:
+        code = _lambda.Code.from_asset(
+            str(BACKEND_BUILD / "page-initializer-build.zip")
+        )
+
+        function = _lambda.Function(
+            self,
+            "RSSMusicPlayerPageInitializerFunction",
+            code=code,
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="lambda_handler.handler",
+            memory_size=256,
+            architecture=_lambda.Architecture.ARM_64,
+            environment={},
+            timeout=Duration.seconds(10),
+        )
+
+        cms_bucket.grant_read_write(function)
+        function.add_environment("RSS_PLAYER_CMS_BUCKET", cms_bucket.bucket_name)
+
+        return function
+
+    def _make_page_initializer_resource(
+        self,
+        page_init_function: _lambda.Function,
+    ) -> cr.AwsCustomResource:
+        provider = cr.Provider(
+            self,
+            "RSSMusicPlayerPageInitializerProvider",
+            on_event_handler=page_init_function,
+        )
+
+        resource = CustomResource(
+            self,
+            "RSSMusicPlayerPageInitializer",
+            service_token=provider.service_token,
+            properties={
+                "CodeVersion": page_init_function.current_version.version,
+            },
+        )
+
+        # migration_resource.node.add_dependency(database)
+
+        return resource
+
     def _make_db_service_function(
         self,
         database: rds.DatabaseInstance,
         database_vpc: ec2.Vpc,
         group: ec2.SecurityGroup,
     ) -> _lambda.Function:
-        # This corresponds to the role created in the database, make sure to make a 
+        # This corresponds to the role created in the database, make sure to make a
         # migration if you change this.
         DB_SERVICE_ROLE = "rssmusicplayerapp"
 
@@ -407,22 +458,25 @@ class RSSMusicPlayerStack(Stack):
             "PODCAST_INDEX_KEY_ROUTE": "/rss-music-player/podcast-index-api/key",
             "PODCAST_INDEX_SECRET_ROUTE": "/rss-music-player/podcast-index-api/secret",
             "SECRET_KEY_ROUTE": "/rss-music-player/jwt/key",
-            "RSS_PLAYER_API_TOKENS_PER_REFILL": json.dumps({
-                "global": {"overall": 6000, "podcast_index": 90},
-                "public": {"overall": 5500, "podcast_index": 60},
-                "user": {"overall": 60, "podcast_index": 15},
-            }),
+            "RSS_PLAYER_API_TOKENS_PER_REFILL": json.dumps(
+                {
+                    "global": {"overall": 6000, "podcast_index": 90},
+                    "public": {"overall": 5500, "podcast_index": 60},
+                    "user": {"overall": 60, "podcast_index": 15},
+                }
+            ),
             "RSS_PLAYER_TOKEN_REFILL_SECONDS": "60",
-            "RSS_PLAYER_TOKEN_PENALTY": json.dumps({
-                "podcast_index": 15,
-            }),
+            "RSS_PLAYER_TOKEN_PENALTY": json.dumps(
+                {
+                    "podcast_index": 15,
+                }
+            ),
         }
 
         if CURRENT_STAGE == Stage.DEVELOPMENT:
             environment["RSS_PLAYER_DISABLE_EMAIL_VERIFY"] = "true"
         elif CURRENT_STAGE == Stage.PRODUCTION:
             environment["RSS_PLAYER_SES_FROM_EMAIL"] = os.environ["MPP_NOREPLY_EMAIL"]
-
 
         function = _lambda.Function(
             self,
@@ -538,7 +592,10 @@ class RSSMusicPlayerStack(Stack):
         )
 
     def _make_database(
-        self, database_vpc: ec2.Vpc, group: ec2.SecurityGroup, secret: SecretValue,
+        self,
+        database_vpc: ec2.Vpc,
+        group: ec2.SecurityGroup,
+        secret: SecretValue,
     ) -> rds.DatabaseInstance:
         removal_policy = RemovalPolicy.DESTROY
         if CURRENT_STAGE == Stage.PRODUCTION:
@@ -797,13 +854,3 @@ class RSSMusicPlayerStack(Stack):
         dashboard.add_widgets(
             cloudwatch.Row(search_endpoint_metric_widget, feed_endpoint_metric_widget)
         )
-
-    def _make_github_roles(self) -> list[iam.Role]:
-        id_provider = iam.OidcProviderNative(
-            self,
-            "RssMusicPlayerGitHubIdProvider",
-            url="https://token.actions.githubusercontent.com",
-            client_ids=["sts.amazonaws.com"],
-        )
-
-
