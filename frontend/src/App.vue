@@ -2,6 +2,7 @@
 import { onMounted } from "vue";
 import { verifyToken } from "./auth/authService";
 import NavBar from "./components/NavBar.vue";
+import LegalFooter from "./components/LegalFooter.vue";
 
 // Verify stored token on app startup
 onMounted(async () => {
@@ -13,6 +14,7 @@ onMounted(async () => {
   <div class="app-wrapper">
     <NavBar />
     <router-view />
+		<LegalFooter />
   </div>
 </template>
 
