@@ -1,11 +1,9 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div class="modal-overlay" @click.self="close">
     <div class="modal-card" role="dialog" aria-modal="true">
       <div class="modal-header">
         <h2 class="modal-title">Add to playlist</h2>
-        <button class="modal-close" type="button" @click="$emit('close')">
-          ✕
-        </button>
+        <button class="modal-close" type="button" @click="close">✕</button>
       </div>
 
       <p v-if="track" class="modal-track-name">
@@ -23,7 +21,8 @@
             :key="p.id"
             class="playlist-item"
             type="button"
-            @click="$emit('select-playlist', p)"
+            :disabled="submitting"
+            @click="selectPlaylist(p)"
           >
             <span class="playlist-name">{{ p.title }}</span>
             <span class="playlist-count">{{ p.track_count ?? 0 }} tracks</span>
@@ -45,7 +44,12 @@
             placeholder="Description (optional)"
             rows="3"
           ></textarea>
-          <button class="create-btn" type="button" @click="create">
+          <button
+            class="create-btn"
+            type="button"
+            :disabled="submitting || !newTitle.trim()"
+            @click="create"
+          >
             Create + Add
           </button>
         </div>
@@ -54,35 +58,20 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "AddToPlaylistModal",
+<script setup>
+import { useAddToPlaylistModal } from "../controllers/addToPlaylistModal.js";
 
-  props: {
-    playlists: { type: Array, default: () => [] },
-    loading: { type: Boolean, default: false },
-    error: { type: String, default: "" },
-    track: { type: Object, default: null },
-  },
+const props = defineProps({
+  playlists: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
+  error: { type: String, default: "" },
+  track: { type: Object, default: null },
+});
 
-  emits: ["close", "select-playlist", "create-playlist"],
+const emit = defineEmits(["close", "select-playlist", "create-playlist"]);
 
-  data() {
-    return {
-      newTitle: "",
-      newDescription: "",
-    };
-  },
-
-  methods: {
-    create() {
-      this.$emit("create-playlist", {
-        title: this.newTitle.trim(),
-        description: this.newDescription.trim(),
-      });
-    },
-  },
-};
+const { newTitle, newDescription, submitting, create, selectPlaylist, close } =
+  useAddToPlaylistModal(props, emit);
 </script>
 
 <style scoped>
@@ -239,5 +228,11 @@ export default {
 
 .create-btn:hover {
   opacity: 0.9;
+}
+
+.create-btn:disabled,
+.playlist-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
