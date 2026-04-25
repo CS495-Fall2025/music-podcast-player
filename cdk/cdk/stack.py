@@ -444,7 +444,7 @@ class RSSMusicPlayerStack(Stack):
         function = _lambda.Function(
             self,
             "RSSMusicPlayerMakeAdminFunction",
-            code=_lambda.Code.from_asset(str(BACKEND_BUILD / "make-admin-build.zip")),
+            code=_lambda.Code.from_asset(str(BACKEND_BUILD / "set-admin-build.zip")),
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="lambda_handler.handler",
             memory_size=256,

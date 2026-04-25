@@ -36,4 +36,4 @@ RUN rm -rf ./bin
 RUN find . -name "__pycache__" -type d -exec rm -rf {} +
 RUN rm copy_lib_requirements.py
 
-CMD ["zip", "/mnt/result/make-admin-build.zip", "-r", "."]
+CMD ["zip", "/mnt/result/set-admin-build.zip", "-r", "."]
