@@ -44,6 +44,14 @@ jobs:
         with:
           name: backend-build-migration-handler
           path: builds/
+      - uses: actions/download-artifact@v5
+        with:
+          name: backend-build-page-initializer
+          path: builds/
+      - uses: actions/download-artifact@v5
+        with:
+          name: backend-build-set-admin
+          path: builds/
       - run: apk add nodejs npm
       - run: npm install -g aws-cdk
       - run: python -m pip install --upgrade pip
