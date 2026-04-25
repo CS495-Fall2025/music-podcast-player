@@ -459,6 +459,12 @@ class RSSMusicPlayerStack(Stack):
 
         database.grant_connect(function, DB_ACCESS_ROLE)
 
+        CfnOutput(
+            self,
+            "RSSMusicPlayerSetAdminScriptArn",
+            value=function.function_arn,
+        )
+
         return function
 
     def _make_api_service_function(
