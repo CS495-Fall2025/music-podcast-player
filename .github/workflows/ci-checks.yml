@@ -80,3 +80,9 @@ jobs:
     uses: ./.github/workflows/ci-backend.yml
     with:
       package-path: backend/packages/page_initializer
+  backend-set-admin-ci:
+    uses: ./.github/workflows/ci-backend.yml
+    with:
+      package-path: backend/packages/set_admin
+      uses_psycopg2: true
+      tests: true
