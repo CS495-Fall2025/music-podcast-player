@@ -12,7 +12,7 @@ PACKAGE_NAMES = [
     "db-service",
     "migration-handler",
     "page-initializer",
-    "make-admin",
+    "set-admin",
 ]
 
 

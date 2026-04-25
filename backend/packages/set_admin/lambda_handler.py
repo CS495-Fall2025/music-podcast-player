@@ -48,7 +48,7 @@ def get_db_connection_url() -> URL:
 assign_library_directory()
 
 
-def handler(event, context):
+def handler(event, _context):
     db_connection = get_db_connection_url()
 
     data_model.initialize_engine(db_connection)

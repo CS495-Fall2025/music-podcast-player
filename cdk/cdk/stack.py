@@ -45,7 +45,7 @@ DATABASE_MASTER_USERNAME = "rssmusicplayer"
 
 # This corresponds to the role created in the database, make sure to make a
 # migration if you change this.
-DB_SERVICE_ROLE = "rssmusicplayerapp"
+DB_ACCESS_ROLE = "rssmusicplayerapp"
 
 
 # Production variables
@@ -86,11 +86,14 @@ class RSSMusicPlayerStack(Stack):
         page_init_function = self._make_page_initializer_function(cms_bucket)
         self._make_page_initializer_resource(page_init_function)
 
-        # For when we split the backend.
         db_service_function = self._make_db_service_function(
             database, database_vpc, security_groups["function"]
         )
         db_service_api = self._make_db_service_api(db_service_function)
+
+        self._make_make_admin_function(
+            database, database_vpc, security_groups["function"]
+        )
 
         api_service_function = self._make_api_service_function(
             distribution.domain_name,
@@ -375,7 +378,7 @@ class RSSMusicPlayerStack(Stack):
             "driver": "postgresql+psycopg2",
             "address": database.db_instance_endpoint_address,
             "port": database.db_instance_endpoint_port,
-            "role": DB_SERVICE_ROLE,
+            "role": DB_ACCESS_ROLE,
             "region": "us-east-2",
             "database": "rssmusicplayer",
         }
@@ -393,10 +396,10 @@ class RSSMusicPlayerStack(Stack):
             },
             vpc=database_vpc,
             security_groups=[group],
-            timeout=Duration.seconds(5),
+            timeout=Duration.seconds(10),
         )
 
-        database.grant_connect(function, DB_SERVICE_ROLE)
+        database.grant_connect(function, DB_ACCESS_ROLE)
 
         return function
 
@@ -422,6 +425,41 @@ class RSSMusicPlayerStack(Stack):
         )
 
         return api
+    
+    def _make_make_admin_function(
+        self,
+        database: rds.DatabaseInstance,
+        database_vpc: ec2.Vpc,
+        group: ec2.SecurityGroup,
+    ) -> _lambda.Function:
+        database_info = {
+            "driver": "postgresql+psycopg2",
+            "address": database.db_instance_endpoint_address,
+            "port": database.db_instance_endpoint_port,
+            "role": DB_ACCESS_ROLE,
+            "region": "us-east-2",
+            "database": "rssmusicplayer",
+        }
+
+        function = _lambda.Function(
+            self,
+            "RSSMusicPlayerMakeAdminFunction",
+            code=_lambda.Code.from_asset(str(BACKEND_BUILD / "make-admin-build.zip")),
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="lambda_handler.handler",
+            memory_size=256,
+            architecture=_lambda.Architecture.ARM_64,
+            environment={
+                "DATABASE_INFO": json.dumps(database_info),
+            },
+            vpc=database_vpc,
+            security_groups=[group],
+            timeout=Duration.seconds(5),
+        )
+
+        database.grant_connect(function, DB_ACCESS_ROLE)
+
+        return function
 
     def _make_api_service_function(
         self, frontend_domain, db_service_api, ddb_table, cms_bucket

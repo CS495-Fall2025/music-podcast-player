@@ -9,9 +9,9 @@ ENV UV_PYTHON=/usr/bin/python3.12
 # Install dependencies for psycogp2
 RUN dnf install -y python3.12-devel postgresql-devel gcc make
 
-WORKDIR /app/build/make_admin
+WORKDIR /app/build/set_admin
 
-COPY ./packages/make_admin/pyproject.toml pyproject.toml
+COPY ./packages/set_admin/pyproject.toml pyproject.toml
 
 # Install backend dependencies (will be cached)
 COPY ./packages/data_model ../data_model
@@ -19,11 +19,11 @@ RUN uv sync --no-install-project --group lambda
 
 # Install backend package (dependencies cached)
 WORKDIR /app/build
-COPY ./packages/make_admin ./make_admin
-RUN uv pip install ./make_admin[lambda] -t ../
+COPY ./packages/set_admin ./set_admin
+RUN uv pip install ./set_admin[lambda] -t ../
 
 WORKDIR /app
-COPY ./packages/make_admin/lambda_handler.py lambda_handler.py
+COPY ./packages/set_admin/lambda_handler.py lambda_handler.py
 
 # Package dynamic libraries used by some packages.
 COPY ./docker/scripts/copy_lib_requirements.py ./
