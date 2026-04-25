@@ -43,6 +43,11 @@ FRONTEND_BUILD = os.environ.get("FRONTEND_BUILD_PATH", FRONTEND_PATH / "dist")
 API_SERVICE_PREFIX = "/api/v1"
 DATABASE_MASTER_USERNAME = "rssmusicplayer"
 
+# This corresponds to the role created in the database, make sure to make a
+# migration if you change this.
+DB_SERVICE_ROLE = "rssmusicplayerapp"
+
+
 # Production variables
 if CURRENT_STAGE == Stage.PRODUCTION:
     DOMAIN_NAME = os.environ["MPP_DOMAIN_NAME"]
@@ -366,10 +371,6 @@ class RSSMusicPlayerStack(Stack):
         database_vpc: ec2.Vpc,
         group: ec2.SecurityGroup,
     ) -> _lambda.Function:
-        # This corresponds to the role created in the database, make sure to make a
-        # migration if you change this.
-        DB_SERVICE_ROLE = "rssmusicplayerapp"
-
         database_info = {
             "driver": "postgresql+psycopg2",
             "address": database.db_instance_endpoint_address,
