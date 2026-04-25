@@ -20,11 +20,15 @@ def parse_args() -> Namespace:
 
     parser.add_argument("identifier", help="The username or email of the user")
     parser.add_argument(
-        "-d", "--demote", action="store_true",
+        "-d",
+        "--demote",
+        action="store_true",
         help="Remove the user's admin status instead of making them an admin",
     )
     parser.add_argument(
-        "-e", "--email", action="store_true",
+        "-e",
+        "--email",
+        action="store_true",
         help="Indicates that the identifier is an email",
     )
 
@@ -44,7 +48,7 @@ def main() -> None:
         sys.exit(1)
 
     data_model.initialize_engine(db_url)
-  
+
     identifier_type = "email" if args.email else "username"
     identifier_arg = {identifier_type: args.identifier}
     with data_model.make_session() as session:

@@ -37,7 +37,7 @@ def _get_new_page_versions(pages: list[str]) -> dict[str, int]:
 
 
 def _get_outdated_pages(
-        stored_versions: dict[str, int], new_versions: dict[str, int]
+    stored_versions: dict[str, int], new_versions: dict[str, int]
 ) -> list[str]:
     result = []
     for page in new_versions:
@@ -51,7 +51,7 @@ def _get_outdated_pages(
 
 
 def _replace_outdated_pages(
-        outdated_pages: list[str], new_versions: dict[str, int]
+    outdated_pages: list[str], new_versions: dict[str, int]
 ) -> None:
     for page in outdated_pages:
         page_path = PAGE_DIRECTORY / f"{page}.html"
@@ -63,7 +63,7 @@ def _replace_outdated_pages(
 
 def run() -> None:
     pages = _get_page_names()
-    
+
     print(f"Discovered {len(pages)} pages.")
 
     stored_versions = _get_page_stored_versions(pages)

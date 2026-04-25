@@ -12,7 +12,6 @@ def session() -> Session:
     engine = data_model.get_engine()
     data_model.Base.metadata.create_all(engine)
 
-
     with data_model.make_session() as session:
         yield session
 

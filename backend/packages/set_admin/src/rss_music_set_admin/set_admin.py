@@ -6,10 +6,7 @@ from rss_music_set_admin.errors import UserNotFoundError
 
 
 def set_admin(
-        session: Session,
-        admin: bool,
-        email: str | None = None,
-        username: str | None = None
+    session: Session, admin: bool, email: str | None = None, username: str | None = None
 ) -> None:
     if email is not None:
         user = _get_user_by_email(session, email)

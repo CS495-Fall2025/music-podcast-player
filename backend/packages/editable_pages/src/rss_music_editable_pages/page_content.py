@@ -17,7 +17,7 @@ PAGE_KEYS = {
 }
 
 MAX_CONTENT_BYTES = 64 * 1024  # 64 KB, small for speed/security
-DEFAULT_PAGE_VERSION = 0 
+DEFAULT_PAGE_VERSION = 0
 
 
 class PageNotFoundError(Exception):
