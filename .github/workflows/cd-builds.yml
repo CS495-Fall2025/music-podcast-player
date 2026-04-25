@@ -33,10 +33,6 @@ jobs:
     uses: ./.github/workflows/build-backend.yml
     with:
       package-name: migration-handler 
-  build-backend-editable-pages:
-    uses: ./.github/workflows/build-backend.yml
-    with:
-      package-name: editable-pages
   build-backend-page-initializer:
     uses: ./.github/workflows/build-backend.yml
     with:
