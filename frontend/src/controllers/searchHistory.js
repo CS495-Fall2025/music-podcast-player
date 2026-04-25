@@ -57,8 +57,8 @@ export function addSearch(query) {
 export function clearSearchHistory() {
   searchHistory.value = [];
   deleteCookie(COOKIE_NAME);
-	// This cookie not being present should be treated as search history being disabled.
-	deleteCookie(SETTINGS_COOKIE);
+  // This cookie not being present should be treated as search history being disabled.
+  deleteCookie(SETTINGS_COOKIE);
 }
 
 export function setSaveHistory(enabled) {

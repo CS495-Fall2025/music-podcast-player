@@ -1,15 +1,9 @@
 <template>
-	<nav class="footer">
-		<router-link to="/terms">
-			Terms of Service
-		</router-link>
-		<router-link to="/privacy">
-			Privacy Policy
-		</router-link>
-		<router-link to="/cookies">
-			Cookie Policy
-		</router-link>
-	</nav>
+  <nav class="footer">
+    <router-link to="/terms"> Terms of Service </router-link>
+    <router-link to="/privacy"> Privacy Policy </router-link>
+    <router-link to="/cookies"> Cookie Policy </router-link>
+  </nav>
 </template>
 
 <style scoped>
@@ -30,6 +24,6 @@ a {
   border-top: var(--border-thick) var(--orange);
   position: relative;
   z-index: var(--navbar-z);
-	margin-top: auto;
+  margin-top: auto;
 }
 </style>

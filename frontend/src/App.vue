@@ -14,7 +14,7 @@ onMounted(async () => {
   <div class="app-wrapper">
     <NavBar />
     <router-view />
-		<LegalFooter />
+    <LegalFooter />
   </div>
 </template>
 

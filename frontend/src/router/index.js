@@ -99,23 +99,23 @@ const routes = [
     component: PublicUserPage,
     meta: { requiresAuth: false },
   },
-  
-	{
+
+  {
     path: "/terms",
     component: TermsOfServicePage,
-    meta: { requiresAuth: false},
+    meta: { requiresAuth: false },
   },
-  
-	{
+
+  {
     path: "/privacy",
     component: PrivacyPolicyPage,
     meta: { requiresAuth: false },
   },
-  
-	{
+
+  {
     path: "/cookies",
     component: CookiePolicyPage,
-    meta: { requiresAuth: false},
+    meta: { requiresAuth: false },
   },
 
   ...(import.meta.env.VITE_INCLUDE_DEV_FEATURES !== "yes" ? [] : []),
