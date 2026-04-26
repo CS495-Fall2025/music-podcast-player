@@ -1,0 +1,22 @@
+FROM python:3.13-alpine
+
+WORKDIR /app
+
+# Install uv for better dependency management
+RUN pip3 install uv
+
+# Install rss_music_editable_pages package
+COPY editable_pages editable_pages
+
+# Install rss_music_page_initializer dependencies
+WORKDIR /app/page_initializer
+
+COPY page_initializer/pyproject.toml pyproject.toml
+RUN uv sync --no-install-project
+
+# Install rss_music_page_initializer
+COPY page_initializer .
+RUN uv sync
+
+# Run local handler when container starts
+CMD ["uv", "run", "local_handler.py"]

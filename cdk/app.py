@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 import aws_cdk as cdk
+from dotenv import load_dotenv
 
 from cdk.stack import RSSMusicPlayerStack
 from cdk.stages import CURRENT_STAGE, Stage
 
+
+load_dotenv()
 
 if CURRENT_STAGE == Stage.PRODUCTION:
     print("Synthesizing for production environment.")
