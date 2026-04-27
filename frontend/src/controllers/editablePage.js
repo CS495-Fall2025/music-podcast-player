@@ -6,6 +6,7 @@ export default function useEditablePage(page) {
   const { currentUserIsAdmin } = useAuth();
 
   const isEditing = ref(false);
+  const isLoading = ref(false);
   const savedContent = ref("");
   const editContent = ref("");
   const loadError = ref("");
@@ -39,17 +40,21 @@ export default function useEditablePage(page) {
   };
 
   onMounted(async () => {
+    isLoading.value = true;
     try {
       const html = await getPageContent(page);
       savedContent.value = html;
     } catch {
       loadError.value = "Failed to load page content.";
+    } finally {
+      isLoading.value = false;
     }
   });
 
   return {
     currentUserIsAdmin,
     isEditing,
+    isLoading,
     savedContent,
     editContent,
     loadError,

@@ -1,5 +1,6 @@
 <script setup>
 import useEditablePage from "../controllers/editablePage";
+import StatusPage from "../pages/StatusPage.vue";
 
 const props = defineProps({
   page: {
@@ -11,6 +12,7 @@ const props = defineProps({
 const {
   currentUserIsAdmin,
   isEditing,
+  isLoading,
   savedContent,
   editContent,
   loadError,
@@ -23,7 +25,12 @@ const {
 </script>
 
 <template>
-  <div class="editable-page-container">
+  <StatusPage
+    v-if="isLoading"
+    :isLoading="true"
+    title="Loading..."
+  />
+  <div v-else class="editable-page-container">
     <div v-if="loadError" class="load-error">{{ loadError }}</div>
     <div v-if="currentUserIsAdmin" class="edit-button">
       <button v-if="!isEditing" @click="startEditing">Edit</button>
