@@ -25,11 +25,7 @@ const {
 </script>
 
 <template>
-  <StatusPage
-    v-if="isLoading"
-    :isLoading="true"
-    title="Loading..."
-  />
+  <StatusPage v-if="isLoading" :isLoading="true" title="Loading..." />
   <div v-else class="editable-page-container">
     <div v-if="loadError" class="load-error">{{ loadError }}</div>
     <div v-if="currentUserIsAdmin" class="edit-button">
