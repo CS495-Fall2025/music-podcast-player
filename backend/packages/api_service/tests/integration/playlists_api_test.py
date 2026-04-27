@@ -232,6 +232,79 @@ def test_get_playlist_success(mock_get_feed, auth_client, user, custom_responses
     assert data["tracks"][0]["audio"] == "http://example.com/ep1.mp3"
 
 
+@patch("rss_music_api_service.routes.playlists.LinkFunctions.get_feed_by_url")
+def test_get_playlist_reuses_feed_lookup_for_same_feed_url(
+    mock_get_feed, auth_client, user, custom_responses
+):
+    from rss_music_api_service.data import Rss
+
+    mock_get_feed.return_value = Rss(
+        url="http://example.com/feed.rss",
+        title="Test Podcast",
+        description="A test podcast",
+        artist="Test Artist",
+        link="http://example.com",
+        art_url="http://example.com/art.jpg",
+        language="en",
+        pub_date="",
+        last_build_date="",
+        items=[
+            {
+                "title": "Episode 1",
+                "enclosure_url": "http://example.com/ep1.mp3",
+                "artist": "Test Artist",
+                "description": "Desc 1",
+                "image": "http://example.com/ep1.jpg",
+            },
+            {
+                "title": "Episode 2",
+                "enclosure_url": "http://example.com/ep2.mp3",
+                "artist": "Test Artist",
+                "description": "Desc 2",
+                "image": "http://example.com/ep2.jpg",
+            },
+        ],
+        value_items=[{}],
+    )
+
+    custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/5"] = (
+        ConstantResponse(
+            status_code=200,
+            json_data={
+                "id": 5,
+                "title": "Car",
+                "description": "Road tunes",
+                "track_count": 2,
+                "created_by_user_id": user.id,
+                "created_at": "2026-01-01T00:00:00",
+                "tracks": [
+                    {
+                        "id": 1,
+                        "playlist_id": 5,
+                        "track_url": "http://example.com/ep1.mp3",
+                        "feed_url": "http://example.com/feed.rss",
+                        "position": 1,
+                        "added_at": "2026-01-01T00:00:00",
+                    },
+                    {
+                        "id": 2,
+                        "playlist_id": 5,
+                        "track_url": "http://example.com/ep2.mp3",
+                        "feed_url": "http://example.com/feed.rss",
+                        "position": 2,
+                        "added_at": "2026-01-01T00:00:00",
+                    },
+                ],
+            },
+        )
+    )
+
+    response = auth_client.get("/playlists/5")
+
+    assert response.status_code == 200
+    assert mock_get_feed.call_count == 1
+
+
 def test_get_playlist_not_found(auth_client, custom_responses):
     custom_responses[f"{os.environ['RSS_PLAYER_DB_SERVICE_URL']}/playlists/999"] = (
         ConstantResponse(

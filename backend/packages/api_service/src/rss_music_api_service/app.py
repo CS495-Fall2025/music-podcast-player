@@ -49,6 +49,8 @@ def create_app() -> Flask:
 
     @app.before_request
     def before_all_requests():
+        if request.method == "OPTIONS":
+            return None
         success = api_usage.use_api_tokens_for_endpoint(request.url_rule.rule)
         if not success:
             return get_error_response(RequestError.TOO_MANY_REQUESTS)
@@ -69,12 +71,14 @@ def apply_blueprints(app: Flask) -> None:
     from rss_music_api_service.routes.link import LINK_BP
     from rss_music_api_service.routes.auth import AUTH_BP
     from rss_music_api_service.routes.playlists import PLAYLISTS_BP
+    from rss_music_api_service.routes.pages import PAGES_BP
 
     blueprints = [
         SEARCH_BP,
         LINK_BP,
         AUTH_BP,
         PLAYLISTS_BP,
+        PAGES_BP,
     ]
 
     root_bp = Blueprint("root", __name__, url_prefix=app.config["API_ROOT"])

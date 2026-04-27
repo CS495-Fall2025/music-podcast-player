@@ -74,9 +74,12 @@ onBeforeUnmount(() => {
 <template>
   <form class="search-feed-form" @submit="onUserFormSubmit">
     <div class="input-div">
-      <label for="query-input" class="input-label">
-        Search the PodcastIndex for feeds:
-      </label>
+      <span class="error-message" v-if="!canSubmit"
+        >Search query has incorrect length or is using disallowed
+        characters.</span
+      >
+      <label for="query-input" class="input-label"> SEARCH </label>
+      <h2 class="podcast-subheader">Powered by the PodcastIndex</h2>
       <div class="input-row" ref="historyWrapper">
         <div class="input-wrap">
           <input
@@ -110,13 +113,8 @@ onBeforeUnmount(() => {
         >
           🕘
         </button>
-
         <SearchHistory v-if="showHistory" @select="handleHistorySelect" />
       </div>
-      <span class="error-message" v-if="!canSubmit"
-        >Search query has incorrect length or is using disallowed
-        characters.</span
-      >
     </div>
     <button class="submit-button" :disabled="!canSubmit">Search Feeds</button>
   </form>
@@ -127,29 +125,80 @@ onBeforeUnmount(() => {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
   padding: 24px;
+  justify-content: center;
 }
+
+.input-div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.input-label {
+  align-self: center;
+  font-size: 50px;
+  flex-wrap: wrap;
+  color: inherit;
+  color: var(--light-orange);
+  margin-bottom: 16px;
+  letter-spacing: 3px;
+  padding-left: 2%;
+}
+
+.podcast-subheader {
+  align-self: center;
+  flex-wrap: wrap;
+  color: inherit;
+  text-align: center;
+  padding-left: 2%;
+  font-size: 16px;
+  padding-bottom: 5%;
+}
+
 .input-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  width: 80%;
+  max-width: 800px;
   position: relative;
 }
+
 .input-wrap {
   position: relative;
+  flex: 1;
 }
 
 .input-wrap input {
   padding-right: 36px;
   box-sizing: border-box;
+  color: inherit;
+  border: 2px solid var(--border-color);
+  border-right: 0;
+  border-radius: 4px 0 0 4px;
+  padding: 9.9px;
+  width: 100%;
+}
+
+.input-wrap input:focus {
+  outline: none;
+  border-color: var(--primary-color);
 }
 
 .history-button {
-  background: transparent;
-  border: none;
   cursor: pointer;
   line-height: 1;
+  border: 2px solid var(--border-color);
+  border-left: 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.submit-button {
+  display: block;
+  margin-top: 16px;
+  align-self: center;
 }
 
 .clear-button {

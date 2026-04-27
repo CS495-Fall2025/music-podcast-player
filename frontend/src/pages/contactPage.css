@@ -1,0 +1,44 @@
+.contact-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+.edit-button {
+  align-self: flex-end;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.contact-content {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  background-color: var(--body-background);
+  color: var(--text);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.contact-edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.editor {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 10px;
+  resize: none;
+}

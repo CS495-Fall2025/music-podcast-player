@@ -1,0 +1,34 @@
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023
+
+# Install general dependencies
+RUN dnf install -y python312 findutils zip
+RUN python3.12 -m ensurepip --upgrade
+RUN pip3 install uv
+ENV UV_PYTHON=/usr/bin/python3.12
+
+WORKDIR /app/build/page_initializer
+
+COPY ./packages/page_initializer/pyproject.toml pyproject.toml
+
+# Install backend dependencies (will be cached)
+COPY ./packages/editable_pages ../editable_pages
+RUN uv sync --no-install-project --group lambda
+
+# Install backend package (dependencies cached)
+WORKDIR /app/build
+COPY ./packages/page_initializer ./page_initializer
+RUN uv pip install ./page_initializer[lambda] -t ../
+
+WORKDIR /app
+COPY ./packages/page_initializer/lambda_handler.py lambda_handler.py
+
+# Bring in initial page data.
+COPY ./packages/page_initializer/pages/ pages/
+COPY ./packages/page_initializer/page_versions.json page_versions.json
+
+# Remove unneeded files
+RUN rm -rf ./build
+RUN rm -rf ./bin
+RUN find . -name "__pycache__" -type d -exec rm -rf {} +
+
+CMD ["zip", "/mnt/result/page-initializer-build.zip", "-r", "."]

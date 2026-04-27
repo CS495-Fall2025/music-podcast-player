@@ -30,6 +30,7 @@
 </template>
 
 <style scoped>
+/* --- Base Container --- */
 .track {
   display: flex;
   align-items: center;
@@ -45,64 +46,23 @@
     background-color 0.2s ease;
 }
 
-.track:hover,
-.track.active {
-  background-color: var(--hover-blue);
-  color: var(--dark-blue);
-  transform: scale(1.015);
+/* --- Hover & Active States --- */
+@media (hover: hover) and (pointer: fine) {
+  .track:hover {
+    background-color: var(--hover-blue);
+    color: var(--dark-blue);
+    transform: scale(1.015);
+  }
 }
 
 .track.active {
   background-color: var(--active-blue);
+  color: var(--dark-blue);
+  transform: scale(1.015);
   border-left: 4px solid var(--dark-blue);
 }
 
-.track-info {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  width: auto;
-  max-width: 50%;
-  /* flex: 0 0 auto; */
-  /* overflow: hidden; */
-}
-
-.track-title {
-  font-size: 1rem;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.track:hover .track-title,
-.track.active .track-title {
-  text-overflow: clip;
-  white-space: normal;
-}
-
-.track-artist {
-  font-size: 0.8rem;
-  opacity: 0.75;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.track-number {
-  font-size: 0.75rem;
-  opacity: 0.65;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.track:hover .track-artist,
-.track.active .track-artist {
-  text-overflow: clip;
-  white-space: normal;
-}
-
+/* --- Track Image & Layout --- */
 .track-image {
   width: 64px;
   height: 64px;
@@ -111,6 +71,47 @@
   object-fit: cover;
 }
 
+.track-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: auto;
+  max-width: 50%;
+}
+
+/* --- Typography: Shared Truncation --- */
+.track-title,
+.track-artist,
+.track-number {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* --- Typography: Specifics --- */
+.track-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.track-artist {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.track-number {
+  font-size: 0.75rem;
+  opacity: 0.65;
+}
+
+/* --- Typography: Active State Overrides --- */
+.track.active .track-title,
+.track.active .track-artist {
+  text-overflow: clip;
+  white-space: normal;
+}
+
+/* --- Description --- */
 .track-description {
   flex: 1;
   min-width: 0;
@@ -123,7 +124,6 @@
   overflow: hidden;
 }
 
-.track:hover .track-description,
 .track.active .track-description {
   line-clamp: 3;
   -webkit-line-clamp: unset;

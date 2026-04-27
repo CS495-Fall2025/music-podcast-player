@@ -8,6 +8,7 @@ export default defineConfig([
     files: ["**/*.{js,mjs,cjs,vue}"],
     plugins: { js },
     extends: ["js/recommended"],
+    ignores: ["dist/**"],
 
     languageOptions: {
       globals: {

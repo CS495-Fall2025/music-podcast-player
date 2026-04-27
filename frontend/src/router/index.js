@@ -9,8 +9,14 @@ import ForgotPasswordPage from "../pages/ForgotPasswordPage.vue";
 import ResetPasswordPage from "../pages/ResetPasswordPage.vue";
 import { isAuthenticated } from "../auth/authService";
 import UserProfilePage from "../pages/UserPage.vue";
+import ContactPage from "../pages/ContactPage.vue";
+import AboutPage from "../pages/AboutPage.vue";
 import PublicUserPage from "../pages/PublicUserPage.vue";
+import TermsOfServicePage from "../pages/TermsOfServicePage.vue";
+import PrivacyPolicyPage from "../pages/PrivacyPolicyPage.vue";
+import CookiePolicyPage from "../pages/CookiePolicyPage.vue";
 import { clearError } from "../controllers/statusStore.js";
+import { resetCurrentFeed } from "../controllers/localFeedStore.js";
 
 const routes = [
   { path: "/", redirect: "/search" },
@@ -22,8 +28,20 @@ const routes = [
   },
 
   {
+    path: "/about",
+    component: AboutPage,
+    meta: { requiresAuth: false },
+  },
+
+  {
     path: "/search",
     component: SearchFeedPage,
+    meta: { requiresAuth: false },
+  },
+
+  {
+    path: "/contact",
+    component: ContactPage,
     meta: { requiresAuth: false },
   },
 
@@ -82,6 +100,24 @@ const routes = [
     meta: { requiresAuth: false },
   },
 
+  {
+    path: "/terms",
+    component: TermsOfServicePage,
+    meta: { requiresAuth: false },
+  },
+
+  {
+    path: "/privacy",
+    component: PrivacyPolicyPage,
+    meta: { requiresAuth: false },
+  },
+
+  {
+    path: "/cookies",
+    component: CookiePolicyPage,
+    meta: { requiresAuth: false },
+  },
+
   ...(import.meta.env.VITE_INCLUDE_DEV_FEATURES !== "yes" ? [] : []),
 ];
 
@@ -93,6 +129,7 @@ const router = createRouter({
 router.beforeEach((to) => {
   // Clear any persistent errors when navigating to new route
   clearError();
+  resetCurrentFeed();
 
   if (to.meta.requiresAuth && !isAuthenticated()) {
     // redirect unauthenticated users to home(search page)

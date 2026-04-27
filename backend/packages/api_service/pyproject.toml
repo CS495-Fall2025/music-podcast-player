@@ -13,6 +13,7 @@ dependencies = [
 	"structlog>=24.0,<25.0",
 	"rss-music-common-validators==0.1.0",
 	"rss-music-db-service-schemas==0.1.0",
+	"rss-music-editable-pages==0.1.0",
 ]
 
 
@@ -58,3 +59,4 @@ exclude = ["tests*"]
 rss-music-common-validators = { path = "../common_validators" }
 rss-music-db-service-schemas = { path = "../db_service_schemas" }
 rss-music-dynamodb-tables = { path = "../dynamodb_tables" }
+rss-music-editable-pages = { path = "../editable_pages" }

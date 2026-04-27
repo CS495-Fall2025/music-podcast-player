@@ -5,7 +5,7 @@ const COOKIE_NAME = "searchHistory";
 const SETTINGS_COOKIE = "saveSearchHistory";
 
 export const searchHistory = ref([]);
-export const saveSearchHistory = ref(true);
+export const saveSearchHistory = ref(false);
 
 // Cookie helper functions
 function getCookie(name) {
@@ -26,7 +26,7 @@ export function loadSearchHistory() {
   const saved = getCookie(COOKIE_NAME);
   const setting = getCookie(SETTINGS_COOKIE);
 
-  saveSearchHistory.value = setting !== "false";
+  saveSearchHistory.value = setting === "true";
 
   if (saved && saveSearchHistory.value) {
     try {
@@ -57,6 +57,8 @@ export function addSearch(query) {
 export function clearSearchHistory() {
   searchHistory.value = [];
   deleteCookie(COOKIE_NAME);
+  // This cookie not being present should be treated as search history being disabled.
+  deleteCookie(SETTINGS_COOKIE);
 }
 
 export function setSaveHistory(enabled) {

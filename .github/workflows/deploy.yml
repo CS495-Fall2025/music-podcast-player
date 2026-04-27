@@ -44,6 +44,14 @@ jobs:
         with:
           name: backend-build-migration-handler
           path: builds/
+      - uses: actions/download-artifact@v5
+        with:
+          name: backend-build-page-initializer
+          path: builds/
+      - uses: actions/download-artifact@v5
+        with:
+          name: backend-build-set-admin
+          path: builds/
       - run: apk add nodejs npm
       - run: npm install -g aws-cdk
       - run: python -m pip install --upgrade pip
@@ -54,6 +62,12 @@ jobs:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE }}
           aws-region: ${{ vars.AWS_REGION }}
       - run: cdk deploy --require-approval never
+        env:
+          # These variables only need to be set in production, they will be ignored in
+          # development.
+          vars.MPP_DOMAIN_NAME: ${{ vars.MPP_DOMAIN_NAME }}
+          vars.MPP_RECORD_NAME: ${{ vars.MPP_RECORD_NAME }}
+          vars.MPP_R53_ZONE_ID: ${{ vars.MPP_R53_ZONE_ID }}
       - uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ vars.AWS_POST_DEPLOY_ROLE }}

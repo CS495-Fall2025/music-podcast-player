@@ -33,4 +33,11 @@ jobs:
     uses: ./.github/workflows/build-backend.yml
     with:
       package-name: migration-handler 
-
+  build-backend-page-initializer:
+    uses: ./.github/workflows/build-backend.yml
+    with:
+      package-name: page-initializer
+  build-backend-set-admin:
+    uses: ./.github/workflows/build-backend.yml
+    with:
+      package-name: set-admin

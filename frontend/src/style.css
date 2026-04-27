@@ -94,8 +94,8 @@ body {
 
   height: 100dvh;
 
-  overflow: hidden;
-  -webkit-overflow-scrolling: touch;
+  /*overflow: hidden;
+  -webkit-overflow-scrolling: touch;*/
 
   background-color: var(--body-background);
 

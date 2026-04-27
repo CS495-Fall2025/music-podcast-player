@@ -9,6 +9,7 @@ RUN pip install uv
 COPY common_validators common_validators
 COPY db_service_schemas db_service_schemas
 COPY dynamodb_tables dynamodb_tables
+COPY editable_pages editable_pages
 
 # Install rss_music_api_service dependencies
 WORKDIR /app/api_service

@@ -6,6 +6,7 @@ import loadConfig from "../config";
 // The token is in an httpOnly cookie, inaccessible to JavaScript
 const isLoggedIn = ref(false);
 const currentUserData = ref(null);
+const isAdmin = ref(false);
 
 // Refresh token check interval (every 30 minutes)
 let refreshInterval = null;
@@ -14,6 +15,8 @@ export function useAuth() {
   const isAuthenticated = computed(() => isLoggedIn.value);
 
   const currentUser = computed(() => currentUserData.value);
+
+  const currentUserIsAdmin = computed(() => isAdmin.value);
 
   const completeLogin = async () => {
     // Verify the authentication succeeded by checking the cookie
@@ -39,6 +42,7 @@ export function useAuth() {
 
     isLoggedIn.value = false;
     currentUserData.value = null;
+    isAdmin.value = false;
     stopAutoRefresh();
   };
 
@@ -59,6 +63,7 @@ export function useAuth() {
       const data = await response.json();
       if (data.valid === true) {
         isLoggedIn.value = true;
+        isAdmin.value = data.user?.is_admin === true;
         currentUserData.value = {
           username: data.user.username,
           email: data.user.email,
@@ -125,6 +130,7 @@ export function useAuth() {
   return {
     isAuthenticated,
     currentUser,
+    currentUserIsAdmin,
     completeLogin,
     logout,
     verifyToken,
