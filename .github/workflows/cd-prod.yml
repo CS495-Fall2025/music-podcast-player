@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - prod
+  pull-request:
+    branches:
+      - dev
 
 jobs:
   deploy-dev-stack:
