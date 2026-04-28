@@ -67,6 +67,7 @@ jobs:
           # development.
           MPP_DOMAIN_NAME: ${{ vars.MPP_DOMAIN_NAME }}
           MPP_RECORD_NAME: ${{ vars.MPP_RECORD_NAME }}
+          MPP_NOREPLY_EMAIL: ${{ vars.MPP_NOREPLY_EMAIL }}
           MPP_R53_ZONE_ID: ${{ vars.MPP_R53_ZONE_ID }}
       - uses: aws-actions/configure-aws-credentials@v5
         with:
