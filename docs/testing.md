@@ -1,24 +1,31 @@
 # Testing
-Testing ensures to us that, in all possible scenarios, the app functions as intended. This will allow us release the app to real users in a fully functional state, as well as increase maintainability.
 
-## Unit Testing
-Unit testing has been, and will continue to be, implemented in the frontend and backend of the project. 
+Testing helps ensure the correctness, reliability, and maintainability of the
+Music Podcast Player.
 
-## Integration Testing
-Integration testing has been, and will continue to be, implemented in the backend. We will also be implementing integration testing to the frontend in the coming semester.
+## Frontend Tests
 
-## User Testing
-User testing will be conducted in the coming semester.
+To run the frontend tests, enter the `frontend` directory and run the following.
 
-## Running the frontend tests
-Within the frontend directory, run the following commands:<br/>
-`npm install`<br/>
-`npm run test`
+```
+npm install
+npm run test
+```
 
-## Running the backend tests
-Within the backend directory, run the following commands: <br/>
-`python -m venv test_venv`<br/>
-(Linux, MacOS) `source test_venv/bin/activate`<br/>
-(Windows) `.\test_venv\bin\Activate.ps1`<br/>
-`pip install dev_requirements.txt`<br/>
-`python -m pytest`
+## Backend Tests
+
+The backend of the Music Podcast Player is split into multiple components,
+including the API service and database service. Some packages are solely 
+dependencies (never run directly), and may not always include tests. Both the
+API service and database service include unit and API-scoped integration tests.
+(API-scoped meaning the internals of the service are not mocked, but services
+reached across the network are. For instance, the API service tests mock 
+responses from the database service to ensure it can handle failure cases.)
+
+Within the package's directory (under `backend/packages`), run the following to
+trigger the tests.
+
+```
+uv sync --group dev
+uv run python -m pytest
+```
