@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: RSS Music Backend API
   version: 1.0.0
-  description: Current OpenAPI spec for RSS Music Backend
+  description: Current OpenAPI spec for RSS Music Backend (OUTDATED!)
 
 servers:
   - url: http://localhost:5000
