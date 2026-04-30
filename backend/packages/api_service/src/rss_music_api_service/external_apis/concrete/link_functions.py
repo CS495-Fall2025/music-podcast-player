@@ -188,7 +188,7 @@ class LinkFunctions:
             if rss_image is not None:
                 art_url = rss_image.findtext("url").strip()
             elif it_image is not None:
-                art_url = image.get("href", "").strip()
+                art_url = it_image.get("href", "").strip()
             else:
                 art_url = ""
 
