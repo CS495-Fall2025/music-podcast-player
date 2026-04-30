@@ -1,5 +1,5 @@
 # ADR 006: Playlists
-Status: Proposed
+Status: Accepted
 
 Date: September 30, 2025
 
