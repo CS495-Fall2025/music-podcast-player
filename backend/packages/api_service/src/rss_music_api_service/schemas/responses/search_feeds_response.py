@@ -109,11 +109,10 @@ class SearchFeedsResponseSchema(Schema):
                 valid_feed = PodcastIndexFeedSchema().load(feed)
                 valid_feeds.append(valid_feed)
             except ValidationError as error:
-                invalid_feeds[index] = error.messages
+                if feed["id"]:
+                    invalid_feeds[feed["id"]] = error.messages
 
         data["feeds"] = valid_feeds
-
-        # Currently, these are just ignored, but we could log them later.
         data["rejected_feeds"] = invalid_feeds
 
         return data

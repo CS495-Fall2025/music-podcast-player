@@ -139,6 +139,20 @@ class PodcastIndexAPI:
                 )
             )
 
+        if validated_response["rejected_feeds"]:
+            log_request(
+                logger,
+                "info",
+                "feeds_rejected",
+                "Some feeds returned by the PodcastIndexAPI were rejected",
+                service="PodcastIndexAPI",
+                status_code=response.status_code,
+                details={
+                    "feeds": validated_response["rejected_feeds"],
+                }
+            )
+
+
         return feeds
 
     # Follows https://podcastindex-org.github.io/docs-api/#auth
