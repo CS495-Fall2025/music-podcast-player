@@ -130,7 +130,10 @@ class PodcastIndexAPI:
             feeds.append(
                 Feed(
                     url=feed_data["url"],
-                    art_url=feed_data["artwork"],
+                    # It is possible for the PodcastIndex to return image but not
+                    # artwork. In the event it returns neither the frontend will display
+                    # a default image.
+                    art_url=feed_data["artwork"] if feed_data["artwork"] else feed_data["image"],
                     title=feed_data["title"],
                     artist=feed_data["author"],
                 )
