@@ -4,7 +4,11 @@
 
 <template>
   <div class="feed" @click="selectTrack">
-    <img class="feed-image" :src="feed.art_url || '/src/assets/images/default-image.jpg'" :alt="feed.title" />
+    <img
+      class="feed-image"
+      :src="feed.art_url || '/src/assets/images/default-image.jpg'"
+      :alt="feed.title"
+    />
     <div class="feed-title">{{ feed.title }}</div>
   </div>
 </template>
