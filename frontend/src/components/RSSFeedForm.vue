@@ -16,7 +16,7 @@ const feedUrl = ref("");
   <form class="user-feed-form" @submit="onUserFeedFormSubmit">
     <div class="input-div">
       <label for="user-feed-input" class="input-label">
-        Input a URL to an RSS Feed:
+        Provide a URL for an RSS Feed:
       </label>
 
       <input

@@ -22,7 +22,7 @@
           >Search</router-link
         >
         <router-link to="/input" class="nav-link" @click="closeMenu"
-          >Input Feed</router-link
+          >Provide Feed</router-link
         >
         <div v-if="isOpen" class="nav-dropdown" ref="dropdownRef">
           <button
