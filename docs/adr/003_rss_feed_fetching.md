@@ -1,5 +1,5 @@
 # ADR 003: RSS Feed Fetching
-Status: Accepted
+Status: Superseeded (by option 3)
 
 Date: October 3, 2025
 

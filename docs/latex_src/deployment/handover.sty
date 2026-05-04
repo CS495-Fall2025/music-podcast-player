@@ -1,0 +1,67 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{handover}
+
+\usepackage[margin=1.5in]{geometry}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{parskip}
+\usepackage{titlesec}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{base}{rgb}{0.098, 0.090, 0.141}
+\definecolor{comment}{rgb}{0.565, 0.549, 0.667}
+\definecolor{keyword}{rgb}{0.192, 0.455, 0.561}
+\definecolor{literal}{rgb}{0.965, 0.757, 0.467}
+\definecolor{basic}{rgb}{0.431, 0.416, 0.525}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{base},
+    commentstyle=\it\color{comment},
+    keywordstyle=\color{keyword},
+    numberstyle=\tiny\color{base},
+    stringstyle=\color{literal},
+    basicstyle=\ttfamily\footnotesize\color{basic},
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\titleformat{\section}
+    {\normalfont\Large\scshape}
+    {\thesection}
+    {0.6em}
+    {}
+    
+\titleformat{\subsection}
+    {\normalfont\large\scshape}
+    {\thesubsection}
+    {0.6em}
+    {}
+
+\newcommand{\doctitle}[2]{%
+	\begin{minipage}{\textwidth}%
+		\Huge%
+		\centering%
+        #1%
+	\end{minipage}%
+	\par%
+	\vspace{-0.4em}%
+	\rule{\textwidth}{0.4pt}%
+	\par%
+	\begin{minipage}{\textwidth}%
+		\large%
+		\centering%
+        #2%
+	\end{minipage}%
+	\vspace{1.6em}%
+}

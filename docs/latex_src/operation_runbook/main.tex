@@ -1,0 +1,255 @@
+\documentclass{article}
+\usepackage{handover}
+\usepackage{float}
+
+\begin{document}
+\doctitle{Operation Runbook}{Music Podcast Player}
+
+\section{Introduction}
+This operations runbook explains the basic steps for running, checking, troubleshooting, and maintaining the Music Podcast Player application. It is meant to help developers quickly understand what to do when starting the system, checking if services are working, or fixing common problems.
+
+\section{System Overview}
+Music Podcast Player is made up of a frontend, backend API, database service, PostgreSQL database, and supporting local services. The frontend is the web interface that users interact with. The backend handles requests from the frontend, connects to the database service, and communicates with external services such as the Podcast Index API.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l l}
+        \toprule
+        Component & Purpose \\
+        \midrule
+        Frontend & Web interface for the application \\
+        Backend API & Handles frontend requests \\
+        Database Service & Connects the backend to PostgreSQL \\
+        PostgreSQL & Stores users, playlists, and track data \\
+        Migrations & Sets up and updates the database schema \\
+        MinIO & Local S3-compatible storage \\
+        DynamoDB & Local rate-limit token storage \\
+        \bottomrule
+    \end{tabular}
+    \caption{System Components}
+    \label{tab:system-components}
+\end{table}
+
+\section{Local Startup and Shutdown}
+The application can be started locally using Docker Compose from the project root folder.
+
+\subsection{Startup}
+First, open a terminal in the project root. The root folder should contain \texttt{docker-compose.yml}. Then run:
+
+\begin{verbatim}
+docker compose up
+\end{verbatim}
+
+If the containers need to be rebuilt, run:
+
+\begin{verbatim}
+docker compose up --build
+\end{verbatim}
+
+After startup, the frontend should be available at:
+
+\begin{verbatim}
+http://localhost:5173
+\end{verbatim}
+
+The backend API should be available at:
+
+\begin{verbatim}
+http://localhost:5000
+\end{verbatim}
+
+\subsection{Shutdown}
+To stop the local application, run:
+
+\begin{verbatim}
+docker compose down
+\end{verbatim}
+
+To reset local data and remove Docker volumes, run:
+
+\begin{verbatim}
+docker compose down -v
+\end{verbatim}
+
+The reset command should be used carefully because it removes local database data.
+
+\section{Service Health Checks}
+After the system starts, the main services should be checked to make sure they are running correctly.
+
+\begin{itemize}
+    \item Use \texttt{docker compose ps} to confirm containers are running.
+    \item Open \texttt{http://localhost:5173} to confirm the frontend loads.
+    \item Check backend logs with \texttt{docker compose logs backend-api-service}.
+    \item Check database logs with \texttt{docker compose logs database}.
+    \item Check migration logs with \texttt{docker compose logs migrations}.
+\end{itemize}
+
+If the frontend loads and the backend does not show repeated errors, the local system is likely running correctly.
+
+\section{Common Issues and Fixes}
+
+\subsection{Migration Failure}
+If the migration service fails, check the migration and database logs:
+
+\begin{verbatim}
+docker compose logs migrations
+docker compose logs database
+\end{verbatim}
+
+For local development, the common fix is to reset the environment:
+
+\begin{verbatim}
+docker compose down -v
+docker compose up --build
+\end{verbatim}
+
+\subsection{Database Fails to Start}
+If the database container fails, check the database logs:
+
+\begin{verbatim}
+docker compose logs database
+\end{verbatim}
+
+If the issue is caused by old local data, reset the environment with:
+
+\begin{verbatim}
+docker compose down -v
+docker compose up --build
+\end{verbatim}
+
+\subsection{Frontend Cannot Connect to Backend}
+If the frontend loads but API requests fail, confirm that the backend container is running:
+
+\begin{verbatim}
+docker compose ps
+docker compose logs backend-api-service
+\end{verbatim}
+
+The frontend should connect to the backend at:
+
+\begin{verbatim}
+http://localhost:5000
+\end{verbatim}
+
+If this value is wrong, check the frontend runtime configuration file, such as \texttt{config.json}.
+
+\subsection{Unauthorized Requests}
+A \texttt{401 Unauthorized} response usually means the user is not logged in or the request needs authentication. The user should refresh the page, log in again, and confirm that the account exists. Backend logs can also be checked for authentication errors.
+
+\subsection{Playlist Track Information Missing}
+If a playlist item shows missing information, such as ``track title not found,'' the saved track object may be missing required fields. The track should include information such as \texttt{title}, \texttt{track\_url}, \texttt{guid}, and \texttt{duration}. The issue may be in the frontend feed parser, playlist API helper, or backend playlist route.
+
+\section{Testing and Quality Checks}
+Before merging or deploying changes, the team should run basic frontend and backend checks.
+
+\subsection{Frontend}
+From the frontend folder, run:
+
+\begin{verbatim}
+npm install
+npm run test -- --run
+npm run lint
+npm run format-check
+npm run build
+\end{verbatim}
+
+If formatting needs to be fixed, run:
+
+\begin{verbatim}
+npm run format-fix
+\end{verbatim}
+
+\subsection{Backend}
+From the backend package folders, run:
+
+\begin{verbatim}
+python -m pytest
+python -m ruff check
+python -m ruff format --check
+\end{verbatim}
+
+If formatting needs to be fixed, run:
+
+\begin{verbatim}
+python -m ruff format
+\end{verbatim}
+
+\section{Deployment Checks}
+The project uses GitHub Actions for testing and deployment. Before deploying, the team should confirm that the correct branch is being used and that the workflow checks pass.
+
+For a development deployment, changes are usually pushed to the \texttt{dev} branch. For production, the team should make sure the development version works first, pull requests are reviewed, and all required AWS environment variables are configured.
+
+Before deployment, check the following:
+
+\begin{itemize}
+    \item Frontend checks pass.
+    \item Backend checks pass.
+    \item Docker Compose works locally.
+    \item GitHub Actions workflows pass.
+    \item No secrets or private credentials were committed.
+    \item Database migrations are reviewed before production deployment.
+\end{itemize}
+
+\section{Monitoring and Incident Response}
+For deployed environments, the team should monitor GitHub Actions and AWS CloudWatch. Important items to watch include backend errors, failed deployments, database connection errors, authentication failures, and external API failures.
+
+If the website is down, first check whether the frontend deployment completed successfully. Then check backend logs, API errors, and recent commits. If the backend is failing, review logs, environment variables, database access, and external service connections.
+
+If the database is having problems, check database logs, migration logs, and connection settings. For serious production issues, the team should consider restoring from a known good backup only after identifying the cause.
+
+\section{Security and Secrets}
+Sensitive values should not be committed to the repository. Local secrets should stay in local secret files, and production secrets should be stored through AWS services.
+
+Examples of sensitive values include:
+
+\begin{itemize}
+    \item Podcast Index API keys
+    \item JWT secret keys
+    \item Database passwords
+    \item AWS access keys
+\end{itemize}
+
+If a secret is accidentally committed, it should be rotated immediately.
+
+\section{Routine Maintenance Checklist}
+Before demos, major merges, or deployments, the team should complete the following checklist:
+
+\begin{itemize}
+    \item Start the app locally with Docker Compose.
+    \item Confirm the frontend loads.
+    \item Confirm the backend API is running.
+    \item Confirm the database is healthy.
+    \item Test login or signup.
+    \item Test RSS feed loading or search.
+    \item Test music playback.
+    \item Test playlist features.
+    \item Run frontend and backend checks.
+    \item Check GitHub Actions results.
+\end{itemize}
+
+\section{Quick Reference Commands}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l l}
+        \toprule
+        Task & Command \\
+        \midrule
+        Start app & \texttt{docker compose up} \\
+        Rebuild app & \texttt{docker compose up --build} \\
+        Stop app & \texttt{docker compose down} \\
+        Reset local data & \texttt{docker compose down -v} \\
+        Check containers & \texttt{docker compose ps} \\
+        View all logs & \texttt{docker compose logs} \\
+        Backend logs & \texttt{docker compose logs backend-api-service} \\
+        Database logs & \texttt{docker compose logs database} \\
+        Migration logs & \texttt{docker compose logs migrations} \\
+        \bottomrule
+    \end{tabular}
+    \caption{Common Operations Commands}
+    \label{tab:quick-commands}
+\end{table}
+
+\section{Conclusion}
+This runbook gives the team a basic process for operating Music Podcast Player. It explains how to start the app, check service health, troubleshoot common issues, run quality checks, and respond to deployment or production problems. The main goal is to make routine operations clear and easy to follow.
+
+\end{document}
