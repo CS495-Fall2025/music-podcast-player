@@ -130,10 +130,28 @@ class PodcastIndexAPI:
             feeds.append(
                 Feed(
                     url=feed_data["url"],
-                    art_url=feed_data["artwork"],
+                    # It is possible for the PodcastIndex to return image but not
+                    # artwork. In the event it returns neither the frontend will display
+                    # a default image.
+                    art_url=feed_data["artwork"]
+                    if feed_data["artwork"]
+                    else feed_data["image"],
                     title=feed_data["title"],
                     artist=feed_data["author"],
                 )
+            )
+
+        if validated_response["rejected_feeds"]:
+            log_request(
+                logger,
+                "info",
+                "feeds_rejected",
+                "Some feeds returned by the PodcastIndexAPI were rejected",
+                service="PodcastIndexAPI",
+                status_code=response.status_code,
+                details={
+                    "feeds": validated_response["rejected_feeds"],
+                },
             )
 
         return feeds

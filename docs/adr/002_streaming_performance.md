@@ -1,5 +1,5 @@
 # ADR 002: Quick Performance for Streaming & Data Retrieval
-Status: Proposed
+Status: Rejected
 
 Date: October 3, 2025
 

@@ -1,0 +1,44 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{handover}
+
+\usepackage[margin=1.5in]{geometry}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{placeins}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{enumitem}
+\usepackage{float}
+
+\titleformat{\section}
+    {\normalfont\Large\scshape}
+    {\thesection}
+    {0.6em}
+    {}
+    
+\titleformat{\subsection}
+    {\normalfont\large\scshape}
+    {\thesubsection}
+    {0.6em}
+    {}
+
+\newcommand{\doctitle}[2]{%
+    \FloatBarrier
+	\begin{minipage}{\textwidth}%
+		\Huge%
+		\centering%
+        #1%
+	\end{minipage}%
+	\par%
+	\vspace{-0.4em}%
+	\rule{\textwidth}{0.4pt}%
+	\par%
+	\begin{minipage}{\textwidth}%
+		\large%
+		\centering%
+        #2%
+	\end{minipage}%
+	\vspace{1.6em}%
+}

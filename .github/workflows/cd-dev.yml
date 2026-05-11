@@ -1,9 +1,13 @@
 name: Development Deployment
 
-on:
-  push:
-    branches:
-      - dev
+# I've disabled this check because the development deployment has been brought 
+# down. Update the development environment in GitHub before re-enabling these
+# actions.
+#
+#on:
+#  push:
+#    branches:
+#      - dev
 
 jobs:
   deploy-dev-stack:

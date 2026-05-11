@@ -1,0 +1,226 @@
+\documentclass{article}
+\usepackage{handover}
+\usepackage{hyperref}
+
+\begin{document}
+\doctitle{Deployment Instructions}{Music Podcast Player}
+\section{Introduction}
+
+This document aims to prepare the reader for deployment of the Music Podcast Player, both
+locally and to Amazon Web Services (AWS). Additionally, it explains how to configure the
+Continuous Deployment (CD) GitHub Actions to automatically deploy to AWS. Finally, it 
+provides guidance on the configuration of a deployment in each environment.
+
+The architecture of the Music Podcast Player consists of a frontend, two APIs, a
+PostgreSQL database, and a DynamoDB table. The PostgreSQL database and one of the APIs 
+are kept inside a Virtual Private Cloud (VPC) without outbound internet access. 
+Additionally, it makes requests to RSS feeds hosted by artists and hosting providers, as 
+well as to the PodcastIndex API. For more detailed information on the architecture, see 
+the Architecture documentation. It may also be helpful to read the Environment 
+Configuration documentation before continuing.
+
+\section{Local Deployment}
+
+The Music Podcast Player has been designed to be deployed independently of any cloud
+provider through the use of Docker Compose in order to facilitate local development.
+However, while the local deployment doesn't depend on cloud infrastructure, it does need 
+to make calls to the PodcastIndex API in order for the search feature to work, which 
+requires authentication configuration.
+
+The credentials for the PodcastIndex API need to be provided to the API service through
+two environment variables. The \verb|docker-compose.yml| handles this by importing them 
+from an environment file at \verb|secrets/backend.env|, which has the following format.
+
+\begin{verbatim}
+RSS_PLAYER_PODCAST_INDEX_KEY=<api-key>
+RSS_PLAYER_PODCAST_INDEX_SECRET=<api-secret>
+\end{verbatim}
+
+At the time of writing, both the \verb|api-key| and \verb|api-secret| can be obtained 
+from the \href{https://api.podcastindex.org/}{PodcastIndex API website} by creating an 
+account. Note that the \verb|api-secret| can sometimes contain \verb|$|, which must be
+escaped for Docker by writing two: \verb|$$|.
+
+Following this configuration, you can deploy the Music Podcast Player locally using
+the following.
+
+\begin{verbatim}
+docker compose up --build
+\end{verbatim}
+
+The PostgreSQL image will maintain it's state in an anonymous volume between deployments.
+If you would like to reset it's state, you can bring down the volumes.
+
+\begin{verbatim}
+docker compose down -v
+\end{verbatim}
+
+\section{AWS Deployment}
+% Use of CDK, environment independent
+% Setup CDK, bootstrap
+% JWT secret key, PodcastIndex API vars
+
+In order to as easy as possible to deploy the Music Podcast Player on AWS, we've used the
+AWS Cloud Development Kit (CDK) to describe the resources in our deployments. That said,
+the CDK expects the builds for both the frontend and backend to be available at
+synthesis time. Additionally, in order to keep our deployments environment-independent, 
+some environment specific configuration must be provided in environment variables. Also,
+non-rotating secrets such as the PodcastIndex API credentials must be manually created in
+Systems Manager's Parameter Store.
+
+\subsection{Setup AWS Environment}
+
+On an AWS account that has never been used to deploy from the CDK before needs to be 
+\href{https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html}{bootstrapped}. First,
+start off by creating a \href{https://docs.python.org/3/library/venv.html}
+{virtual environment} using the \verb|requirements.txt| in the \verb|cdk| directory.
+Then, after
+\href{https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html}
+{configuring AWS credentials} for the command line, run the following.
+
+\begin{verbatim}
+cdk bootstrap
+\end{verbatim}
+
+Before synthesizing the Cloudformation template or deploying, several environment
+variables need to be set, either in a \verb|.env| or directly.
+
+\begin{enumerate}
+    \item \verb|DEPLOY_ENVIRONMENT| \\
+    This is either set to \verb|development| or \verb|production|. The difference is that
+    email verification is disabled in development, and a DNS record is made for the 
+    production deployment.
+    \item \verb|MPP_DOMAIN_NAME| \\
+    The domain name, without a subdomain, used in production. As an example,
+    if the app is hosted at \verb|www.mydeployment.com|, this variable would be set to
+    \verb|mydeployment.com|.
+    \item \verb|MPP_RECORD_NAME| \\
+    The subdomain used in production. In the previous example, this would be set to
+    \verb|www|.
+    \item \verb|MPP_R53_ZONE_ID| \\
+    The Route 53 zone ID to use in production. This can be found under ``Hosted zones''
+    in the AWS Console after registering a domain.
+    \item \verb|MPP_NOREPLY_EMAIL| \\
+    The email address to use when sending no reply mail in production. Typically in the
+    form \verb|no-reply@<domain>|.
+\end{enumerate}
+
+Additionally, it is not possible to create \verb|SecureString| Systems Manager
+parameters (static secrets) using the CDK. As such, the following \verb|SecureString|
+parameters must be created manually.
+
+\begin{enumerate}
+    \item \verb|/rss-music-player/jwt/key| \\
+    This is the secret key used by the API service to generate JSON Web Tokens (JWTs) for
+    user authentication. You can generate one randomly in Python using the following.
+    \pagebreak
+    \begin{verbatim}
+    import secrets
+    import base64
+    token_bytes = secrets.token_bytes(96)
+    print(base64.b64encode(token_bytes).decode("UTF-8"))
+    \end{verbatim}
+    \item \verb|/rss-music-player/podcast-index-api/key| \\
+    The PodcastIndex API key obtained from the PodcastIndex.
+    \item \verb|/rss-music-player/podcast-index-api/secret| \\
+    The PodcastIndex API secret obtained from the PodcastIndex.
+\end{enumerate}
+
+\subsection{Build the Music Podcast Player}
+
+Before we deploy to AWS, we need to build both the frontend and backend. In order to
+build the frontend, run the following inside the \verb|frontend| directory. This should
+produce a build inside \verb|dist| in the same directory.
+
+\begin{verbatim}
+npm run build
+\end{verbatim}
+
+The backend consists of three Lambda functions, each built for ARM because it tends to be
+cheaper. Each component has it's own Docker image that builds it, allowing for caching to
+speed up builds. In order to simply this process, we've provided a script that enables
+ARM emulation and builds each of the three components. Run it as shown inside the 
+\verb|backend| directory. This should produce a ZIP file for each component in the 
+\verb|builds| directory.
+
+\begin{verbatim}
+python build_for_deploy.py
+\end{verbatim}
+
+\subsection{Manual Deployment}
+% Build, Deploy CDK, run DB secret rotation
+Now that the frontend and backend have been built, we can deploy using the following 
+command.
+
+\begin{verbatim}
+cdk deploy
+\end{verbatim}
+
+Sometimes it is helpful to synthesize the Cloudformation template without actually
+deploying it, in which case \verb|cdk synth| can be used. To show what changes would be
+made to an existing deployment without actually updating the deployment, run
+\verb|cdk diff|.
+
+In order to avoid the added cost of a Secrets Manager Endpoint or NAT Gateway in the VPC,
+the database master password is randomly generated in the CDK and provided to the 
+Migration Function as an environment variable. Once the migrations have run, the Database
+Service is able to access the database without the credential, since it uses IAM
+authentication. Generally, it is not a best practice to put the database password in an
+environment variable, but since the database is already in a VPC not exposed to the 
+internet, and environment variables are not likely to be leaked we've deemed this an 
+acceptable risk. In order to minimize it though, we recommend rotating the database 
+password after deployment by running the rotation script. (Make sure AWS credentials are
+configured for the script so it is able to run.)
+
+\begin{verbatim}
+python rotate_db_secret.py
+\end{verbatim}
+
+This script may also be used to rotate the database secret at any time should it be 
+necessary.
+
+\subsection{Continuous Deployment}
+
+Continuous Deployment (CD) allows the Music Podcast Player deployments to be
+automatically updated as changes are made in GitHub. The workflows we've designed for
+this purpose automate the process of building the necessary components, deploying the
+app, and rotating the database secret at the end.
+
+Our CD workflows authenticate with AWS using OpenID Connect.
+To configure the deployment workflows (workflows that use \verb|deploy.yml|), you will 
+need to set the following environment variables in a GitHub Environment. Several of these
+variables reference AWS roles that can be assumed by GitHub using OpenID connect when the
+workflows run. You can set these up following \href{https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws}
+{GitHub's documentation} on the subject.
+
+\begin{enumerate}
+    \item \verb|AWS_DEPLOY_ROLE| \\
+    This is the ARN of an AWS role that can be assumed by GitHub that allows the workflow
+    to assume the following roles.
+    \begin{enumerate}
+        \item \verb|cdk-deploy-role-<account>-<region>|
+        \item \verb|cdk-file-publishing-role-<account>-<region>|
+        \item \verb|cdk-lookup-role-<account>-<region>|
+        \item \verb|cdk-image-publishing-role-<account>-<region>|
+    \end{enumerate}
+    \item \verb|AWS_POST_DEPLOY_ROLE| \\
+    This is the ARN of an AWS role allowing the workflow to perform the actions defined
+    in post-deploy scripts. Currently, this is just rotating the database credential. The
+    following permissions are required:
+    \begin{enumerate}
+        \item \verb|cloudformation:DescribeStacks|
+        \item \verb|rds:ModifyDBInstance|
+    \end{enumerate}
+    \item \verb|AWS_REGION| \\
+    This is the AWS region to deploy to.
+\end{enumerate}
+
+Additionally, we have a workflow called \verb|cd-checks.yml| which runs on pull 
+requests made to the development branch and ensures that the app is able to build and
+checks the changes to the current deployment that would be made if the changes were to 
+be deployed. Since it is not actually deploying to AWS, it just needs to be able to 
+assume the \verb|cdk-lookup-role-<account>-<region>| role. If an environment will be
+running this action, set \verb|AWS_LOOKUP_ROLE| to the ARN of the role the workflow will
+assume for this.
+
+\end{document}

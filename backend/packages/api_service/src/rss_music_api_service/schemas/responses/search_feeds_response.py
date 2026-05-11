@@ -40,14 +40,14 @@ class PodcastIndexFeedSchema(Schema):
     id = fields.Int(required=True, validate=validate.Range(min=0))
     podcastGuid = fields.UUID(required=True)
     title = fields.Str(required=True, validate=validate.Length(min=1, max=255))
-    url = fields.Str(required=True, validate=validate_url_or_empty)
+    url = fields.URL(required=True)
     originalUrl = fields.Str(required=True, validate=validate_url_or_empty)
     link = fields.String(required=True, validate=validate_url_or_empty)
     description = fields.Str(required=True, validate=validate.Length(min=0, max=4000))
     author = fields.Str(required=True, validate=validate.Length(min=0, max=255))
     ownerName = fields.Str(required=True, validate=validate.Length(min=0, max=255))
-    image = fields.URL(required=True)
-    artwork = fields.URL(required=True)
+    image = fields.Str(required=True, validate=validate_url_or_empty)
+    artwork = fields.Str(required=True, validate=validate_url_or_empty)
     lastUpdateTime = fields.Int(required=True, validate=validate.Range(min=0))
     lastCrawlTime = fields.Int(required=True, validate=validate.Range(min=0))
     lastParseTime = fields.Int(required=True, validate=validate.Range(min=0))
@@ -109,11 +109,10 @@ class SearchFeedsResponseSchema(Schema):
                 valid_feed = PodcastIndexFeedSchema().load(feed)
                 valid_feeds.append(valid_feed)
             except ValidationError as error:
-                invalid_feeds[index] = error.messages
+                if feed["id"]:
+                    invalid_feeds[feed["id"]] = error.messages
 
         data["feeds"] = valid_feeds
-
-        # Currently, these are just ignored, but we could log them later.
         data["rejected_feeds"] = invalid_feeds
 
         return data

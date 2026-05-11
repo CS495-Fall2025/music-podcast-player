@@ -181,9 +181,14 @@ class LinkFunctions:
             if valueType != "lightning" or valueMethod != "keysend":
                 value_items = []
 
-            image = channel.find(it("image"))
-            if image is not None:
-                art_url = image.get("href", "").strip()
+            # RSS image
+            rss_image = channel.find("image")
+            # iTunes image
+            it_image = channel.find(it("image"))
+            if rss_image is not None:
+                art_url = rss_image.findtext("url").strip()
+            elif it_image is not None:
+                art_url = it_image.get("href", "").strip()
             else:
                 art_url = ""
 

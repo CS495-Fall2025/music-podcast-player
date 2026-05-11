@@ -1,5 +1,5 @@
 # ADR 001: Search Features
-Status: Accepted
+Status: Superseded (no caching)
 
 Date: October 3, 2025
 
